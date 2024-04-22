@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monolith_BGM", "Monolith_BGM\Monolith_BGM.csproj", "{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monolith_BGM", "Monolith_BGM\Monolith_BGM.csproj", "{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BGM.SftpUtilities", "BGM.SftpUtilities\BGM.SftpUtilities.csproj", "{3A39FF7E-D506-42BB-9B6C-B19504CCF578}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A39FF7E-D506-42BB-9B6C-B19504CCF578}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A39FF7E-D506-42BB-9B6C-B19504CCF578}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A39FF7E-D506-42BB-9B6C-B19504CCF578}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A39FF7E-D506-42BB-9B6C-B19504CCF578}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
