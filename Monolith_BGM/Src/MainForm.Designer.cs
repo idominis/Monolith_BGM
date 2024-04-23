@@ -28,32 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            button1 = new Button();
+            SaveToDbButton = new Button();
             SuspendLayout();
             // 
-            // button1
+            // SaveToDbButton
             // 
-            button1.Location = new Point(48, 40);
-            button1.Name = "button1";
-            button1.Size = new Size(75, 23);
-            button1.TabIndex = 0;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            SaveToDbButton.Location = new Point(55, 53);
+            SaveToDbButton.Margin = new Padding(3, 4, 3, 4);
+            SaveToDbButton.Name = "SaveToDbButton";
+            SaveToDbButton.Size = new Size(157, 31);
+            SaveToDbButton.TabIndex = 0;
+            SaveToDbButton.Text = "Save to XMLs DB";
+            SaveToDbButton.UseVisualStyleBackColor = true;
+            SaveToDbButton.Click += SaveToDbButton_Click;
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Controls.Add(button1);
+            ClientSize = new Size(914, 600);
+            Controls.Add(SaveToDbButton);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "MainForm";
-            Text = "Form1";
+            Text = "MainForm";
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Button button1;
+        private Button SaveToDbButton;
     }
 }

@@ -68,18 +68,62 @@ namespace Monolith_BGM
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void SaveToDbButton_Click(object sender, EventArgs e)
         {
-            // Path to the XML file
-            string filePath = @"path\to\your\file.xml";
             var xmlLoader = new XmlDataLoader();
-            var purchaseOrders = xmlLoader.LoadFromXml<PurchaseOrderDetail>(filePath);
+            string baseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
 
-            // Save to database
-            SavePurchaseOrderDetails(purchaseOrders);
+            try
+            {
+                // Get the list of directories in the base directory
+                var directories = Directory.GetDirectories(baseDirectoryPath);
 
-            MessageBox.Show("Data loaded and saved successfully!");
+                foreach (var directory in directories)
+                {
+                    // Get the list of XML files in the directory
+                    var xmlFiles = Directory.GetFiles(directory, "*.xml");
+
+                    foreach (var xmlFile in xmlFiles)
+                    {
+                        // Load the XML file
+                        var purchaseOrderDetails = xmlLoader.LoadFromXml(xmlFile);
+
+                        // Save the purchase orders to the database
+                        SavePurchaseOrderDetails(purchaseOrderDetails.Details);
+                    }
+                }
+
+                MessageBox.Show("Purchase orders loaded and saved successfully!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading XML data: {ex.Message}");
+            }
         }
+
+        public void SavePurchaseOrderDetails(IEnumerable<PurchaseOrderDetail> details)
+        {
+            using (var context = new BGM_dbContext())
+            {
+                foreach (var detail in details)
+                {
+                    if (!IsPurchaseOrderDetailExists(detail.ProductId))
+                    {
+                        context.PurchaseOrderDetails.Add(detail);
+                    }
+                }
+                context.SaveChanges();
+            }
+        }
+
+        public bool IsPurchaseOrderDetailExists(int purchaseOrderDetailId)
+        {
+            using (var context = new BGM_dbContext())
+            {
+                return context.PurchaseOrderDetails.Any(p => p.PurchaseOrderDetailId == purchaseOrderDetailId);
+            }
+        }
+
 
     }
 }
