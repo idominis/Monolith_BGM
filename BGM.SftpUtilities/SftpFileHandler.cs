@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using Renci.SshNet.Sftp;
@@ -29,120 +30,59 @@ namespace BGM.SftpUtilities
         }
 
         // Method to download XML files from a directory only if they don't already exist locally
-        public void DownloadXmlFilesFromDirectory(string remoteDirectoryPath, string localDirectoryPath)
+        public bool DownloadXmlFilesFromDirectory(string remoteDirectoryPath, string localBaseDirectoryPath)
         {
+            bool newFilesDownloaded = false;
+
             using (var client = _clientManager.Connect())
             {
-                // Ensure the local directory exists
-                if (!Directory.Exists(localDirectoryPath))
-                {
-                    Directory.CreateDirectory(localDirectoryPath);
-                }
+                // Get the list of directories in the remote directory
+                var directories = client.ListDirectory(remoteDirectoryPath).Where(x => x.IsDirectory && x.Name != "." && x.Name != "..");
 
-                try
-                {
-                    // List all files and folders in the directory
-                    var filesAndFolders = client.ListDirectory(remoteDirectoryPath);
-                    foreach (var file in filesAndFolders)
-                    {
-                        if (!file.IsDirectory)
-                        {
-                            if (file.Name.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
-                            {
-                                string localFilePath = Path.Combine(localDirectoryPath, file.Name);
-
-                                // Check if the file already exists locally
-                                if (!File.Exists(localFilePath))
-                                {
-                                    using (var fileStream = new FileStream(localFilePath, FileMode.Create))
-                                    {
-                                        client.DownloadFile(file.FullName, fileStream);
-                                    }
-                                }
-                            }
-                        }
-                        else if (file.Name != "." && file.Name != "..")
-                        {
-                            // Recursive call to process subdirectories
-                            DownloadXmlFilesFromDirectory(file.FullName, Path.Combine(localDirectoryPath, file.Name));
-                        }
-                    }
-                }
-                catch (SshException ex)
-                {
-                    Console.WriteLine($"SSH error: {ex.Message}");
-                    // Optional: Implement retry logic here
-                }
-                finally
-                {
-                    _clientManager.Disconnect(client);  // Ensure the client is always disconnected
-                }
-            }
-        }
-
-        public string GetLatestRemoteDirectory(string remoteBaseDirectoryPath)
-        {
-            using (var client = _clientManager.Connect())
-            {
-                // Get the list of directories
-                var directories = client.ListDirectory(remoteBaseDirectoryPath);
-
-                // Parse the directory names as dates and find the latest
-                DateTime latestDate = DateTime.MinValue;
-                string latestDirectory = null;
                 foreach (var directory in directories)
                 {
-                    if (DateTime.TryParse(directory.Name, out DateTime date) && date > latestDate)
+                    // Create a local directory with the same name if it doesn't exist
+                    string localDirectoryPath = Path.Combine(localBaseDirectoryPath, directory.Name);
+                    Directory.CreateDirectory(localDirectoryPath);
+
+                    // Get the list of files in the remote directory
+                    var files = client.ListDirectory(Path.Combine(remoteDirectoryPath, directory.Name)).Where(x => !x.IsDirectory);
+
+                    foreach (var file in files)
                     {
-                        latestDate = date;
-                        latestDirectory = directory.Name;
+                        // Skip the file if it has been marked as processed
+                        if (file.Name.EndsWith(".processed"))
+                        {
+                            continue;
+                        }
+
+                        // Check if the file has already been downloaded
+                        string localFilePath = Path.Combine(localDirectoryPath, file.Name);
+                        if (File.Exists(localFilePath))
+                        {
+                            continue;
+                        }
+
+                        // Download the file
+                        using (var fileStream = new FileStream(localFilePath, FileMode.Create))
+                        {
+                            client.DownloadFile(file.FullName, fileStream);
+                        }
+
+                        newFilesDownloaded = true;
+          
+                        // Rename the remote file to mark it as processed
+                        string processedFilePath = file.FullName + ".processed";
+                        client.RenameFile(file.FullName, processedFilePath);
                     }
                 }
 
-                return Path.Combine(remoteBaseDirectoryPath, latestDirectory);
-            }
-        }
-
-        public string GetLatestLocalDirectory(string localBaseDirectoryPath)
-        {
-            // Get the list of directories
-            var directories = Directory.GetDirectories(localBaseDirectoryPath);
-
-            // Parse the directory names as dates and find the latest
-            DateTime latestDate = DateTime.MinValue;
-            string latestDirectory = null;
-            foreach (var directory in directories)
-            {
-                string directoryName = Path.GetFileName(directory);
-                if (DateTime.TryParse(directoryName, out DateTime date) && date > latestDate)
-                {
-                    latestDate = date;
-                    latestDirectory = directoryName;
-                }
+                _clientManager.Disconnect(client);
             }
 
-            return Path.Combine(localBaseDirectoryPath, latestDirectory);
+            return newFilesDownloaded;
         }
 
-        public bool AreAllFilesDownloaded(string remoteDirectoryPath, string localDirectoryPath)
-        {
-            using (var client = _clientManager.Connect())
-            {
-                // Get the list of files in the remote directory
-                var remoteFiles = client.ListDirectory(remoteDirectoryPath);
-
-                // Check if each file exists in the local directory
-                foreach (var remoteFile in remoteFiles)
-                {
-                    string localFilePath = Path.Combine(localDirectoryPath, remoteFile.Name);
-                    if (!File.Exists(localFilePath))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-        }
     }
+
 }

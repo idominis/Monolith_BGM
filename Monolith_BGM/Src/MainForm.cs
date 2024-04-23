@@ -21,7 +21,7 @@ namespace Monolith_BGM
 
         private void InitializeSftp()
         {
-            string host = "192.168.100.163";
+            string host = "192.168.0.140";
             string username = "tester";
             string password = "password";
 
@@ -35,6 +35,9 @@ namespace Monolith_BGM
             timer.Elapsed += OnTimedEvent;
             timer.AutoReset = true;
             timer.Enabled = true;
+
+            // Call OnTimedEvent immediately
+            OnTimedEvent(timer, null);
         }
 
         private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
@@ -42,51 +45,27 @@ namespace Monolith_BGM
             string remoteBaseDirectoryPath = @"\PurchasingOrders";
             string localBaseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
 
-         
-                //fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
-                //MessageBox.Show("All XML files have been downloaded successfully!");
-
-                // Ask user if they want to exit the application
-                //DialogResult exitResponse = MessageBox.Show("Do you want to exit the application?", "Exit Application", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            //if (exitResponse == DialogResult.Yes)
-            //{
-            //    Application.Exit(); // Close the application if the user chooses 'Yes'
-            //}
-            //else
-            //{
-                //var xmlLoader = new XmlDataLoader();
-                //string directoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
-
-                try
+            try
+            {
+                // Download XML files from the directory
+                bool newFilesDownloaded = fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
+                
+                if (newFilesDownloaded)
                 {
-                    // Get the latest directory
-                string latestRemoteDirectoryPath = fileHandler.GetLatestRemoteDirectory(remoteBaseDirectoryPath);
-                //string latestLocalDirectoryPath = Path.Combine(localBaseDirectoryPath, Path.GetFileName(localBaseDirectoryPath));
-                string latestLocalDirectoryPath = fileHandler.GetLatestLocalDirectory(localBaseDirectoryPath);
-
-                if()
-
-                // Check if all files in the latest directory have been downloaded
-                bool areAllFilesDownloaded = fileHandler.AreAllFilesDownloaded(latestRemoteDirectoryPath, latestLocalDirectoryPath);
-                    if (!areAllFilesDownloaded)
-                    {
-                        fileHandler.GetLatestRemoteDirectory(remoteBaseDirectoryPath);
-                        var areAllDownloaded = fileHandler.AreAllFilesDownloaded(latestRemoteDirectoryPath, latestLocalDirectoryPath);
-                        // Download missing files from the latest directory
-                        if (!areAllDownloaded)
-                        {
-                            fileHandler.DownloadXmlFilesFromDirectory(latestRemoteDirectoryPath, latestLocalDirectoryPath);
-                            MessageBox.Show("New XML files have been downloaded successfully!");
-                        }
-
-                        // Rest of the code...
-                    }
+                    MessageBox.Show("XML files have been downloaded successfully!");
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show("Failed to download XML files: " + ex.Message);
+                    MessageBox.Show("No new XML files.");
                 }
-            //}
+
+                // Rest of the code...
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to download XML files: " + ex.Message);
+            }
+
         }
 
         private void button1_Click(object sender, EventArgs e)
