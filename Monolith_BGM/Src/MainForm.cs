@@ -70,6 +70,15 @@ namespace Monolith_BGM
 
         private void button1_Click(object sender, EventArgs e)
         {
+            // Path to the XML file
+            string filePath = @"path\to\your\file.xml";
+            var xmlLoader = new XmlDataLoader();
+            var purchaseOrders = xmlLoader.LoadFromXml<PurchaseOrderDetail>(filePath);
+
+            // Save to database
+            SavePurchaseOrderDetails(purchaseOrders);
+
+            MessageBox.Show("Data loaded and saved successfully!");
         }
 
     }
