@@ -79,5 +79,70 @@ namespace BGM.SftpUtilities
                 }
             }
         }
+
+        public string GetLatestRemoteDirectory(string remoteBaseDirectoryPath)
+        {
+            using (var client = _clientManager.Connect())
+            {
+                // Get the list of directories
+                var directories = client.ListDirectory(remoteBaseDirectoryPath);
+
+                // Parse the directory names as dates and find the latest
+                DateTime latestDate = DateTime.MinValue;
+                string latestDirectory = null;
+                foreach (var directory in directories)
+                {
+                    if (DateTime.TryParse(directory.Name, out DateTime date) && date > latestDate)
+                    {
+                        latestDate = date;
+                        latestDirectory = directory.Name;
+                    }
+                }
+
+                return Path.Combine(remoteBaseDirectoryPath, latestDirectory);
+            }
+        }
+
+        public string GetLatestLocalDirectory(string localBaseDirectoryPath)
+        {
+            // Get the list of directories
+            var directories = Directory.GetDirectories(localBaseDirectoryPath);
+
+            // Parse the directory names as dates and find the latest
+            DateTime latestDate = DateTime.MinValue;
+            string latestDirectory = null;
+            foreach (var directory in directories)
+            {
+                string directoryName = Path.GetFileName(directory);
+                if (DateTime.TryParse(directoryName, out DateTime date) && date > latestDate)
+                {
+                    latestDate = date;
+                    latestDirectory = directoryName;
+                }
+            }
+
+            return Path.Combine(localBaseDirectoryPath, latestDirectory);
+        }
+
+        public bool AreAllFilesDownloaded(string remoteDirectoryPath, string localDirectoryPath)
+        {
+            using (var client = _clientManager.Connect())
+            {
+                // Get the list of files in the remote directory
+                var remoteFiles = client.ListDirectory(remoteDirectoryPath);
+
+                // Check if each file exists in the local directory
+                foreach (var remoteFile in remoteFiles)
+                {
+                    string localFilePath = Path.Combine(localDirectoryPath, remoteFile.Name);
+                    if (!File.Exists(localFilePath))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
     }
 }

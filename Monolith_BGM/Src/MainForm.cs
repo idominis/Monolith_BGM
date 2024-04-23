@@ -21,7 +21,7 @@ namespace Monolith_BGM
 
         private void InitializeSftp()
         {
-            string host = "192.168.0.128";
+            string host = "192.168.100.163";
             string username = "tester";
             string password = "password";
 
@@ -42,76 +42,55 @@ namespace Monolith_BGM
             string remoteBaseDirectoryPath = @"\PurchasingOrders";
             string localBaseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
 
-            // Call method to download all XML files from the directory
-            try
-            {
-                fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
-                MessageBox.Show("All XML files have been downloaded successfully!");
+         
+                //fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
+                //MessageBox.Show("All XML files have been downloaded successfully!");
 
                 // Ask user if they want to exit the application
-                DialogResult exitResponse = MessageBox.Show("Do you want to exit the application?", "Exit Application", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (exitResponse == DialogResult.Yes)
+                //DialogResult exitResponse = MessageBox.Show("Do you want to exit the application?", "Exit Application", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            //if (exitResponse == DialogResult.Yes)
+            //{
+            //    Application.Exit(); // Close the application if the user chooses 'Yes'
+            //}
+            //else
+            //{
+                //var xmlLoader = new XmlDataLoader();
+                //string directoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
+
+                try
                 {
-                    Application.Exit(); // Close the application if the user chooses 'Yes'
+                    // Get the latest directory
+                string latestRemoteDirectoryPath = fileHandler.GetLatestRemoteDirectory(remoteBaseDirectoryPath);
+                //string latestLocalDirectoryPath = Path.Combine(localBaseDirectoryPath, Path.GetFileName(localBaseDirectoryPath));
+                string latestLocalDirectoryPath = fileHandler.GetLatestLocalDirectory(localBaseDirectoryPath);
+
+                if()
+
+                // Check if all files in the latest directory have been downloaded
+                bool areAllFilesDownloaded = fileHandler.AreAllFilesDownloaded(latestRemoteDirectoryPath, latestLocalDirectoryPath);
+                    if (!areAllFilesDownloaded)
+                    {
+                        fileHandler.GetLatestRemoteDirectory(remoteBaseDirectoryPath);
+                        var areAllDownloaded = fileHandler.AreAllFilesDownloaded(latestRemoteDirectoryPath, latestLocalDirectoryPath);
+                        // Download missing files from the latest directory
+                        if (!areAllDownloaded)
+                        {
+                            fileHandler.DownloadXmlFilesFromDirectory(latestRemoteDirectoryPath, latestLocalDirectoryPath);
+                            MessageBox.Show("New XML files have been downloaded successfully!");
+                        }
+
+                        // Rest of the code...
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    var xmlLoader = new XmlDataLoader();
-                    string directoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
-
-                    // Ensure the directory exists
-                    if (!Directory.Exists(directoryPath))
-                    {
-                        MessageBox.Show("Directory does not exist.");
-                        return;
-                    }
-
-                    //var purchaseOrderDetails = xmlLoader.LoadFromXml(filePath);
-                    //var purchaseOrders = purchaseOrderDetails.Details;
-                    // Process each XML file in the directory
-                    var allPurchaseOrders = new List<PurchaseOrderDetail>();
-                    foreach (string filePath in Directory.GetFiles(directoryPath, "*.xml"))
-                    {
-                        var purchaseOrderDetails = xmlLoader.LoadFromXml(filePath);
-                        var purchaseOrders = purchaseOrderDetails.Details;
-                        //var purchaseOrders = xmlLoader.LoadFromXml<PurchaseOrderDetail>(filePath);
-                        //allPurchaseOrders.AddRange(purchaseOrders);  // Aggregate orders from all files
-                    }
-
-                    // Process purchaseOrders as needed
-                    // Example: Display count of loaded purchase orders
-                    MessageBox.Show($"Total purchase orders loaded: {allPurchaseOrders.Count}");
+                    MessageBox.Show("Failed to download XML files: " + ex.Message);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to download XML files: " + ex.Message);
-            }
+            //}
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //var xmlLoader = new XmlDataLoader();
-            //string directoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
-
-            //// Ensure the directory exists
-            //if (!Directory.Exists(directoryPath))
-            //{
-            //    MessageBox.Show("Directory does not exist.");
-            //    return;
-            //}
-
-            //// Process each XML file in the directory
-            //var allPurchaseOrders = new List<PurchaseOrderDetail>();
-            //foreach (string filePath in Directory.GetFiles(directoryPath, "*.xml"))
-            //{
-            //    var purchaseOrders = xmlLoader.LoadFromXml<PurchaseOrderDetail>(filePath);
-            //    allPurchaseOrders.AddRange(purchaseOrders);  // Aggregate orders from all files
-            //}
-
-            //// Process purchaseOrders as needed
-            //// Example: Display count of loaded purchase orders
-            //MessageBox.Show($"Total purchase orders loaded: {allPurchaseOrders.Count}");
         }
 
     }
