@@ -7,7 +7,7 @@ public class PurchaseOrderDetailProfile : Profile
     public PurchaseOrderDetailProfile()
     {
         CreateMap<PurchaseOrderDetailDto, PurchaseOrderDetail>()
-            .ForMember(dest => dest.PurchaseOrderDetailId, opt => opt.Ignore()) // Explicitly ignore
+            //.ForMember(dest => dest.PurchaseOrderDetailId, opt => opt.Ignore()) // Explicitly ignore
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

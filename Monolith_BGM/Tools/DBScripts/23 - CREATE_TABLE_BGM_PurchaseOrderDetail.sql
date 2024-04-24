@@ -10,7 +10,7 @@ GO
 
 CREATE TABLE [Purchasing].[PurchaseOrderDetail](
 	[PurchaseOrderID] [int] NOT NULL,
-	[PurchaseOrderDetailID] [int] IDENTITY(1,1) NOT NULL,
+	[PurchaseOrderDetailID] [int] NOT NULL,
 	[DueDate] [datetime] NOT NULL,
 	[OrderQty] [smallint] NOT NULL,
 	[ProductID] [int] NOT NULL,
