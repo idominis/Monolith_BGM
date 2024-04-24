@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "DDSVk+u/rmbD9Oxdgzf96kUBUKQ03oi/7uTkMtkbn92mkxb4vWNzJdjoFN+nJlUOtL+u6X/fer+8axDEji3bVQ==",
+  "dgSpecHash": "Q+68DZp8gPcYnDBgAaKhZE58KoR7XNVyMVajNO89+HWAPZGGMZk/fmu/N7M0USU5jSjakziZVxemawIFK0Ha0w==",
   "success": true,
   "projectFilePath": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Monolith_BGM.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\ido\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\microsoft.data.sqlclient\\2.1.7\\microsoft.data.sqlclient.2.1.7.nupkg.sha512",
@@ -33,6 +34,9 @@
     "C:\\Users\\ido\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\ido\\.nuget\\packages\\serilog\\3.1.1\\serilog.3.1.1.nupkg.sha512",
+    "C:\\Users\\ido\\.nuget\\packages\\serilog.sinks.console\\5.0.1\\serilog.sinks.console.5.0.1.nupkg.sha512",
+    "C:\\Users\\ido\\.nuget\\packages\\serilog.sinks.file\\5.0.0\\serilog.sinks.file.5.0.0.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\ssh.net\\2024.0.0\\ssh.net.2024.0.0.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\system.collections.immutable\\6.0.0\\system.collections.immutable.6.0.0.nupkg.sha512",
     "C:\\Users\\ido\\.nuget\\packages\\system.configuration.configurationmanager\\4.7.0\\system.configuration.configurationmanager.4.7.0.nupkg.sha512",

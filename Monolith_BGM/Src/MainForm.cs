@@ -4,6 +4,9 @@ using Monolith_BGM.Models;
 using System;
 using System.Windows.Forms;
 using AutoMapper;
+using Microsoft.VisualBasic.Logging;
+using Serilog;
+using Log = Serilog.Log;
 
 namespace Monolith_BGM
 {
@@ -57,15 +60,18 @@ namespace Monolith_BGM
                 if (newFilesDownloaded)
                 {
                     MessageBox.Show("XML files have been downloaded successfully!");
+                    Log.Information("XML files have been downloaded successfully!");
                 }
                 else
                 {
                     MessageBox.Show("No new XML files.");
+                    Log.Information("No new XML files.");
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to download XML files: " + ex.Message);
+                Log.Error(ex, "Failed to download XML files.");
             }
 
         }
@@ -82,17 +88,26 @@ namespace Monolith_BGM
                 var xmlFiles = Directory.GetFiles(baseDirectoryPath, "*.xml", SearchOption.AllDirectories);
                 foreach (var xmlFile in xmlFiles)
                 {
-                    var purchaseOrderDetails = xmlLoader.LoadFromXml<PurchaseOrderDetails>(xmlFile);
-                    allPurchaseOrderDetails.AddRange(purchaseOrderDetails.Details);
+                    try
+                    {
+                        var purchaseOrderDetails = xmlLoader.LoadFromXml<PurchaseOrderDetails>(xmlFile);
+                        allPurchaseOrderDetails.AddRange(purchaseOrderDetails.Details);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error along with the filename
+                        Log.Error(ex, "Error loading XML data from file: {FileName}", xmlFile);
+                        MessageBox.Show($"Error loading XML data from file: {xmlFile}\nError: {ex.Message}");
+                    }
                 }
 
                 // Save the purchase orders to the database
                 SavePurchaseOrderDetails(allPurchaseOrderDetails);
-                MessageBox.Show("Purchase orders loaded and saved successfully!");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading XML data: {ex.Message}");
+                MessageBox.Show($"Error processing XML files: {ex.Message}");
+                Log.Error(ex, "Error processing XML files.");
             }
         }
 
@@ -116,10 +131,13 @@ namespace Monolith_BGM
                 {
                     context.PurchaseOrderDetails.AddRange(newDetails);
                     context.SaveChanges();
+                    MessageBox.Show("Purchase orders loaded and saved successfully!");
+                    Log.Information("Purchase orders loaded and saved successfully!");
                 }
                 else
                 {
                     MessageBox.Show("No new purchase orders to save.");
+                    Log.Information("No new purchase orders to save.");
                 }
             }
         }
@@ -136,10 +154,12 @@ namespace Monolith_BGM
             {
                 timer.Start();
                 MessageBox.Show("The service has been started.");
+                Log.Information("The service has been started.");
             }
             else
             {
                 MessageBox.Show("The service is running.");
+                Log.Information("The service is running.");
             }
         }
 
@@ -149,10 +169,12 @@ namespace Monolith_BGM
             {
                 timer.Stop();
                 MessageBox.Show("The service has been stopped.");
+                Log.Information("The service has been stopped.");
             }
             else
             {
                 MessageBox.Show("The service is not running.");
+                Log.Information("The service is not running."); 
             }
         }
     }

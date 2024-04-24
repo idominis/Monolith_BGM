@@ -11,24 +11,28 @@
       "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\models\\purchaseorderdetail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\dataaccess\\dto\\purchaseorderdetaildto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\dataaccess\\dto\\purchaseorderdetaildto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\dataaccess\\xmldataloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\dataaccess\\xmldataloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3A39FF7E-D506-42BB-9B6C-B19504CCF578}|BGM.SftpUtilities\\BGM.SftpUtilities.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\bgm.sftputilities\\sftpfilehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3A39FF7E-D506-42BB-9B6C-B19504CCF578}|BGM.SftpUtilities\\BGM.SftpUtilities.csproj|solutionrelative:bgm.sftputilities\\sftpfilehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\src\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\src\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\models\\bgm_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\models\\bgm_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\src\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\src\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3A39FF7E-D506-42BB-9B6C-B19504CCF578}|BGM.SftpUtilities\\BGM.SftpUtilities.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\bgm.sftputilities\\sftpfilehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3A39FF7E-D506-42BB-9B6C-B19504CCF578}|BGM.SftpUtilities\\BGM.SftpUtilities.csproj|solutionrelative:bgm.sftputilities\\sftpfilehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\src\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\src\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\src\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\src\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3A39FF7E-D506-42BB-9B6C-B19504CCF578}|BGM.SftpUtilities\\BGM.SftpUtilities.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\bgm.sftputilities\\sftpclientmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -37,6 +41,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ido\\source\\repos\\Monolith_BGM\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\PurchaseOrderDetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Monolith_BGM\\Src\\PurchaseOrderDetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -54,17 +62,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "BGM_dbContext.cs",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Models\\BGM_dbContext.cs",
               "RelativeDocumentMoniker": "Monolith_BGM\\Models\\BGM_dbContext.cs",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Models\\BGM_dbContext.cs",
               "RelativeToolTip": "Monolith_BGM\\Models\\BGM_dbContext.cs",
-              "ViewState": "AQIAAAkAAAAAAAAAAAA3wBQAAAAdAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABQAAAAdAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T12:48:18.219Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -74,7 +81,7 @@
               "RelativeDocumentMoniker": "Monolith_BGM\\Src\\MainForm.cs",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\MainForm.cs",
               "RelativeToolTip": "Monolith_BGM\\Src\\MainForm.cs",
-              "ViewState": "AQIAAGAAAAAAAAAAAAAqwGoAAAAMAAAA",
+              "ViewState": "AQIAAH4AAAAAAAAAAADgv40AAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T13:09:58.576Z",
               "IsPinned": true,
@@ -82,21 +89,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "SftpFileHandler.cs",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\SftpFileHandler.cs",
               "RelativeDocumentMoniker": "BGM.SftpUtilities\\SftpFileHandler.cs",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\SftpFileHandler.cs",
               "RelativeToolTip": "BGM.SftpUtilities\\SftpFileHandler.cs",
-              "ViewState": "AQIAAA4AAAAAAAAAAAAIwDUAAAA9AAAA",
+              "ViewState": "AQIAAA4AAAAAAAAAAAAywDUAAAA9AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T05:44:16.994Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "SftpClientManager.cs",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\SftpClientManager.cs",
               "RelativeDocumentMoniker": "BGM.SftpUtilities\\SftpClientManager.cs",
@@ -105,12 +111,11 @@
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAPAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T05:33:49.52Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\Program.cs",
               "RelativeDocumentMoniker": "Monolith_BGM\\Src\\Program.cs",
@@ -119,8 +124,7 @@
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T13:07:31.864Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -130,51 +134,75 @@
               "RelativeDocumentMoniker": "Monolith_BGM\\Models\\PurchaseOrderDetail.cs",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Models\\PurchaseOrderDetail.cs",
               "RelativeToolTip": "Monolith_BGM\\Models\\PurchaseOrderDetail.cs",
-              "ViewState": "AQIAAAEAAAAAAAAAAADwvwwAAAAsAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAWAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T13:03:29.055Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": ".gitignore",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\.gitignore",
               "RelativeDocumentMoniker": ".gitignore",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\.gitignore",
               "RelativeToolTip": ".gitignore",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAAVAAAA",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAKqSURBVDhPjVVNbtpAFH5jbFOpwoAaCSFyg4AaVQop6gW66D0adcMRICeIcgbECbLpptl0VboHKrEgIZIp6QaEAf/g6XszgxkTKvWDj7Fn3jx/7322YaDQ7XbbHKDFOQcexyBGnOBcHsfiXBIRGow9RlH02ff9n81mcwFx/AkYu0sSdjqd9puTk1b17Eycq404il81Ajw8PsCf52deKpW80WjUC4Lgdrvdfv9ydWXjct2UYQAxMpvNQqVS2SdTPyqXwHw\u002Bh/Vqxcrl8ms/CD5M3d\u002BL5XIRgGF8xeU7Q4YhsEySscVxNpuB605h6rrgTl0xEtfrNWmFMAwpMbNMMxvz7ccojt\u002BpLLBXqPoWYXC/34eN76elIc7P34JpmuB5Hvzo9YD6FUbRKxRB5QokCQlUqW3bUL\u002B8TMrWS7ZtCwqFIpxWTkUlGcOAb/f3MHmcqIgjCqmc4WAA2Gy18hJ0AduyoFqtQSZjYP/JAYl9DxHUH8YMyOUcyOcLGvOCjiIdU4yBCkkEidkhSbhTaBgMHIcSyo2S6cREx8nhxZlokyYwXTKthmEEgwGastmoleOgW6zRKIo9eskHpnBpSr0ungw5Kb5p4BrDcilWxB1XKOLwNghhMBxCqEx5mUwOFjpeQ1MOFWqmyB5SX3K5XMqAvKNRzDngYAzDfpORusK0Kfghlx3h8m4zsrB3WLIgXJam/KOHNEWLkSh5AP5/mPK\u002B2BBt0m\u002BbvSk4R4u2ZcPFRV28wg4hylOgSsgUfY6gKVTPMir8hQqDIFQrO6Q3Wnjhaq0qS9YunnrbJD3EPhWLhQMWU6S\u002B7p4UHXtTkCt8i0yeJhiYwdvCFjRRiYnPLTFjEk1BSjMej8FbeimFyRv75ua2zRlXfwFIGjXG6q8Av0h5HKs4nLm\u002BbrXaAAB/AQ9XoA0UDbnxAAAAAElFTkSuQmCC",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIZSURBVDhPZVOxctNAEH0nyfIkIgqShxLMB8QZG/cU\u002BQz6DMPX8AlpXOQXAoWHGXqIh8oE2VIShhTBiSkcy5LM29NJCFj7aaXbvdXbtycF2mg06lu2feI4Th/bLf8liqJAYXyapnnLcb6vVqs3SqmPr4\u002BPn3LraV1gPwhOhoNB33XdsoAEeBH/a7nExcVXBEGwTpLk03K5fPu\u002B2/1wenT0xJK8DeFYFvZ8Hxa9UhYspegVbNuG53lw3TZarVY7CMMB1169nE4fM/mLIwWw2ei3ZvSTyYR0pWRp3ITu8y7STYrP5\u002BfIs6z9sF4/Y\u002B6OxMsCNClADdA7PNQ9l4sEWTiOjeGLIfr9AbaMjcdjdXPzQ6foFsRkU57niOcxZlFUYib\u002BG6bTKSLeX19dsRUXylK6bbFSA9OC9E6hEIadfxBqSEx02RakZirUDKSAZhDPEfGtTVSMJCZMJbeq8L8GvV6ZZNa1mQfFCUlOIQyMNTQAsjzDPI7Z74z9E5GBfo6QkEGWZaxnRKbpAjxlZFA0NCh7DjvGa3RKDSigsE319qYG/OVkEJNBPYVqEgYSE520BnypWEMDHhqnhYODnp51ZeZQaxOGcib\u002BRKsxEgVbEAaXCRlUGhDzBi6TpGbw1zmQoyw6LO7uses9gr/vw\u002Bd34ft7\u002BvuosOPtYrFYIH1Y621idQs/b29x9u5Mj6yatUCYVfcCYbBasUAmHIDfItdo9VyowNgAAAAASUVORK5CYII=",
               "WhenOpened": "2024-04-22T05:20:41.559Z",
               "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "XmlDataLoader.cs",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\DataAccess\\XmlDataLoader.cs",
               "RelativeDocumentMoniker": "Monolith_BGM\\DataAccess\\XmlDataLoader.cs",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\DataAccess\\XmlDataLoader.cs",
               "RelativeToolTip": "Monolith_BGM\\DataAccess\\XmlDataLoader.cs",
-              "ViewState": "AQIAAAEAAAAAAAAAAADwvwoAAABQAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T17:49:19.986Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
+              "Title": "PurchaseOrderDetails.cs",
+              "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\PurchaseOrderDetails.cs",
+              "RelativeDocumentMoniker": "Monolith_BGM\\Src\\PurchaseOrderDetails.cs",
+              "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\PurchaseOrderDetails.cs",
+              "RelativeToolTip": "Monolith_BGM\\Src\\PurchaseOrderDetails.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAjAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-24T07:25:10.177Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "MainForm.cs [Design]",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\MainForm.cs",
               "RelativeDocumentMoniker": "Monolith_BGM\\Src\\MainForm.cs",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\MainForm.cs [Design]",
               "RelativeToolTip": "Monolith_BGM\\Src\\MainForm.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-04-22T19:24:30.931Z",
+              "WhenOpened": "2024-04-24T06:05:38.555Z",
               "IsPinned": true,
               "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PurchaseOrderDetailDto.cs",
+              "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\DataAccess\\DTO\\PurchaseOrderDetailDto.cs",
+              "RelativeDocumentMoniker": "Monolith_BGM\\DataAccess\\DTO\\PurchaseOrderDetailDto.cs",
+              "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\DataAccess\\DTO\\PurchaseOrderDetailDto.cs",
+              "RelativeToolTip": "Monolith_BGM\\DataAccess\\DTO\\PurchaseOrderDetailDto.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAvAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-24T08:45:00.522Z",
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
