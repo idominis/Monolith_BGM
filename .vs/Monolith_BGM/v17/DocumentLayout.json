@@ -53,10 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Src\\PurchaseOrderDetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Monolith_BGM\\Src\\PurchaseOrderDetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|c:\\users\\ido\\source\\repos\\monolith_bgm\\monolith_bgm\\tools\\dbscripts\\23 - create_table_bgm_purchaseorderdetail.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame",
-      "RelativeMoniker": "D:0:0:{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}|Monolith_BGM\\Monolith_BGM.csproj|solutionrelative:monolith_bgm\\tools\\dbscripts\\23 - create_table_bgm_purchaseorderdetail.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
     }
   ],
   "DocumentGroupContainers": [
@@ -160,7 +156,7 @@
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\.gitignore",
               "RelativeToolTip": ".gitignore",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAAVAAAA",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIZSURBVDhPZVOxctNAEH0nyfIkIgqShxLMB8QZG/cU\u002BQz6DMPX8AlpXOQXAoWHGXqIh8oE2VIShhTBiSkcy5LM29NJCFj7aaXbvdXbtycF2mg06lu2feI4Th/bLf8liqJAYXyapnnLcb6vVqs3SqmPr4\u002BPn3LraV1gPwhOhoNB33XdsoAEeBH/a7nExcVXBEGwTpLk03K5fPu\u002B2/1wenT0xJK8DeFYFvZ8Hxa9UhYspegVbNuG53lw3TZarVY7CMMB1169nE4fM/mLIwWw2ei3ZvSTyYR0pWRp3ITu8y7STYrP5\u002BfIs6z9sF4/Y\u002B6OxMsCNClADdA7PNQ9l4sEWTiOjeGLIfr9AbaMjcdjdXPzQ6foFsRkU57niOcxZlFUYib\u002BG6bTKSLeX19dsRUXylK6bbFSA9OC9E6hEIadfxBqSEx02RakZirUDKSAZhDPEfGtTVSMJCZMJbeq8L8GvV6ZZNa1mQfFCUlOIQyMNTQAsjzDPI7Z74z9E5GBfo6QkEGWZaxnRKbpAjxlZFA0NCh7DjvGa3RKDSigsE319qYG/OVkEJNBPYVqEgYSE520BnypWEMDHhqnhYODnp51ZeZQaxOGcib\u002BRKsxEgVbEAaXCRlUGhDzBi6TpGbw1zmQoyw6LO7uses9gr/vw\u002Bd34ft7\u002BvuosOPtYrFYIH1Y621idQs/b29x9u5Mj6yatUCYVfcCYbBasUAmHIDfItdo9VyowNgAAAAASUVORK5CYII=",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAALRSURBVDhPhVXLTttQEB3beeE0VdIFj1USpIZdEX9QsWVTlXX7Gf2FLrrpT/AtZVWpqoSKuqgIoARDHDsPx4nt654ZP2ICaic5jH0z99wzd\u002BZeNIKdnZ3tk65/1DXtg2EY\u002BxTH\u002BMb8Eyml5FmlY0EQxLFSHuL\u002B4Pkzxr59PTmJLvb23iLgU0lmwSqVCrWaTdrd3aWSYeSE7EAlfrlckjO2Nc/zKrVabcdxnHeLxaL0/vz8h3V8/POh0fhi8KST09NWwzQPXzWbh\u002B12u1Wv18k0TTLh6yYA/wKobW2Rilix0jFWjpRqhWEY1zzPavj\u002B7\u002B/d7qUuMnxfnFEqCebzOU0mU5q4E3gXmNB0NiOkSrqhc/qiEmR7qzB8EwdB5\u002BjiQsO2WQkhG4JVFFGwWtFgMKD\u002BdZ/6fca1\u002BNubG5rNZ7KnnPpgOCTXcUoLz2sGy\u002BVLjJWZJt/DzKrVKnW63bwYYuw0jcrlsqjc3t4hqOPU6fLXJQ2Hd2TbDxKaK8wIwjDCyi7Zo9EaNvsHursbknVvoTBjQjHI3DIhoIK1NG2Z8jwhZGPPj5vgGInDh/tN13m6dF5uQsh7UrSE8P/IjBehlOKZlENyXYdGSHETxW1AD1KEIibEIEwZc8LEtKQonQ4dHBwIekX01uDCcSwbC8ysoDBJNYxCclyXRrYtsBmjFNk7isRZZJVOFCZWUJikzBkk/t/An\u002BRIprMze7SHSvHP60k5nowli8o8\u002BELGm3uoJA1nsw8Z3IsFcFEkZRHybMow9FWtWqMuilIsAON1r/cI7U5aFOnFtckbXw0hwKtFKIqLoqwLkGC8gQlipG1YYcrBltDjtlGQjwsTR8qXVDh4jcfvIRAgho8fz\u002BG5meV6fZCOserN7a20zWQ6xZUFwPOzy8A1JpAMRnR1dUVjtJPvQV96Bea3je95NMQRvLcsLvRGVflfwOZZj0Xtagn1YSDjRER/ASUBxEQ5Crn2AAAAAElFTkSuQmCC",
               "WhenOpened": "2024-04-22T05:20:41.559Z",
               "IsPinned": true
             },
@@ -175,8 +171,7 @@
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-22T17:49:19.986Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -267,20 +262,18 @@
               "RelativeToolTip": "Monolith_BGM\\DataAccess\\Map\\PurchaseOrderDetailProfile.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAOAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-04-24T14:04:29.194Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-04-24T14:04:29.194Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "23 - CREATE_TABLE_BGM_PurchaseOrderDetail.sql ",
+              "Title": "23 - CREATE_TABLE_BGM_PurchaseOrderDetail.sql",
               "DocumentMoniker": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Tools\\DBScripts\\23 - CREATE_TABLE_BGM_PurchaseOrderDetail.sql",
               "RelativeDocumentMoniker": "Monolith_BGM\\Tools\\DBScripts\\23 - CREATE_TABLE_BGM_PurchaseOrderDetail.sql",
               "ToolTip": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Tools\\DBScripts\\23 - CREATE_TABLE_BGM_PurchaseOrderDetail.sql",
               "RelativeToolTip": "Monolith_BGM\\Tools\\DBScripts\\23 - CREATE_TABLE_BGM_PurchaseOrderDetail.sql",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2024-04-24T13:58:23.896Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-04-24T13:58:23.896Z"
             }
           ]
         },
