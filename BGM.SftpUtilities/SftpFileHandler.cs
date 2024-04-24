@@ -29,7 +29,7 @@ namespace BGM.SftpUtilities
             }
         }
 
-        // Method to download XML files from a directory only if they don't already exist locally
+        // Method to download XML files from a directory
         public bool DownloadXmlFilesFromDirectory(string remoteDirectoryPath, string localBaseDirectoryPath)
         {
             bool newFilesDownloaded = false;

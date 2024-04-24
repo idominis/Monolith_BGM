@@ -1,3 +1,5 @@
+using AutoMapper;
+
 namespace Monolith_BGM
 {
     internal static class Program
@@ -8,10 +10,16 @@ namespace Monolith_BGM
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());
+
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<PurchaseOrderDetailProfile>();
+            });
+
+            var mapper = config.CreateMapper();
+
+            Application.Run(new MainForm(mapper));
         }
     }
 }

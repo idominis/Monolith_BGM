@@ -1,8 +1,9 @@
 using BGM.SftpUtilities;
-//using Monolith_BGM.DataAccess;
+using Monolith_BGM.DataAccess.DTO;
 using Monolith_BGM.Models;
 using System;
 using System.Windows.Forms;
+using AutoMapper;
 
 namespace Monolith_BGM
 {
@@ -11,17 +12,19 @@ namespace Monolith_BGM
         private System.Timers.Timer timer;
         private SftpClientManager clientManager;
         private SftpFileHandler fileHandler;
+        private readonly IMapper _mapper;
 
-        public MainForm()
+
+        public MainForm(IMapper mapper)
         {
+            _mapper = mapper;
             InitializeComponent();
             InitializeSftp();
-            InitializeTimer();
         }
 
         private void InitializeSftp()
         {
-            string host = "192.168.0.140";
+            string host = "192.168.56.1";
             string username = "tester";
             string password = "password";
 
@@ -31,14 +34,15 @@ namespace Monolith_BGM
 
         private void InitializeTimer()
         {
-            timer = new System.Timers.Timer(10000); // Interval in milliseconds
-            timer.Elapsed += OnTimedEvent;
-            timer.AutoReset = true;
-            timer.Enabled = true;
-
-            // Call OnTimedEvent immediately
-            OnTimedEvent(timer, null);
+            if (timer == null)
+            {
+                timer = new System.Timers.Timer(10000); // Interval in milliseconds
+                timer.Elapsed += OnTimedEvent;
+                timer.AutoReset = true;
+            }
+            timer.Enabled = true; // Ensure the timer is enabled.
         }
+
 
         private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
@@ -49,7 +53,7 @@ namespace Monolith_BGM
             {
                 // Download XML files from the directory
                 bool newFilesDownloaded = fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
-                
+
                 if (newFilesDownloaded)
                 {
                     MessageBox.Show("XML files have been downloaded successfully!");
@@ -58,8 +62,6 @@ namespace Monolith_BGM
                 {
                     MessageBox.Show("No new XML files.");
                 }
-
-                // Rest of the code...
             }
             catch (Exception ex)
             {
@@ -72,27 +74,20 @@ namespace Monolith_BGM
         {
             var xmlLoader = new XmlDataLoader();
             string baseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
+            List<PurchaseOrderDetailDto> allPurchaseOrderDetails = new List<PurchaseOrderDetailDto>();
 
             try
             {
-                // Get the list of directories in the base directory
-                var directories = Directory.GetDirectories(baseDirectoryPath);
-
-                foreach (var directory in directories)
+                // Collect all PurchaseOrderDetails from XML files
+                var xmlFiles = Directory.GetFiles(baseDirectoryPath, "*.xml", SearchOption.AllDirectories);
+                foreach (var xmlFile in xmlFiles)
                 {
-                    // Get the list of XML files in the directory
-                    var xmlFiles = Directory.GetFiles(directory, "*.xml");
-
-                    foreach (var xmlFile in xmlFiles)
-                    {
-                        // Load the XML file
-                        var purchaseOrderDetails = xmlLoader.LoadFromXml(xmlFile);
-
-                        // Save the purchase orders to the database
-                        SavePurchaseOrderDetails(purchaseOrderDetails.Details);
-                    }
+                    var purchaseOrderDetails = xmlLoader.LoadFromXml<PurchaseOrderDetails>(xmlFile);
+                    allPurchaseOrderDetails.AddRange(purchaseOrderDetails.Details);
                 }
 
+                // Save the purchase orders to the database
+                SavePurchaseOrderDetails(allPurchaseOrderDetails);
                 MessageBox.Show("Purchase orders loaded and saved successfully!");
             }
             catch (Exception ex)
@@ -101,29 +96,64 @@ namespace Monolith_BGM
             }
         }
 
-        public void SavePurchaseOrderDetails(IEnumerable<PurchaseOrderDetail> details)
+        public void SavePurchaseOrderDetails(List<PurchaseOrderDetailDto> allDetailsDto)
         {
             using (var context = new BGM_dbContext())
             {
-                foreach (var detail in details)
+                // Fetch existing IDs from the database
+                var existingIds = new HashSet<int>(context.PurchaseOrderDetails.Select(p => p.PurchaseOrderDetailId));
+
+                // Filter DTOs first before mapping
+                var filteredDtos = allDetailsDto.Where(dto => !existingIds.Contains(dto.PurchaseOrderDetailId)).ToList();
+                var allDetails = filteredDtos.Select(dto => _mapper.Map<PurchaseOrderDetail>(dto)).ToList();
+
+
+                // Filter out details that already exist in the database
+                var newDetails = allDetails.Where(d => !existingIds.Contains(d.PurchaseOrderDetailId)).ToList();
+
+                // Add and save new entries
+                if (newDetails.Any())
                 {
-                    if (!IsPurchaseOrderDetailExists(detail.ProductId))
-                    {
-                        context.PurchaseOrderDetails.Add(detail);
-                    }
+                    context.PurchaseOrderDetails.AddRange(newDetails);
+                    context.SaveChanges();
                 }
-                context.SaveChanges();
+                else
+                {
+                    MessageBox.Show("No new purchase orders to save.");
+                }
             }
         }
 
-        public bool IsPurchaseOrderDetailExists(int purchaseOrderDetailId)
+
+        private void ServiceStartButton_Click(object sender, EventArgs e)
         {
-            using (var context = new BGM_dbContext())
+            if (timer == null)
             {
-                return context.PurchaseOrderDetails.Any(p => p.PurchaseOrderDetailId == purchaseOrderDetailId);
+                InitializeTimer();
+            }
+
+            if (!timer.Enabled)
+            {
+                timer.Start();
+                MessageBox.Show("The service has been started.");
+            }
+            else
+            {
+                MessageBox.Show("The service is running.");
             }
         }
 
-
+        private void ServiceStopButton_Click(object sender, EventArgs e)
+        {
+            if (timer != null && timer.Enabled)
+            {
+                timer.Stop();
+                MessageBox.Show("The service has been stopped.");
+            }
+            else
+            {
+                MessageBox.Show("The service is not running.");
+            }
+        }
     }
 }

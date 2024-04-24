@@ -1,3 +1,4 @@
+using Monolith_BGM.DataAccess.DTO;
 using Monolith_BGM.Models;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -6,5 +7,5 @@ using System.Xml.Serialization;
 public class PurchaseOrderDetails
 {
     [XmlElement("PurchaseOrderDetail")]
-    public List<PurchaseOrderDetail> Details { get; set; }
+    public List<PurchaseOrderDetailDto> Details { get; set; }
 }
