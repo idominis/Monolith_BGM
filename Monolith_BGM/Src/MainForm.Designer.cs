@@ -31,6 +31,9 @@
             SaveToDbButton = new Button();
             ServiceStartButton = new Button();
             ServiceStopButton = new Button();
+            statusStrip1 = new StatusStrip();
+            toolStripStatusLabel = new ToolStripStatusLabel();
+            statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // SaveToDbButton
@@ -63,17 +66,36 @@
             ServiceStopButton.UseVisualStyleBackColor = true;
             ServiceStopButton.Click += ServiceStopButton_Click;
             // 
+            // statusStrip1
+            // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel });
+            statusStrip1.Location = new Point(0, 428);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(800, 22);
+            statusStrip1.TabIndex = 3;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel
+            // 
+            toolStripStatusLabel.Name = "toolStripStatusLabel";
+            toolStripStatusLabel.Size = new Size(209, 17);
+            toolStripStatusLabel.Text = "Status messages will be displayed here";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(statusStrip1);
             Controls.Add(ServiceStopButton);
             Controls.Add(ServiceStartButton);
             Controls.Add(SaveToDbButton);
             Name = "MainForm";
             Text = "MainForm";
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -81,5 +103,7 @@
         private Button SaveToDbButton;
         private Button ServiceStartButton;
         private Button ServiceStopButton;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel toolStripStatusLabel;
     }
 }

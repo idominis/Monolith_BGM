@@ -9,6 +9,7 @@ using Serilog;
 using Log = Serilog.Log;
 using Microsoft.EntityFrameworkCore;
 using BGM.Common;
+using System.Data;
 
 namespace Monolith_BGM
 {
@@ -22,13 +23,16 @@ namespace Monolith_BGM
         private string remoteBaseDirectoryPath = @"\PurchasingOrders";
         private string localBaseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
         private ErrorHandlerService _errorHandler;
+        private readonly IStatusUpdateService _statusUpdateService;
 
-        public MainForm(IMapper mapper, DataService dataService, ErrorHandlerService errorHandler)
-        {
+        public MainForm(IMapper mapper, DataService dataService, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService)
+        {                              
             _mapper = mapper;
             _dataService = dataService;
             _errorHandler = errorHandler;
+            _statusUpdateService = statusUpdateService; // Make sure this is assigned before calling any method that uses it
             InitializeComponent();
+            _statusUpdateService.StatusUpdated += UpdateStatusMessage; // Subscribe to events after it is assigned
             InitializeSftp();
         }
 
@@ -39,7 +43,7 @@ namespace Monolith_BGM
             string password = "password";
 
             clientManager = new SftpClientManager(host, username, password);
-            fileHandler = new SftpFileHandler(clientManager);
+            fileHandler = new SftpFileHandler(clientManager, _statusUpdateService);
         }
 
         private void InitializeTimer()
@@ -53,7 +57,7 @@ namespace Monolith_BGM
             timer.Enabled = true;
 
             // Call OnTimedEvent immediately
-            OnTimedEvent(timer, null);
+            //OnTimedEvent(timer, null);
         }
 
         private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
@@ -65,12 +69,12 @@ namespace Monolith_BGM
 
                 if (newFilesDownloaded)
                 {
-                    MessageBox.Show("XML files have been downloaded successfully!");
+                    _statusUpdateService.RaiseStatusUpdated("XML files have been downloaded successfully!");
                     Log.Information("XML files have been downloaded successfully!");
                 }
                 else
                 {
-                    MessageBox.Show("No new XML files.");
+                    _statusUpdateService.RaiseStatusUpdated("No new XML files");
                     Log.Information("No new XML files.");
                 }
             }
@@ -90,6 +94,7 @@ namespace Monolith_BGM
                 timer = null;
             }
 
+            _statusUpdateService.StatusUpdated -= UpdateStatusMessage;
             base.OnFormClosing(e); // Call the base class method
         }
 
@@ -135,12 +140,12 @@ namespace Monolith_BGM
             if (!timer.Enabled)
             {
                 timer.Start();
-                MessageBox.Show("The service has been started.");
+                _statusUpdateService.RaiseStatusUpdated("The service has been started");
                 Log.Information("The service has been started.");
             }
             else
             {
-                MessageBox.Show("The service is running.");
+                _statusUpdateService.RaiseStatusUpdated("The service is running");
                 Log.Information("The service is running.");
             }
         }
@@ -150,13 +155,25 @@ namespace Monolith_BGM
             if (timer != null && timer.Enabled)
             {
                 timer.Stop();
-                MessageBox.Show("The service has been stopped.");
+                _statusUpdateService.RaiseStatusUpdated("The service has been stopped");
                 Log.Information("The service has been stopped.");
             }
             else
             {
-                MessageBox.Show("The service is not running.");
+                _statusUpdateService.RaiseStatusUpdated("The service is not running");
                 Log.Information("The service is not running."); 
+            }
+        }
+
+        private void UpdateStatusMessage(string message)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => toolStripStatusLabel.Text = message));
+            }
+            else
+            {
+                toolStripStatusLabel.Text = message;
             }
         }
     }

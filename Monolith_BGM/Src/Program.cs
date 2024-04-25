@@ -28,6 +28,8 @@ namespace Monolith_BGM
             // Log the start of the application
             Log.Information("Application Starting");
 
+            var statusUpdateService = new StatusUpdateService();
+
             // Configure AutoMapper
             var config = new MapperConfiguration(cfg =>
             {
@@ -36,13 +38,13 @@ namespace Monolith_BGM
             var mapper = config.CreateMapper();
             var dbContext = new BGM_dbContext(); // You'd typically have some setup or factory for DbContext
             var errorHandler = new ErrorHandlerService();  // Instantiate the error handler
-            var dataService = new DataService(dbContext, mapper, errorHandler);
-            
+
+            var dataService = new DataService(dbContext, mapper, errorHandler, statusUpdateService);
 
             // Run the main form
             try
             {
-                Application.Run(new MainForm(mapper, dataService, errorHandler));
+                Application.Run(new MainForm(mapper, dataService, errorHandler, statusUpdateService));
             }
             catch (Exception ex)
             {

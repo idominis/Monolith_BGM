@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using BGM.Common;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using Renci.SshNet.Sftp;
@@ -12,10 +13,12 @@ namespace BGM.SftpUtilities
     public class SftpFileHandler
     {
         private SftpClientManager _clientManager;
+        private readonly IStatusUpdateService _statusUpdateService;
 
-        public SftpFileHandler(SftpClientManager clientManager)
+        public SftpFileHandler(SftpClientManager clientManager, IStatusUpdateService statusUpdateService)
         {
             _clientManager = clientManager;
+            _statusUpdateService = statusUpdateService;
         }
 
         public void UploadFile(string localFilePath, string remotePath)
@@ -39,6 +42,7 @@ namespace BGM.SftpUtilities
                 using (var client = _clientManager.Connect())
                 {
                     // Log successful connection
+                    _statusUpdateService.RaiseStatusUpdated("Connected to SFTP server successfully");  // TODO
                     Log.Information("Connected to SFTP server successfully.");
 
                     var directories = client.ListDirectory(remoteDirectoryPath).Where(x => x.IsDirectory && x.Name != "." && x.Name != "..");
@@ -64,6 +68,7 @@ namespace BGM.SftpUtilities
                             string processedFilePath = file.FullName + ".processed";
                             client.RenameFile(file.FullName, processedFilePath);
                             Log.Information("File {FileName} downloaded and marked as processed.", file.Name);
+                            _statusUpdateService.RaiseStatusUpdated("Files downloaded and marked as processed"); // TODO
                         }
                     }
                 }
@@ -76,9 +81,5 @@ namespace BGM.SftpUtilities
 
             return newFilesDownloaded;
         }
-
-
-
     }
-
 }

@@ -13,12 +13,16 @@ public class DataService
     private readonly BGM_dbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly ErrorHandlerService _errorHandler;
+    public delegate void StatusUpdateHandler(string message);
+    public event StatusUpdateHandler StatusUpdated;
+    private readonly IStatusUpdateService _statusUpdateService;
 
-    public DataService(BGM_dbContext dbContext, IMapper mapper, ErrorHandlerService errorHandler)
+    public DataService(BGM_dbContext dbContext, IMapper mapper, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService)
     {
         _dbContext = dbContext;
         _mapper = mapper;
         _errorHandler = errorHandler;
+        _statusUpdateService = statusUpdateService;
     }
 
     public async Task AddPurchaseOrderDetailsAsync(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
@@ -53,12 +57,14 @@ public class DataService
             if (_dbContext.ChangeTracker.HasChanges())
             {
                 await _dbContext.SaveChangesAsync();
-                MessageBox.Show("Purchase orders loaded and saved successfully!");
+                //MessageBox.Show("Purchase orders loaded and saved successfully!");
+                _statusUpdateService.RaiseStatusUpdated("Purchase orders loaded and saved successfully!");
                 Log.Information("Purchase orders loaded and saved successfully!");
             }
             else
             {
-                MessageBox.Show("No new purchase orders to save.");
+                //MessageBox.Show("No new purchase orders to save.");
+                _statusUpdateService.RaiseStatusUpdated("No new purchase orders to save");
                 Log.Information("No new purchase orders to save.");
             }
         }
@@ -66,7 +72,26 @@ public class DataService
         {
             // Log and handle the exception appropriately
             _errorHandler.LogError(ex, "Failed to update the database.");
-            MessageBox.Show("Failed to update the database: " + ex.Message);
+            //MessageBox.Show("Failed to update the database: " + ex.Message);
+            _statusUpdateService.RaiseStatusUpdated("Failed to update the database: " + ex.Message);
+        }
+    }
+
+    protected virtual void OnStatusUpdated(string message)
+    {
+        StatusUpdated?.Invoke(message);
+    }
+
+    public async Task PerformOperation()
+    {
+        try
+        {
+            // Operation logic
+            OnStatusUpdated("Operation successful");
+        }
+        catch (Exception ex)
+        {
+            OnStatusUpdated("Operation failed: " + ex.Message);
         }
     }
 }
