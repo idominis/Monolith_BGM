@@ -35,8 +35,9 @@ namespace Monolith_BGM
             });
             var mapper = config.CreateMapper();
             var dbContext = new BGM_dbContext(); // You'd typically have some setup or factory for DbContext
-            var dataService = new DataService(dbContext, mapper);
             var errorHandler = new ErrorHandlerService();  // Instantiate the error handler
+            var dataService = new DataService(dbContext, mapper, errorHandler);
+            
 
             // Run the main form
             try
