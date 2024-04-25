@@ -5,6 +5,7 @@ using System.Xml.Serialization;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using Renci.SshNet.Sftp;
+using Serilog;
 
 namespace BGM.SftpUtilities
 {
@@ -33,55 +34,50 @@ namespace BGM.SftpUtilities
         public bool DownloadXmlFilesFromDirectory(string remoteDirectoryPath, string localBaseDirectoryPath)
         {
             bool newFilesDownloaded = false;
-
-            using (var client = _clientManager.Connect())
+            try
             {
-                // Get the list of directories in the remote directory
-                var directories = client.ListDirectory(remoteDirectoryPath).Where(x => x.IsDirectory && x.Name != "." && x.Name != "..");
-
-                foreach (var directory in directories)
+                using (var client = _clientManager.Connect())
                 {
-                    // Create a local directory with the same name if it doesn't exist
-                    string localDirectoryPath = Path.Combine(localBaseDirectoryPath, directory.Name);
-                    Directory.CreateDirectory(localDirectoryPath);
+                    // Log successful connection
+                    Log.Information("Connected to SFTP server successfully.");
 
-                    // Get the list of files in the remote directory
-                    var files = client.ListDirectory(Path.Combine(remoteDirectoryPath, directory.Name)).Where(x => !x.IsDirectory);
-
-                    foreach (var file in files)
+                    var directories = client.ListDirectory(remoteDirectoryPath).Where(x => x.IsDirectory && x.Name != "." && x.Name != "..");
+                    foreach (var directory in directories)
                     {
-                        // Skip the file if it has been marked as processed
-                        if (file.Name.EndsWith(".processed"))
-                        {
-                            continue;
-                        }
+                        string localDirectoryPath = Path.Combine(localBaseDirectoryPath, directory.Name);
+                        Directory.CreateDirectory(localDirectoryPath); // Safe to call even if directory exists
 
-                        // Check if the file has already been downloaded
-                        string localFilePath = Path.Combine(localDirectoryPath, file.Name);
-                        if (File.Exists(localFilePath))
+                        var files = client.ListDirectory(Path.Combine(remoteDirectoryPath, directory.Name)).Where(x => !x.IsDirectory);
+                        foreach (var file in files)
                         {
-                            continue;
-                        }
+                            string localFilePath = Path.Combine(localDirectoryPath, file.Name);
+                            if (File.Exists(localFilePath) || file.Name.EndsWith(".processed"))
+                                continue;
 
-                        // Download the file
-                        using (var fileStream = new FileStream(localFilePath, FileMode.Create))
-                        {
-                            client.DownloadFile(file.FullName, fileStream);
-                        }
+                            using (var fileStream = new FileStream(localFilePath, FileMode.Create))
+                            {
+                                client.DownloadFile(file.FullName, fileStream);
+                            }
+                            newFilesDownloaded = true;
 
-                        newFilesDownloaded = true;
-          
-                        // Rename the remote file to mark it as processed
-                        string processedFilePath = file.FullName + ".processed";
-                        client.RenameFile(file.FullName, processedFilePath);
+                            // Rename file on server to mark as processed
+                            string processedFilePath = file.FullName + ".processed";
+                            client.RenameFile(file.FullName, processedFilePath);
+                            Log.Information("File {FileName} downloaded and marked as processed.", file.Name);
+                        }
                     }
                 }
-
-                _clientManager.Disconnect(client);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to download XML files from directory: {DirectoryPath}", remoteDirectoryPath);
+                throw; // Consider rethrowing to handle these exceptions further up the call stack
             }
 
             return newFilesDownloaded;
         }
+
+
 
     }
 

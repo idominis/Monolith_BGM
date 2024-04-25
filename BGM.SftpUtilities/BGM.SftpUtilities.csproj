@@ -13,4 +13,8 @@
     <PackageReference Include="SSH.NET" Version="2024.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BGM.Common\BGM.Common.csproj" />
+  </ItemGroup>
+
 </Project>

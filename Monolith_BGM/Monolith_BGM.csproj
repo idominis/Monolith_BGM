@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BGM.Common\BGM.Common.csproj" />
     <ProjectReference Include="..\BGM.SftpUtilities\BGM.SftpUtilities.csproj" />
   </ItemGroup>
 

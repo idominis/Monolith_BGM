@@ -857,10 +857,24 @@
           }
         }
       },
+      "BGM.Common/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "dependencies": {
+          "Serilog": "3.1.1"
+        },
+        "compile": {
+          "bin/placeholder/BGM.Common.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BGM.Common.dll": {}
+        }
+      },
       "BGM.SftpUtilities/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
+          "BGM.Common": "1.0.0",
           "SSH.NET": "2024.0.0",
           "Serilog": "3.1.1",
           "Serilog.Sinks.Console": "5.0.1",
@@ -2215,6 +2229,11 @@
         "version.txt"
       ]
     },
+    "BGM.Common/1.0.0": {
+      "type": "project",
+      "path": "../BGM.Common/BGM.Common.csproj",
+      "msbuildProject": "../BGM.Common/BGM.Common.csproj"
+    },
     "BGM.SftpUtilities/1.0.0": {
       "type": "project",
       "path": "../BGM.SftpUtilities/BGM.SftpUtilities.csproj",
@@ -2224,6 +2243,7 @@
   "projectFileDependencyGroups": {
     "net6.0-windows7.0": [
       "AutoMapper >= 13.0.1",
+      "BGM.Common >= 1.0.0",
       "BGM.SftpUtilities >= 1.0.0",
       "Microsoft.EntityFrameworkCore >= 6.0.29",
       "Microsoft.EntityFrameworkCore.Design >= 6.0.29",
@@ -2267,6 +2287,9 @@
         "net6.0-windows7.0": {
           "targetAlias": "net6.0-windows",
           "projectReferences": {
+            "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.Common\\BGM.Common.csproj": {
+              "projectPath": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.Common\\BGM.Common.csproj"
+            },
             "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\BGM.SftpUtilities.csproj": {
               "projectPath": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\BGM.SftpUtilities.csproj"
             }

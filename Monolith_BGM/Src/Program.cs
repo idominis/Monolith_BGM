@@ -1,7 +1,9 @@
 using System;
 using System.Windows.Forms;
 using AutoMapper;
+using Monolith_BGM.Models;
 using Serilog;
+using BGM.Common;
 
 namespace Monolith_BGM
 {
@@ -20,7 +22,6 @@ namespace Monolith_BGM
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug() // Set the minimum log level to Debug for detailed logs
                 .WriteTo.Console()    // Write logs to the console
-              //.WriteTo.File("logs/Monolith_BGM.log", rollingInterval: RollingInterval.Day) // Write logs to a file with daily rolling
                 .WriteTo.File(@"C:\Logs\Monolith_BGM.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
@@ -33,11 +34,14 @@ namespace Monolith_BGM
                 cfg.AddProfile<PurchaseOrderDetailProfile>();
             });
             var mapper = config.CreateMapper();
+            var dbContext = new BGM_dbContext(); // You'd typically have some setup or factory for DbContext
+            var dataService = new DataService(dbContext, mapper);
+            var errorHandler = new ErrorHandlerService();  // Instantiate the error handler
 
             // Run the main form
             try
             {
-                Application.Run(new MainForm(mapper));
+                Application.Run(new MainForm(mapper, dataService, errorHandler));
             }
             catch (Exception ex)
             {

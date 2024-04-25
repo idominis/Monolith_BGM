@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
-public class XmlDataLoader
+public class XmlService
 {
     // Define the method as generic with a type parameter T
     public T LoadFromXml<T>(string filePath)
