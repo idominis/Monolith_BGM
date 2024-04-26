@@ -33,7 +33,6 @@ namespace BGM.SftpUtilities
             }
         }
 
-        // Method to download XML files from a directory
         public bool DownloadXmlFilesFromDirectory(string remoteDirectoryPath, string localBaseDirectoryPath)
         {
             bool newFilesDownloaded = false;
@@ -41,34 +40,26 @@ namespace BGM.SftpUtilities
             {
                 using (var client = _clientManager.Connect())
                 {
-                    // Log successful connection
-                    _statusUpdateService.RaiseStatusUpdated("Connected to SFTP server successfully");  // TODO
-                    Log.Information("Connected to SFTP server successfully.");
+                    var entries = client.ListDirectory(remoteDirectoryPath);
 
-                    var directories = client.ListDirectory(remoteDirectoryPath).Where(x => x.IsDirectory && x.Name != "." && x.Name != "..");
-                    foreach (var directory in directories)
+                    foreach (var entry in entries)
                     {
-                        string localDirectoryPath = Path.Combine(localBaseDirectoryPath, directory.Name);
-                        Directory.CreateDirectory(localDirectoryPath); // Safe to call even if directory exists
-
-                        var files = client.ListDirectory(Path.Combine(remoteDirectoryPath, directory.Name)).Where(x => !x.IsDirectory);
-                        foreach (var file in files)
+                        if (entry.IsDirectory && entry.Name != "." && entry.Name != "..")
                         {
-                            string localFilePath = Path.Combine(localDirectoryPath, file.Name);
-                            if (File.Exists(localFilePath) || file.Name.EndsWith(".processed"))
-                                continue;
-
-                            using (var fileStream = new FileStream(localFilePath, FileMode.Create))
+                            // Recursively handle subdirectories
+                            string subDirectoryPath = Path.Combine(remoteDirectoryPath, entry.Name);
+                            string localSubDirectoryPath = Path.Combine(localBaseDirectoryPath, entry.Name);
+                            Directory.CreateDirectory(localSubDirectoryPath); // Ensure the directory exists locally
+                            newFilesDownloaded |= DownloadXmlFilesFromDirectory(subDirectoryPath, localSubDirectoryPath);
+                        }
+                        else if (!entry.IsDirectory && !entry.Name.EndsWith(".processed"))
+                        {
+                            // Process files directly in the current directory
+                            SftpFile file = entry as SftpFile; // Explicitly cast to SftpFile
+                            if (file != null)
                             {
-                                client.DownloadFile(file.FullName, fileStream);
+                                newFilesDownloaded |= ProcessFilesInDirectory(client, new[] { file }, localBaseDirectoryPath, remoteDirectoryPath);
                             }
-                            newFilesDownloaded = true;
-
-                            // Rename file on server to mark as processed
-                            string processedFilePath = file.FullName + ".processed";
-                            client.RenameFile(file.FullName, processedFilePath);
-                            Log.Information("File {FileName} downloaded and marked as processed.", file.Name);
-                            _statusUpdateService.RaiseStatusUpdated("Files downloaded and marked as processed"); // TODO
                         }
                     }
                 }
@@ -76,10 +67,40 @@ namespace BGM.SftpUtilities
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to download XML files from directory: {DirectoryPath}", remoteDirectoryPath);
-                throw; // Consider rethrowing to handle these exceptions further up the call stack
+                throw; // Optionally rethrow to handle these exceptions further up the call stack
             }
 
             return newFilesDownloaded;
         }
+
+
+        private bool ProcessFilesInDirectory(SftpClient client, IEnumerable<SftpFile> files, string localDirectoryPath, string remoteDirectoryPath)
+        {
+            bool downloaded = false;
+            foreach (var file in files)
+            {
+                string localFilePath = Path.Combine(localDirectoryPath, file.Name);
+                if (!File.Exists(localFilePath))
+                {
+                    using (var fileStream = new FileStream(localFilePath, FileMode.Create))
+                    {
+                        client.DownloadFile(file.FullName, fileStream);
+                    }
+                    downloaded = true;
+
+                    // Rename the file on server to mark as processed
+                    string processedFilePath = file.FullName + ".processed";
+                    client.RenameFile(file.FullName, processedFilePath);
+                    Log.Information("File {FileName} downloaded and marked as processed.", file.Name);
+                }
+            }
+            return downloaded;
+        }
+
+
+
+
+
+
     }
 }

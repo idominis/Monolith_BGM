@@ -19,11 +19,13 @@ namespace Monolith_BGM
         private SftpClientManager clientManager;
         private SftpFileHandler fileHandler;
         private readonly IMapper _mapper;
-        private readonly DataService _dataService;
-        private string remoteBaseDirectoryPath = @"\PurchasingOrders";
-        private string localBaseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
+        private readonly DataService _dataService;      
         private ErrorHandlerService _errorHandler;
         private readonly IStatusUpdateService _statusUpdateService;
+
+        private string purchasingOrdersPath = @"\PurchasingOrders";
+        private string purchasingHeadersPath = @"\PurchasingOrdersHeaders";
+        private string localBaseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
 
         public MainForm(IMapper mapper, DataService dataService, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService)
         {                              
@@ -38,7 +40,7 @@ namespace Monolith_BGM
 
         private void InitializeSftp()
         {
-            string host = "192.168.56.1";
+            string host = "192.168.75.1";
             string username = "tester";
             string password = "password";
 
@@ -55,34 +57,58 @@ namespace Monolith_BGM
                 timer.AutoReset = true;
             }
             timer.Enabled = true;
-
-            // Call OnTimedEvent immediately
-            //OnTimedEvent(timer, null);
         }
 
         private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
+            DownloadFiles(purchasingOrdersPath, localBaseDirectoryPath);
+            DownloadFiles(purchasingHeadersPath, Path.Combine(localBaseDirectoryPath, "Headers"));
+        }
+
+        private void DownloadFiles(string remotePath, string localPath)
+        {
             try
             {
-                // Download XML files from the directory
-                bool newFilesDownloaded = fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
-
-                if (newFilesDownloaded)
+                bool filesDownloaded = fileHandler.DownloadXmlFilesFromDirectory(remotePath, localPath);
+                if (filesDownloaded)
                 {
-                    _statusUpdateService.RaiseStatusUpdated("XML files have been downloaded successfully!");
-                    Log.Information("XML files have been downloaded successfully!");
+                    _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
+                    Log.Information($"XML files from {remotePath} have been downloaded successfully!");
                 }
                 else
                 {
-                    _statusUpdateService.RaiseStatusUpdated("No new XML files");
-                    Log.Information("No new XML files.");
+                    _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
+                    Log.Information($"No new XML files in {remotePath}.");
                 }
             }
             catch (Exception ex)
             {
-                _errorHandler.LogError(ex, "Failed to download XML files.");
+                _errorHandler.LogError(ex, $"Failed to download XML files from {remotePath}.");
             }
         }
+        //private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        // Download XML files from the directory
+        //        bool newFilesDownloaded = fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
+
+        //        if (newFilesDownloaded)
+        //        {
+        //            _statusUpdateService.RaiseStatusUpdated("XML files have been downloaded successfully!");
+        //            Log.Information("XML files have been downloaded successfully!");
+        //        }
+        //        else
+        //        {
+        //            _statusUpdateService.RaiseStatusUpdated("No new XML files");
+        //            Log.Information("No new XML files.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _errorHandler.LogError(ex, "Failed to download XML files.");
+        //    }
+        //}
 
         // Override the OnFormClosing method to clean up the timer
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -91,11 +117,51 @@ namespace Monolith_BGM
             {
                 timer.Stop();  
                 timer.Dispose();
-                timer = null;
             }
-
             _statusUpdateService.StatusUpdated -= UpdateStatusMessage;
             base.OnFormClosing(e); // Call the base class method
+        }
+
+        private void UpdateStatusMessage(string message)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => toolStripStatusLabel.Text = message));
+            }
+            else
+            {
+                toolStripStatusLabel.Text = message;
+            }
+        }
+
+        private void ServiceStartButton_Click(object sender, EventArgs e)
+        {
+            if (timer == null || !timer.Enabled)
+            {
+                InitializeTimer();
+                _statusUpdateService.RaiseStatusUpdated("The service has been started.");
+                Log.Information("The service has been started.");
+            }
+            else
+            {
+                _statusUpdateService.RaiseStatusUpdated("The service is already running.");
+                Log.Information("The service is already running.");
+            }
+        }
+
+        private void ServiceStopButton_Click(object sender, EventArgs e)
+        {
+            if (timer != null && timer.Enabled)
+            {
+                timer.Stop();
+                _statusUpdateService.RaiseStatusUpdated("The service has been stopped.");
+                Log.Information("The service has been stopped.");
+            }
+            else
+            {
+                _statusUpdateService.RaiseStatusUpdated("The service is not running.");
+                Log.Information("The service is not running.");
+            }
         }
 
         private async void SaveToDbButton_Click(object sender, EventArgs e)
@@ -128,53 +194,6 @@ namespace Monolith_BGM
             {
                 _errorHandler.LogError(ex, "Error processing XML files.");
             }
-        }
-
-        private void ServiceStartButton_Click(object sender, EventArgs e)
-        {
-            if (timer == null)
-            {
-                InitializeTimer();
-            }
-
-            if (!timer.Enabled)
-            {
-                timer.Start();
-                _statusUpdateService.RaiseStatusUpdated("The service has been started");
-                Log.Information("The service has been started.");
-            }
-            else
-            {
-                _statusUpdateService.RaiseStatusUpdated("The service is running");
-                Log.Information("The service is running.");
-            }
-        }
-
-        private void ServiceStopButton_Click(object sender, EventArgs e)
-        {
-            if (timer != null && timer.Enabled)
-            {
-                timer.Stop();
-                _statusUpdateService.RaiseStatusUpdated("The service has been stopped");
-                Log.Information("The service has been stopped.");
-            }
-            else
-            {
-                _statusUpdateService.RaiseStatusUpdated("The service is not running");
-                Log.Information("The service is not running."); 
-            }
-        }
-
-        private void UpdateStatusMessage(string message)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action(() => toolStripStatusLabel.Text = message));
-            }
-            else
-            {
-                toolStripStatusLabel.Text = message;
-            }
-        }
+        }          
     }
 }
