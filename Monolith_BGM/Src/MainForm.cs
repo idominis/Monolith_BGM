@@ -19,7 +19,7 @@ namespace Monolith_BGM
         private SftpClientManager clientManager;
         private SftpFileHandler fileHandler;
         private readonly IMapper _mapper;
-        private readonly DataService _dataService;      
+        private readonly DataService _dataService;
         private ErrorHandlerService _errorHandler;
         private readonly IStatusUpdateService _statusUpdateService;
 
@@ -28,7 +28,7 @@ namespace Monolith_BGM
         private string localBaseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
 
         public MainForm(IMapper mapper, DataService dataService, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService)
-        {                              
+        {
             _mapper = mapper;
             _dataService = dataService;
             _errorHandler = errorHandler;
@@ -115,7 +115,7 @@ namespace Monolith_BGM
         {
             if (timer != null)
             {
-                timer.Stop();  
+                timer.Stop();
                 timer.Dispose();
             }
             _statusUpdateService.StatusUpdated -= UpdateStatusMessage;
@@ -164,10 +164,10 @@ namespace Monolith_BGM
             }
         }
 
-        private async void SaveToDbButton_Click(object sender, EventArgs e)
+        private async void SavePODToDbButton_Click(object sender, EventArgs e)
         {
             var xmlLoader = new XmlService();
-            
+
             List<PurchaseOrderDetailDto> allPurchaseOrderDetails = new List<PurchaseOrderDetailDto>();
 
             try
@@ -188,12 +188,50 @@ namespace Monolith_BGM
                 }
 
                 // Save the purchase orders to the database
-                await _dataService.AddPurchaseOrderDetailsAsync(allPurchaseOrderDetails);
+                if (await _dataService.AddPurchaseOrderDetailsAsync(allPurchaseOrderDetails))
+                    _statusUpdateService.RaiseStatusUpdated("Files saved to DB!");
+                else
+                    _statusUpdateService.RaiseStatusUpdated("Failed saving to DB!");
             }
             catch (Exception ex)
             {
-                _errorHandler.LogError(ex, "Error processing XML files.");
+                _errorHandler.LogError(ex, "Error processing POD XML files.");
             }
-        }          
+        }
+
+        private async void SavePOHToDbButton_Click(object sender, EventArgs e)
+        {
+            var xmlLoader = new XmlService();
+
+            List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
+
+            try
+            {
+                // Collect all PurchaseOrderHeaders from XML files
+                var xmlFiles = Directory.GetFiles(localBaseDirectoryPath, "*.xml", SearchOption.AllDirectories);
+                foreach (var xmlFile in xmlFiles)
+                {
+                    try
+                    {
+                        var purchaseOrderHeaders = xmlLoader.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
+                        allPurchaseOrderHeaders.AddRange(purchaseOrderHeaders.Headers);
+                    }
+                    catch (Exception ex)
+                    {
+                        _errorHandler.LogError(ex, "Error loading POH XML data", xmlFile);
+                    }
+                }
+
+                // Save the purchase orders to the database
+                if (await _dataService.AddPurchaseOrderHeadersAsync(allPurchaseOrderHeaders))
+                    _statusUpdateService.RaiseStatusUpdated("POH files saved to DB!");
+                else
+                    _statusUpdateService.RaiseStatusUpdated("POH files failed saving to DB!");
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, "Error processing POH XML files.");
+            }
+        }
     }
 }

@@ -25,58 +25,60 @@ public class DataService
         _statusUpdateService = statusUpdateService;
     }
 
-    public async Task AddPurchaseOrderDetailsAsync(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
+
+    public async Task <bool> AddPurchaseOrderDetailsAsync(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
     {
-        // Clear the DbContext to avoid tracking issues
-        _dbContext.ChangeTracker.Clear();
+        // Fetch existing IDs from the database
+        var existingIds = new HashSet<int>(_dbContext.PurchaseOrderDetails.Select(p => p.PurchaseOrderDetailId));
 
-        // Map DTOs to Entity Models
-        var purchaseOrderDetails = purchaseOrderDetailsDto.Select(dto => _mapper.Map<PurchaseOrderDetail>(dto)).ToList();
+        // Filter DTOs first before mapping
+        var filteredDtos = purchaseOrderDetailsDto.Where(dto => !existingIds.Contains(dto.PurchaseOrderDetailId)).ToList();
+        var allDetails = filteredDtos.Select(dto => _mapper.Map<PurchaseOrderDetail>(dto)).ToList();
 
-        foreach (var detail in purchaseOrderDetails)
+        // Filter out details that already exist in the database
+        var newDetails = allDetails.Where(d => !existingIds.Contains(d.PurchaseOrderDetailId)).ToList();
+
+        // Add and save new entries
+        if (newDetails.Any())
         {
-            // Attempt to fetch the entity from the database to handle updates if exists
-            var existingEntity = await _dbContext.PurchaseOrderDetails
-                .FindAsync(detail.PurchaseOrderId, detail.PurchaseOrderDetailId);
-
-            if (existingEntity == null)
-            {
-                // If the entity doesn't exist, add it
-                _dbContext.PurchaseOrderDetails.Add(detail);
-            }
-            else
-            {
-                // If it exists, update the existing entity with new values
-                _dbContext.Entry(existingEntity).CurrentValues.SetValues(detail);
-            }
+            _dbContext.PurchaseOrderDetails.AddRange(newDetails);
+            await _dbContext.SaveChangesAsync();
+            Log.Information("Purchase orders details loaded and saved successfully!");
+            return true;
         }
-
-        // Save changes to the database
-        try
+        else
         {
-            if (_dbContext.ChangeTracker.HasChanges())
-            {
-                await _dbContext.SaveChangesAsync();
-                //MessageBox.Show("Purchase orders loaded and saved successfully!");
-                _statusUpdateService.RaiseStatusUpdated("Purchase orders loaded and saved successfully!");
-                Log.Information("Purchase orders loaded and saved successfully!");
-            }
-            else
-            {
-                //MessageBox.Show("No new purchase orders to save.");
-                _statusUpdateService.RaiseStatusUpdated("No new purchase orders to save");
-                Log.Information("No new purchase orders to save.");
-            }
-        }
-        catch (DbUpdateException ex)
-        {
-            // Log and handle the exception appropriately
-            _errorHandler.LogError(ex, "Failed to update the database.");
-            //MessageBox.Show("Failed to update the database: " + ex.Message);
-            _statusUpdateService.RaiseStatusUpdated("Failed to update the database: " + ex.Message);
+            Log.Information("No new purchase orders details to save.");
+            return false;
         }
     }
 
+    public async Task <bool> AddPurchaseOrderHeadersAsync(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
+    {
+        // Fetch existing IDs from the database
+        var existingIds = new HashSet<int>(_dbContext.PurchaseOrderHeaders.Select(p => p.PurchaseOrderId));
+
+        // Filter DTOs first before mapping
+        var filteredDtos = purchaseOrderHeadersDto.Where(dto => !existingIds.Contains(dto.PurchaseOrderId)).ToList();
+        var allHeaders = filteredDtos.Select(dto => _mapper.Map<PurchaseOrderHeader>(dto)).ToList();
+
+        // Filter out details that already exist in the database
+        var newDetails = allHeaders.Where(d => !existingIds.Contains(d.PurchaseOrderId)).ToList();
+
+        // Add and save new entries
+        if (newDetails.Any())
+        {
+            _dbContext.PurchaseOrderHeaders.AddRange(newDetails);
+            await _dbContext.SaveChangesAsync();
+            Log.Information("Purchase orders headers loaded and saved successfully!");
+            return true;
+        }
+        else
+        {
+            Log.Information("No new purchase orders headers to save.");
+            return false;
+        }
+    }
     protected virtual void OnStatusUpdated(string message)
     {
         StatusUpdated?.Invoke(message);

@@ -28,29 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
-            SaveToDbButton = new Button();
+            SavePODToDbButton = new Button();
             ServiceStartButton = new Button();
             ServiceStopButton = new Button();
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel = new ToolStripStatusLabel();
+            SavePOHToDbButton = new Button();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
-            // SaveToDbButton
+            // SavePODToDbButton
             // 
-            SaveToDbButton.Location = new Point(12, 150);
-            SaveToDbButton.Name = "SaveToDbButton";
-            SaveToDbButton.Size = new Size(137, 23);
-            SaveToDbButton.TabIndex = 0;
-            SaveToDbButton.Text = "Save XMLs to DB";
-            SaveToDbButton.UseVisualStyleBackColor = true;
-            SaveToDbButton.Click += SaveToDbButton_Click;
+            SavePODToDbButton.Location = new Point(14, 115);
+            SavePODToDbButton.Margin = new Padding(3, 4, 3, 4);
+            SavePODToDbButton.Name = "SavePODToDbButton";
+            SavePODToDbButton.Size = new Size(157, 31);
+            SavePODToDbButton.TabIndex = 0;
+            SavePODToDbButton.Text = "Save POD to DB";
+            SavePODToDbButton.UseVisualStyleBackColor = true;
+            SavePODToDbButton.Click += SavePODToDbButton_Click;
             // 
             // ServiceStartButton
             // 
-            ServiceStartButton.Location = new Point(12, 12);
+            ServiceStartButton.Location = new Point(14, 16);
+            ServiceStartButton.Margin = new Padding(3, 4, 3, 4);
             ServiceStartButton.Name = "ServiceStartButton";
-            ServiceStartButton.Size = new Size(137, 23);
+            ServiceStartButton.Size = new Size(157, 31);
             ServiceStartButton.TabIndex = 1;
             ServiceStartButton.Text = "Service Start";
             ServiceStartButton.UseVisualStyleBackColor = true;
@@ -58,9 +61,10 @@
             // 
             // ServiceStopButton
             // 
-            ServiceStopButton.Location = new Point(155, 12);
+            ServiceStopButton.Location = new Point(177, 16);
+            ServiceStopButton.Margin = new Padding(3, 4, 3, 4);
             ServiceStopButton.Name = "ServiceStopButton";
-            ServiceStopButton.Size = new Size(137, 23);
+            ServiceStopButton.Size = new Size(157, 31);
             ServiceStopButton.TabIndex = 2;
             ServiceStopButton.Text = "Service Stop";
             ServiceStopButton.UseVisualStyleBackColor = true;
@@ -68,28 +72,42 @@
             // 
             // statusStrip1
             // 
+            statusStrip1.ImageScalingSize = new Size(20, 20);
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel });
-            statusStrip1.Location = new Point(0, 428);
+            statusStrip1.Location = new Point(0, 574);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(800, 22);
+            statusStrip1.Padding = new Padding(1, 0, 16, 0);
+            statusStrip1.Size = new Size(914, 26);
             statusStrip1.TabIndex = 3;
             statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel
             // 
             toolStripStatusLabel.Name = "toolStripStatusLabel";
-            toolStripStatusLabel.Size = new Size(209, 17);
+            toolStripStatusLabel.Size = new Size(266, 20);
             toolStripStatusLabel.Text = "Status messages will be displayed here";
+            // 
+            // SavePOHToDbButton
+            // 
+            SavePOHToDbButton.Location = new Point(14, 166);
+            SavePOHToDbButton.Name = "SavePOHToDbButton";
+            SavePOHToDbButton.Size = new Size(157, 29);
+            SavePOHToDbButton.TabIndex = 4;
+            SavePOHToDbButton.Text = "Save POH to DB";
+            SavePOHToDbButton.UseVisualStyleBackColor = true;
+            SavePOHToDbButton.Click += SavePOHToDbButton_Click;
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(914, 600);
+            Controls.Add(SavePOHToDbButton);
             Controls.Add(statusStrip1);
             Controls.Add(ServiceStopButton);
             Controls.Add(ServiceStartButton);
-            Controls.Add(SaveToDbButton);
+            Controls.Add(SavePODToDbButton);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "MainForm";
             Text = "MainForm";
             statusStrip1.ResumeLayout(false);
@@ -100,10 +118,11 @@
 
         #endregion
 
-        private Button SaveToDbButton;
+        private Button SavePODToDbButton;
         private Button ServiceStartButton;
         private Button ServiceStopButton;
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel toolStripStatusLabel;
+        private Button SavePOHToDbButton;
     }
 }
