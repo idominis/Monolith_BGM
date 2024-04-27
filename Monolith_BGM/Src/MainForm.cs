@@ -86,29 +86,7 @@ namespace Monolith_BGM
                 _errorHandler.LogError(ex, $"Failed to download XML files from {remotePath}.");
             }
         }
-        //private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        // Download XML files from the directory
-        //        bool newFilesDownloaded = fileHandler.DownloadXmlFilesFromDirectory(remoteBaseDirectoryPath, localBaseDirectoryPath);
 
-        //        if (newFilesDownloaded)
-        //        {
-        //            _statusUpdateService.RaiseStatusUpdated("XML files have been downloaded successfully!");
-        //            Log.Information("XML files have been downloaded successfully!");
-        //        }
-        //        else
-        //        {
-        //            _statusUpdateService.RaiseStatusUpdated("No new XML files");
-        //            Log.Information("No new XML files.");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _errorHandler.LogError(ex, "Failed to download XML files.");
-        //    }
-        //}
 
         // Override the OnFormClosing method to clean up the timer
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -189,9 +167,9 @@ namespace Monolith_BGM
 
                 // Save the purchase orders to the database
                 if (await _dataService.AddPurchaseOrderDetailsAsync(allPurchaseOrderDetails))
-                    _statusUpdateService.RaiseStatusUpdated("Files saved to DB!");
+                    _statusUpdateService.RaiseStatusUpdated("POD files saved to DB!");
                 else
-                    _statusUpdateService.RaiseStatusUpdated("Failed saving to DB!");
+                    _statusUpdateService.RaiseStatusUpdated("POD files failed saving to DB!");
             }
             catch (Exception ex)
             {
@@ -202,13 +180,15 @@ namespace Monolith_BGM
         private async void SavePOHToDbButton_Click(object sender, EventArgs e)
         {
             var xmlLoader = new XmlService();
-
             List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
+
+            // Define the path to the 'Headers' directory inside the local base directory
+            string headersDirectoryPath = Path.Combine(localBaseDirectoryPath, "Headers");
 
             try
             {
-                // Collect all PurchaseOrderHeaders from XML files
-                var xmlFiles = Directory.GetFiles(localBaseDirectoryPath, "*.xml", SearchOption.AllDirectories);
+                // Collect all PurchaseOrderHeaders from XML files within the 'Headers' directory
+                var xmlFiles = Directory.GetFiles(headersDirectoryPath, "*.xml", SearchOption.AllDirectories);
                 foreach (var xmlFile in xmlFiles)
                 {
                     try
@@ -233,5 +213,6 @@ namespace Monolith_BGM
                 _errorHandler.LogError(ex, "Error processing POH XML files.");
             }
         }
+
     }
 }

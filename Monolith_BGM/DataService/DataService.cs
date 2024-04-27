@@ -53,32 +53,48 @@ public class DataService
         }
     }
 
-    public async Task <bool> AddPurchaseOrderHeadersAsync(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
+    public async Task<bool> AddPurchaseOrderHeadersAsync(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
+{
+    _dbContext.ChangeTracker.Clear(); // Clear the change tracker to avoid conflicts
+
+    // Fetch existing IDs from the database to avoid attaching duplicates
+    var existingIds = await _dbContext.PurchaseOrderHeaders
+                                      .AsNoTracking()
+                                      .Select(p => p.PurchaseOrderId)
+                                      .ToListAsync();
+
+    var newHeaders = new List<PurchaseOrderHeader>();
+
+    foreach (var dto in purchaseOrderHeadersDto)
     {
-        // Fetch existing IDs from the database
-        var existingIds = new HashSet<int>(_dbContext.PurchaseOrderHeaders.Select(p => p.PurchaseOrderId));
-
-        // Filter DTOs first before mapping
-        var filteredDtos = purchaseOrderHeadersDto.Where(dto => !existingIds.Contains(dto.PurchaseOrderId)).ToList();
-        var allHeaders = filteredDtos.Select(dto => _mapper.Map<PurchaseOrderHeader>(dto)).ToList();
-
-        // Filter out details that already exist in the database
-        var newDetails = allHeaders.Where(d => !existingIds.Contains(d.PurchaseOrderId)).ToList();
-
-        // Add and save new entries
-        if (newDetails.Any())
+        if (!existingIds.Contains(dto.PurchaseOrderId))
         {
-            _dbContext.PurchaseOrderHeaders.AddRange(newDetails);
-            await _dbContext.SaveChangesAsync();
-            Log.Information("Purchase orders headers loaded and saved successfully!");
-            return true;
-        }
-        else
-        {
-            Log.Information("No new purchase orders headers to save.");
-            return false;
+            var newHeader = _mapper.Map<PurchaseOrderHeader>(dto);
+            newHeaders.Add(newHeader);
         }
     }
+
+    if (newHeaders.Any())
+    {
+            //_dbContext.PurchaseOrderHeaders.AddRange(newHeaders);
+            for (int i = 0; i < newHeaders.Count; i++)
+            {
+                _dbContext.PurchaseOrderHeaders.Add(newHeaders[i]); // TESTING PURPOSES
+                await _dbContext.SaveChangesAsync();
+            }
+
+            await _dbContext.SaveChangesAsync();
+        Log.Information("Purchase orders headers loaded and saved successfully!");
+        return true;
+    }
+    else
+    {
+        Log.Information("No new purchase orders headers to save.");
+        return false;
+    }
+}
+
+
     protected virtual void OnStatusUpdated(string message)
     {
         StatusUpdated?.Invoke(message);

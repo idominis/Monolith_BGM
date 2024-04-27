@@ -4,6 +4,7 @@ using AutoMapper;
 using Monolith_BGM.Models;
 using Serilog;
 using BGM.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Monolith_BGM
 {
@@ -34,10 +35,15 @@ namespace Monolith_BGM
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<PurchaseOrderDetailProfile>();
+                cfg.AddProfile<PurchaseOrderHeaderProfile>();
             });
             var mapper = config.CreateMapper();
-            var dbContext = new BGM_dbContext(); // You'd typically have some setup or factory for DbContext
+            //var dbContext = new BGM_dbContext(); // You'd typically have some setup or factory for DbContext
             var errorHandler = new ErrorHandlerService();  // Instantiate the error handler
+            var optionsBuilder = new DbContextOptionsBuilder<BGM_dbContext>();
+            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=BGM_db;Trusted_Connection=True;MultipleActiveResultSets=true")
+            .EnableSensitiveDataLogging();
+            var dbContext = new BGM_dbContext(optionsBuilder.Options);
 
             var dataService = new DataService(dbContext, mapper, errorHandler, statusUpdateService);
 

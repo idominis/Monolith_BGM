@@ -13,7 +13,7 @@ namespace Monolith_BGM.DataAccess.DTO
         /// <summary>
         /// Primary key.
         /// </summary>
-        [XmlElement("PurchaseOrderId")]
+        [XmlElement("PurchaseOrderID")]
         public int PurchaseOrderId { get; set; }
         /// <summary>
         /// Incremental number to track changes to the purchase order over time.
@@ -28,17 +28,17 @@ namespace Monolith_BGM.DataAccess.DTO
         /// <summary>
         /// Employee who created the purchase order. Foreign key to Employee.BusinessEntityID.
         /// </summary>
-        [XmlElement("EmployeeId")]
+        [XmlElement("EmployeeID")]
         public int EmployeeId { get; set; }
         /// <summary>
         /// Vendor with whom the purchase order is placed. Foreign key to Vendor.BusinessEntityID.
         /// </summary>
-        [XmlElement("VendorId")]
+        [XmlElement("VendorID")]
         public int VendorId { get; set; }
         /// <summary>
         /// Shipping method. Foreign key to ShipMethod.ShipMethodID.
         /// </summary>
-        [XmlElement("ShipMethodId")]
+        [XmlElement("ShipMethodID")]
         public int ShipMethodId { get; set; }
         /// <summary>
         /// Purchase order creation date.
