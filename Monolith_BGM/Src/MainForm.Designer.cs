@@ -34,6 +34,7 @@
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel = new ToolStripStatusLabel();
             SavePOHToDbButton = new Button();
+            Button = new Button();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -97,11 +98,22 @@
             SavePOHToDbButton.UseVisualStyleBackColor = true;
             SavePOHToDbButton.Click += SavePOHToDbButton_Click;
             // 
+            // Button
+            // 
+            Button.Location = new Point(14, 243);
+            Button.Name = "Button";
+            Button.Size = new Size(157, 29);
+            Button.TabIndex = 5;
+            Button.Text = "Create POS XMLs";
+            Button.UseVisualStyleBackColor = true;
+            CreatePOSXMLsButton_Click.Click += CreatePOSXMLsButton_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(914, 600);
+            Controls.Add(Button);
             Controls.Add(SavePOHToDbButton);
             Controls.Add(statusStrip1);
             Controls.Add(ServiceStopButton);
@@ -124,5 +136,6 @@
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel toolStripStatusLabel;
         private Button SavePOHToDbButton;
+        private Button Button;
     }
 }

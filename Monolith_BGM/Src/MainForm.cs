@@ -214,5 +214,9 @@ namespace Monolith_BGM
             }
         }
 
+        private void CreatePOSXMLsButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

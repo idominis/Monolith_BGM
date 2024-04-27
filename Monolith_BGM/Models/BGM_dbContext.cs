@@ -20,15 +20,7 @@ namespace Monolith_BGM.Models
 
         public virtual DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
         public virtual DbSet<PurchaseOrderHeader> PurchaseOrderHeaders { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BGM_db;Integrated Security=True;Encrypt=True");
-            }
-        }
+        public virtual DbSet<VPurchaseOrderSummary> VPurchaseOrderSummaries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -152,6 +144,45 @@ namespace Monolith_BGM.Models
                 entity.Property(e => e.VendorId)
                     .HasColumnName("VendorID")
                     .HasComment("Vendor with whom the purchase order is placed. Foreign key to Vendor.BusinessEntityID.");
+            });
+
+            modelBuilder.Entity<VPurchaseOrderSummary>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("vPurchaseOrderSummary", "Purchasing");
+
+                entity.Property(e => e.Freight).HasColumnType("money");
+
+                entity.Property(e => e.LineTotal).HasColumnType("money");
+
+                entity.Property(e => e.OrderDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ProductId).HasColumnName("ProductID");
+
+                entity.Property(e => e.ProductName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.ProductNumber)
+                    .IsRequired()
+                    .HasMaxLength(25);
+
+                entity.Property(e => e.PurchaseOrderId).HasColumnName("PurchaseOrderID");
+
+                entity.Property(e => e.SubTotal).HasColumnType("money");
+
+                entity.Property(e => e.TaxAmt).HasColumnType("money");
+
+                entity.Property(e => e.TotalDue).HasColumnType("money");
+
+                entity.Property(e => e.UnitPrice).HasColumnType("money");
+
+                entity.Property(e => e.VendorId).HasColumnName("VendorID");
+
+                entity.Property(e => e.VendorName)
+                    .IsRequired()
+                    .HasMaxLength(50);
             });
 
             OnModelCreatingPartial(modelBuilder);
