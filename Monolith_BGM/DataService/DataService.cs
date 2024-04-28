@@ -100,16 +100,12 @@ public class DataService
         StatusUpdated?.Invoke(message);
     }
 
-    public async Task PerformOperation()
+    public async Task<List<PurchaseOrderSummary>> FetchPurchaseOrderSummaries()
     {
-        try
-        {
-            // Operation logic
-            OnStatusUpdated("Operation successful");
-        }
-        catch (Exception ex)
-        {
-            OnStatusUpdated("Operation failed: " + ex.Message);
-        }
+        // Fetch data from the database view
+        var viewData = await _dbContext.VPurchaseOrderSummaries.ToListAsync();
+
+        // Map data from view model to DTO
+        return _mapper.Map<List<PurchaseOrderSummary>>(viewData);
     }
 }

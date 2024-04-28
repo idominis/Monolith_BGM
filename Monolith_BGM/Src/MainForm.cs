@@ -214,9 +214,22 @@ namespace Monolith_BGM
             }
         }
 
-        private void CreatePOSXMLsButton_Click(object sender, EventArgs e)
+        private async void CreatePOSXMLsButton_ClickAsync(object sender, EventArgs e)
         {
+            var xmlLoader = new XmlService();
 
+            try
+            {
+                var summaries = await _dataService.FetchPurchaseOrderSummaries();
+                xmlLoader.GenerateXMLFiles(summaries);
+                //MessageBox.Show("XML files generated successfully.");
+                _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show($"An error occurred: {ex.Message}");
+                _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files");
+            }
         }
     }
 }

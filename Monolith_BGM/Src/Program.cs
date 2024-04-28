@@ -36,6 +36,7 @@ namespace Monolith_BGM
             {
                 cfg.AddProfile<PurchaseOrderDetailProfile>();
                 cfg.AddProfile<PurchaseOrderHeaderProfile>();
+                cfg.AddProfile<PurchaseOrderSummaryProfile>();
             });
             var mapper = config.CreateMapper();
             //var dbContext = new BGM_dbContext(); // You'd typically have some setup or factory for DbContext

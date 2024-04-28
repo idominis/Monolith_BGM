@@ -106,7 +106,7 @@
             Button.TabIndex = 5;
             Button.Text = "Create POS XMLs";
             Button.UseVisualStyleBackColor = true;
-            CreatePOSXMLsButton_Click.Click += CreatePOSXMLsButton_Click;
+            Button.Click += CreatePOSXMLsButton_ClickAsync;
             // 
             // MainForm
             // 
