@@ -21,15 +21,33 @@ namespace BGM.SftpUtilities
             _statusUpdateService = statusUpdateService;
         }
 
-        public void UploadFile(string localFilePath, string remotePath)
+        public async Task UploadFileAsync(string localFilePath, string remotePath)
         {
-            using (var client = _clientManager.Connect())
+            try
             {
-                using (var fileStream = new FileStream(localFilePath, FileMode.Open))
+                using (var client = _clientManager.Connect())
                 {
-                    client.UploadFile(fileStream, remotePath);
+                    // Extract the remote directory from the path
+                    string remoteDirectory = Path.GetDirectoryName(remotePath);
+
+                    // Check if the directory exists and create it if it doesn't
+                    if (!client.Exists(remoteDirectory))
+                    {
+                        client.CreateDirectory(remoteDirectory); // Ensure this method is available or implement it
+                    }
+
+                    using (var fileStream = new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        await Task.Run(() => client.UploadFile(fileStream, remotePath));
+                    }
+                    _clientManager.Disconnect(client);
                 }
-                _clientManager.Disconnect(client);
+                Log.Information("File uploaded successfully: {LocalFilePath}", localFilePath);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to upload file: {LocalFilePath}", localFilePath);
+                throw; // Consider handling this more gracefully depending on your application's error handling strategy
             }
         }
 
@@ -96,11 +114,6 @@ namespace BGM.SftpUtilities
             }
             return downloaded;
         }
-
-
-
-
-
 
     }
 }

@@ -16,26 +16,40 @@ public class XmlService
         }
     }
 
-    public void GenerateXMLFiles(List<PurchaseOrderSummary> summaries)
+    public void GenerateXMLFiles(List<PurchaseOrderSummary> summaries, DateTime? startDate = null, DateTime? endDate = null)
     {
         var serializer = new XmlSerializer(typeof(List<PurchaseOrderSummary>));
 
-        // Build the base path dynamically to include the current user's Documents folder
+        // Base path including the current user's Documents folder
         string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                                        "BGM_project", "RebexTinySftpServer-Binaries-Latest", "data", "Xmls_Created");
 
         // Ensure the directory exists
         Directory.CreateDirectory(basePath);
 
-        foreach (var group in summaries.GroupBy(s => s.PurchaseOrderID))
+        if (startDate.HasValue && endDate.HasValue)
         {
-            string fileName = Path.Combine(basePath, $"PurchaseOrderGenerated_{group.Key}.xml");
-            using (var stream = new FileStream(fileName, FileMode.Create))
+            // If date range is given, generate a single XML file for that range
+            string dateRangeFileName = Path.Combine(basePath, $"PurchaseOrderSummaries_{startDate.Value:yyyyMMdd}_to_{endDate.Value:yyyyMMdd}.xml");
+            using (var stream = new FileStream(dateRangeFileName, FileMode.Create))
             {
-                serializer.Serialize(stream, group.ToList());
+                serializer.Serialize(stream, summaries);
+            }
+        }
+        else
+        {
+            // Generate multiple XML files, one per PurchaseOrderID
+            foreach (var group in summaries.GroupBy(s => s.PurchaseOrderID))
+            {
+                string fileName = Path.Combine(basePath, $"PurchaseOrderGenerated_{group.Key}.xml");
+                using (var stream = new FileStream(fileName, FileMode.Create))
+                {
+                    serializer.Serialize(stream, group.ToList());
+                }
             }
         }
     }
+
 
 
 }

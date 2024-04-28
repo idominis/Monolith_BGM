@@ -108,4 +108,25 @@ public class DataService
         // Map data from view model to DTO
         return _mapper.Map<List<PurchaseOrderSummary>>(viewData);
     }
+
+    public async Task<List<DateTime>> FetchDistinctOrderDatesAsync()
+    {
+        return await _dbContext.VPurchaseOrderSummaries
+                               .Select(x => x.OrderDate.Date)
+                               .Distinct()
+                               .OrderBy(date => date)
+                               .ToListAsync();
+    }
+
+    public async Task<List<PurchaseOrderSummary>> FetchPurchaseOrderSummariesByDateAsync(DateTime startDate, DateTime endDate)
+    {
+        var viewData = await _dbContext.VPurchaseOrderSummaries
+            .Where(p => p.OrderDate >= startDate && p.OrderDate <= endDate)
+            .ToListAsync();
+
+        // Map data from entity to DTO
+        return _mapper.Map<List<PurchaseOrderSummary>>(viewData);
+    }
+
+
 }

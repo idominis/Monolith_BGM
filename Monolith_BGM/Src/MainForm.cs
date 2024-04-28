@@ -32,9 +32,15 @@ namespace Monolith_BGM
             _mapper = mapper;
             _dataService = dataService;
             _errorHandler = errorHandler;
-            _statusUpdateService = statusUpdateService; // Make sure this is assigned before calling any method that uses it
+            _statusUpdateService = statusUpdateService;
             InitializeComponent();
-            _statusUpdateService.StatusUpdated += UpdateStatusMessage; // Subscribe to events after it is assigned
+
+            comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
+            comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;
+
+            // Register the Load event
+            this.Load += MainForm_Load;
+            _statusUpdateService.StatusUpdated += UpdateStatusMessage;
             InitializeSftp();
         }
 
@@ -57,6 +63,21 @@ namespace Monolith_BGM
                 timer.AutoReset = true;
             }
             timer.Enabled = true;
+        }
+
+        private async void MainForm_Load(object sender, EventArgs e)
+        {
+            await PopulateOrderDateDropdowns();
+        }
+
+        private void ComboBoxStartDate_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ValidateDateSelection();
+        }
+
+        private void ComboBoxEndDate_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ValidateDateSelection();
         }
 
         private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
@@ -222,14 +243,129 @@ namespace Monolith_BGM
             {
                 var summaries = await _dataService.FetchPurchaseOrderSummaries();
                 xmlLoader.GenerateXMLFiles(summaries);
-                //MessageBox.Show("XML files generated successfully.");
                 _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"An error occurred: {ex.Message}");
                 _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files");
             }
         }
+
+        private async Task PopulateOrderDateDropdowns()
+        {
+            try
+            {
+                var orderDates = await _dataService.FetchDistinctOrderDatesAsync();
+                comboBoxStartDate.Items.Clear();
+                comboBoxEndDate.Items.Clear();
+
+                foreach (var date in orderDates)
+                {
+                    comboBoxStartDate.Items.Add(date.ToString("yyyy-MM-dd"));
+                    comboBoxEndDate.Items.Add(date.ToString("yyyy-MM-dd"));
+                }
+
+                if (comboBoxStartDate.Items.Count > 0)
+                    comboBoxStartDate.SelectedIndex = 0;  // Select first item by default
+                if (comboBoxEndDate.Items.Count > 0)
+                    comboBoxEndDate.SelectedIndex = comboBoxEndDate.Items.Count - 1;  // Select last item by default
+            }
+            catch (Exception ex)
+            {
+                _statusUpdateService.RaiseStatusUpdated("Failed to load order dates");
+            }
+        }
+
+        private void ValidateDateSelection()
+        {
+            if (comboBoxStartDate.SelectedItem != null && comboBoxEndDate.SelectedItem != null)
+            {
+                var startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
+                var endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
+
+                if (startDate > endDate)
+                {
+                    comboBoxEndDate.SelectedItem = comboBoxStartDate.SelectedItem;
+                    _statusUpdateService.RaiseStatusUpdated("Start date must be before the end date. Adjusting end date to match start date");
+                }
+            }
+        }
+
+        private void radioButtonOn_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonOn.Checked)
+            {
+                radioButtonOff.Checked = false;
+            }
+        }
+
+        private void radioButtonOff_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonOff.Checked)
+            {
+                radioButtonOn.Checked = false;
+            }
+        }
+
+        private async void generateXmlButton_Click(object sender, EventArgs e)
+        {
+            var xmlLoader = new XmlService();
+            try
+            {
+                DateTime startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
+                DateTime endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
+
+                var summaries = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate, endDate);
+
+                string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PurchaseOrders.xml");
+
+                xmlLoader.GenerateXMLFiles(summaries, startDate, endDate);
+
+                MessageBox.Show($"XML file successfully created at {filePath}"); // TODO - consider showing a dialog with the file path
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}");
+            }
+        }
+
+        private async void sendXmlButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                                               "BGM_project", "RebexTinySftpServer-Binaries-Latest", "data", "Xmls_Created");
+
+                // If using date pickers for dynamic file names
+                DateTime startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
+                DateTime endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
+                string fileName = $"PurchaseOrderSummaries_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
+
+                // Full path to the file
+                string filePath = Path.Combine(basePath, fileName);
+
+                // Construct the remote path
+                string remotePath = Path.Combine("/Uploaded/", fileName); // Ensure this path is correctly handled by your SFTP server
+
+                // Check if the file exists
+                if (File.Exists(filePath))
+                {
+                    // Use SftpFileHandler to upload the file to a specific folder on the server
+                    await fileHandler.UploadFileAsync(filePath, remotePath);
+                    MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);// TODO - consider showing a dialog with the file path
+                }
+                else
+                {
+                    MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);// TODO - consider showing a dialog with the file path
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to send file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);// TODO - consider showing a dialog with the file path
+            }
+        }
+
+
+
     }
 }
