@@ -44,7 +44,7 @@
             label1 = new Label();
             groupBox2 = new GroupBox();
             label3 = new Label();
-            textBox1 = new TextBox();
+            autoSendTextBox = new TextBox();
             radioButtonOff = new RadioButton();
             radioButtonOn = new RadioButton();
             statusStrip1.SuspendLayout();
@@ -196,7 +196,7 @@
             // groupBox2
             // 
             groupBox2.Controls.Add(label3);
-            groupBox2.Controls.Add(textBox1);
+            groupBox2.Controls.Add(autoSendTextBox);
             groupBox2.Controls.Add(radioButtonOff);
             groupBox2.Controls.Add(radioButtonOn);
             groupBox2.Location = new Point(421, 349);
@@ -204,7 +204,7 @@
             groupBox2.Size = new Size(305, 194);
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
-            groupBox2.Text = "Set AutoCreate and Send XMLs";
+            groupBox2.Text = "Set AutoSend created XMLs";
             // 
             // label3
             // 
@@ -215,12 +215,12 @@
             label3.TabIndex = 3;
             label3.Text = "Last Date Sent";
             // 
-            // textBox1
+            // autoSendTextBox
             // 
-            textBox1.Location = new Point(52, 133);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(171, 27);
-            textBox1.TabIndex = 2;
+            autoSendTextBox.Location = new Point(52, 133);
+            autoSendTextBox.Name = "autoSendTextBox";
+            autoSendTextBox.Size = new Size(171, 27);
+            autoSendTextBox.TabIndex = 2;
             // 
             // radioButtonOff
             // 
@@ -290,7 +290,7 @@
         private Button generateXmlButton;
         private GroupBox groupBox2;
         private Button sendXmlButton;
-        private TextBox textBox1;
+        private TextBox autoSendTextBox;
         private RadioButton radioButtonOff;
         private RadioButton radioButtonOn;
         private Label label3;

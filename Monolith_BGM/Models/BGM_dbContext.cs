@@ -20,6 +20,7 @@ namespace Monolith_BGM.Models
 
         public virtual DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
         public virtual DbSet<PurchaseOrderHeader> PurchaseOrderHeaders { get; set; }
+        public virtual DbSet<PurchaseOrderSent> PurchaseOrdersSents { get; set; }
         public virtual DbSet<VPurchaseOrderSummary> VPurchaseOrderSummaries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -144,6 +145,16 @@ namespace Monolith_BGM.Models
                 entity.Property(e => e.VendorId)
                     .HasColumnName("VendorID")
                     .HasComment("Vendor with whom the purchase order is placed. Foreign key to Vendor.BusinessEntityID.");
+            });
+
+            modelBuilder.Entity<PurchaseOrderSent>(entity =>
+            {
+                entity.HasKey(e => e.PurchaseOrderSentId)
+                    .HasName("PK__Purchase__A1D7951FBE409AD9");
+
+                entity.ToTable("PurchaseOrdersSent", "Purchasing");
+
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<VPurchaseOrderSummary>(entity =>

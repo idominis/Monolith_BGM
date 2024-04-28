@@ -296,6 +296,7 @@ namespace Monolith_BGM
             if (radioButtonOn.Checked)
             {
                 radioButtonOff.Checked = false;
+                UploadAllHeaders();
             }
         }
 
@@ -364,6 +365,51 @@ namespace Monolith_BGM
                 MessageBox.Show("Failed to send file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);// TODO - consider showing a dialog with the file path
             }
         }
+
+        private async void UploadAllHeaders()
+        {
+            string localDirectoryPath = Path.Combine(localBaseDirectoryPath, "Headers");
+            string remoteDirectoryPath = "/Uploaded/";
+            DateTime? latestDate = null;
+
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(localDirectoryPath);
+                FileInfo[] files = di.GetFiles("PurchaseOrderHeader*.xml");
+
+                foreach (FileInfo file in files)
+                {
+                    string localFilePath = file.FullName;
+                    string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
+                    await fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
+                    Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
+
+                    // Extract PurchaseOrderID from the filename
+                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
+
+                    // Update the database with the upload status
+                    await _dataService.UpdatePurchaseOrderSentStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
+
+                    // Optionally update UI or handle latest date
+                    DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
+                    if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
+                    {
+                        latestDate = fileDate;
+                        Invoke(new Action(() => {
+                            autoSendTextBox.Text = latestDate.Value.ToString("yyyy-MM-dd");
+                        }));
+                    }
+                }
+
+                MessageBox.Show("All files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error uploading files");
+                MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
 
 

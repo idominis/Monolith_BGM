@@ -128,5 +128,34 @@ public class DataService
         return _mapper.Map<List<PurchaseOrderSummary>>(viewData);
     }
 
+    public async Task<DateTime?> GetLatestDateForPurchaseOrder(int purchaseOrderId)
+    {
+        var latestDate = await _dbContext.VPurchaseOrderSummaries
+                                          .Where(x => x.PurchaseOrderId == purchaseOrderId)
+                                          .Select(x => x.OrderDate)
+                                          .FirstOrDefaultAsync();
+
+        return latestDate;
+    }
+
+    public async Task UpdatePurchaseOrderSentStatus(int purchaseOrderId, bool processed, bool sent, int channel)
+    {
+        var orderSentDto = new PurchaseOrderSent
+        {
+            PurchaseOrderId = purchaseOrderId,
+            OrderProcessed = processed,
+            OrderSent = sent,
+            Channel = channel,
+            ModifiedDate = DateTime.Now
+        };
+
+        // Use AutoMapper to map the DTO to the entity
+        var orderSentEntry = _mapper.Map<PurchaseOrderSent>(orderSentDto);
+
+        _dbContext.PurchaseOrdersSents.Add(orderSentEntry);
+        await _dbContext.SaveChangesAsync();
+    }
+
+
 
 }

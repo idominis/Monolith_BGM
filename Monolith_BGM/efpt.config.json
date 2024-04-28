@@ -24,6 +24,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[Purchasing].[PurchaseOrdersSent]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[Purchasing].[vPurchaseOrderSummary]",
          "ObjectType": 3
       }
