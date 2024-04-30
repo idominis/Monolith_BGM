@@ -10,6 +10,9 @@ using Log = Serilog.Log;
 using Microsoft.EntityFrameworkCore;
 using BGM.Common;
 using System.Data;
+using Monolith_BGM.Controllers;
+using Monolith_BGM.XMLService;
+using Monolith_BGM.Src;
 
 namespace Monolith_BGM
 {
@@ -22,36 +25,63 @@ namespace Monolith_BGM
         private readonly DataService _dataService;
         private ErrorHandlerService _errorHandler;
         private readonly IStatusUpdateService _statusUpdateService;
+        private SftpFileHandler _fileHandler;
+        private MainFormController _controller;
+        private readonly IXmlService _xmlService;
+        private FileManager _fileManager;
 
-        private string purchasingOrdersPath = @"\PurchasingOrders";
-        private string purchasingHeadersPath = @"\PurchasingOrdersHeaders";
-        private string localBaseDirectoryPath = @"C:\Users\Ivan\Documents\BGM_project\RebexTinySftpServer-Binaries-Latest\data_received";
-
-        public MainForm(IMapper mapper, DataService dataService, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService)
+        public MainForm(MainFormController controller, IMapper mapper, DataService dataService, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService, SftpFileHandler fileHandler, IXmlService xmlService)
         {
-            _mapper = mapper;
-            _dataService = dataService;
-            _errorHandler = errorHandler;
-            _statusUpdateService = statusUpdateService;
             InitializeComponent();
-
+            _mapper = mapper;
+            _controller = controller;
+            _dataService = dataService;
+            _statusUpdateService = statusUpdateService;
+            _fileHandler = fileHandler;
+            _errorHandler = errorHandler;
+            _xmlService = xmlService;
+            _fileManager = new FileManager();
+            _controller.DataInitialized += Controller_DataInitialized;
+            _controller.ErrorOccurred += Controller_ErrorOccurred;
+            LoadDataAsync();
             comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
             comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;
-
-            // Register the Load event
-            this.Load += MainForm_Load;
-            _statusUpdateService.StatusUpdated += UpdateStatusMessage;
-            InitializeSftp();
+            
         }
 
-        private void InitializeSftp()
+        private void Controller_DataInitialized(List<DateTime> orderDates)
         {
-            string host = "192.168.75.1";
-            string username = "tester";
-            string password = "password";
+            comboBoxStartDate.Items.Clear();
+            comboBoxEndDate.Items.Clear();
+            foreach (var date in orderDates)
+            {
+                comboBoxStartDate.Items.Add(date.ToString("yyyy-MM-dd"));
+                comboBoxEndDate.Items.Add(date.ToString("yyyy-MM-dd"));
+            }
+            if (comboBoxStartDate.Items.Count > 0)
+                comboBoxStartDate.SelectedIndex = 0;  // Select first item by default
+            if (comboBoxEndDate.Items.Count > 0)
+                comboBoxEndDate.SelectedIndex = comboBoxEndDate.Items.Count - 1;  // Select last item by default
 
-            clientManager = new SftpClientManager(host, username, password);
-            fileHandler = new SftpFileHandler(clientManager, _statusUpdateService);
+            ValidateDateSelection();
+        }
+
+        private void Controller_ErrorOccurred(string message)
+        {
+            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private async void LoadDataAsync()
+        {
+            try
+            {
+                var orderDates = await _dataService.FetchDistinctOrderDatesAsync();
+                Controller_DataInitialized(orderDates);
+            }
+            catch (Exception ex)
+            {
+                Controller_ErrorOccurred("Failed to load order dates: " + ex.Message);
+            }
         }
 
         private void InitializeTimer()
@@ -65,11 +95,6 @@ namespace Monolith_BGM
             timer.Enabled = true;
         }
 
-        private async void MainForm_Load(object sender, EventArgs e)
-        {
-            await PopulateOrderDateDropdowns();
-        }
-
         private void ComboBoxStartDate_SelectedIndexChanged(object sender, EventArgs e)
         {
             ValidateDateSelection();
@@ -80,34 +105,50 @@ namespace Monolith_BGM
             ValidateDateSelection();
         }
 
+        private void ValidateDateSelection()
+        {
+            if (comboBoxStartDate.SelectedItem != null && comboBoxEndDate.SelectedItem != null)
+            {
+                var startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
+                var endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
+
+                if (startDate > endDate)
+                {
+                    comboBoxEndDate.SelectedItem = comboBoxStartDate.SelectedItem;
+                    MessageBox.Show("Start date must be before the end date. Adjusting end date to match start date");
+                }
+            }
+        }
+
         private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
-            DownloadFiles(purchasingOrdersPath, localBaseDirectoryPath);
-            DownloadFiles(purchasingHeadersPath, Path.Combine(localBaseDirectoryPath, "Headers"));
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+            string localHeadersPath = _fileManager.GetSpecificPath("headers");
+            string remoteDetailsDirectoryPath = _fileManager.GetRemoteDetailsDirectoryPath();
+            string remoteHeadersDirectoryPath = _fileManager.GetRemoteHeadersDirectoryPath();
+
+            DownloadFiles(remoteDetailsDirectoryPath, localBaseDirectoryPath); // Download POD files
+            DownloadFiles(remoteHeadersDirectoryPath, localHeadersPath); // Download POH files
         }
 
         private void DownloadFiles(string remotePath, string localPath)
         {
-            try
+            // Add breakpoint here to check the state of _fileHandler
+            if (_fileHandler == null)
+                throw new InvalidOperationException("File handler is not initialized.");
+
+            bool filesDownloaded = _fileHandler.DownloadXmlFilesFromDirectory(remotePath, localPath);
+            if (filesDownloaded)
             {
-                bool filesDownloaded = fileHandler.DownloadXmlFilesFromDirectory(remotePath, localPath);
-                if (filesDownloaded)
-                {
-                    _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
-                    Log.Information($"XML files from {remotePath} have been downloaded successfully!");
-                }
-                else
-                {
-                    _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
-                    Log.Information($"No new XML files in {remotePath}.");
-                }
+                _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
+                Log.Information($"XML files from {remotePath} have been downloaded successfully!");
             }
-            catch (Exception ex)
+            else
             {
-                _errorHandler.LogError(ex, $"Failed to download XML files from {remotePath}.");
+                _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
+                Log.Information($"No new XML files in {remotePath}.");
             }
         }
-
 
         // Override the OnFormClosing method to clean up the timer
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -165,10 +206,8 @@ namespace Monolith_BGM
 
         private async void SavePODToDbButton_Click(object sender, EventArgs e)
         {
-            var xmlLoader = new XmlService();
-
             List<PurchaseOrderDetailDto> allPurchaseOrderDetails = new List<PurchaseOrderDetailDto>();
-
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
             try
             {
                 // Collect all PurchaseOrderDetails from XML files
@@ -177,7 +216,7 @@ namespace Monolith_BGM
                 {
                     try
                     {
-                        var purchaseOrderDetails = xmlLoader.LoadFromXml<PurchaseOrderDetails>(xmlFile);
+                        var purchaseOrderDetails = _xmlService.LoadFromXml<PurchaseOrderDetails>(xmlFile);
                         allPurchaseOrderDetails.AddRange(purchaseOrderDetails.Details);
                     }
                     catch (Exception ex)
@@ -200,9 +239,8 @@ namespace Monolith_BGM
 
         private async void SavePOHToDbButton_Click(object sender, EventArgs e)
         {
-            var xmlLoader = new XmlService();
             List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
-
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
             // Define the path to the 'Headers' directory inside the local base directory
             string headersDirectoryPath = Path.Combine(localBaseDirectoryPath, "Headers");
 
@@ -214,7 +252,7 @@ namespace Monolith_BGM
                 {
                     try
                     {
-                        var purchaseOrderHeaders = xmlLoader.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
+                        var purchaseOrderHeaders = _xmlService.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
                         allPurchaseOrderHeaders.AddRange(purchaseOrderHeaders.Headers);
                     }
                     catch (Exception ex)
@@ -237,12 +275,10 @@ namespace Monolith_BGM
 
         private async void CreatePOSXMLsButton_ClickAsync(object sender, EventArgs e)
         {
-            var xmlLoader = new XmlService();
-
             try
             {
                 var summaries = await _dataService.FetchPurchaseOrderSummaries();
-                xmlLoader.GenerateXMLFiles(summaries);
+                _xmlService.GenerateXMLFiles(summaries);
                 _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
             }
             catch (Exception ex)
@@ -251,47 +287,9 @@ namespace Monolith_BGM
             }
         }
 
-        private async Task PopulateOrderDateDropdowns()
-        {
-            try
-            {
-                var orderDates = await _dataService.FetchDistinctOrderDatesAsync();
-                comboBoxStartDate.Items.Clear();
-                comboBoxEndDate.Items.Clear();
 
-                foreach (var date in orderDates)
-                {
-                    comboBoxStartDate.Items.Add(date.ToString("yyyy-MM-dd"));
-                    comboBoxEndDate.Items.Add(date.ToString("yyyy-MM-dd"));
-                }
 
-                if (comboBoxStartDate.Items.Count > 0)
-                    comboBoxStartDate.SelectedIndex = 0;  // Select first item by default
-                if (comboBoxEndDate.Items.Count > 0)
-                    comboBoxEndDate.SelectedIndex = comboBoxEndDate.Items.Count - 1;  // Select last item by default
-            }
-            catch (Exception ex)
-            {
-                _statusUpdateService.RaiseStatusUpdated("Failed to load order dates");
-            }
-        }
-
-        private void ValidateDateSelection()
-        {
-            if (comboBoxStartDate.SelectedItem != null && comboBoxEndDate.SelectedItem != null)
-            {
-                var startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
-                var endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
-
-                if (startDate > endDate)
-                {
-                    comboBoxEndDate.SelectedItem = comboBoxStartDate.SelectedItem;
-                    _statusUpdateService.RaiseStatusUpdated("Start date must be before the end date. Adjusting end date to match start date");
-                }
-            }
-        }
-
-        private void radioButtonOn_CheckedChanged(object sender, EventArgs e)
+        private void RadioButtonOn_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButtonOn.Checked)
             {
@@ -300,7 +298,7 @@ namespace Monolith_BGM
             }
         }
 
-        private void radioButtonOff_CheckedChanged(object sender, EventArgs e)
+        private void RadioButtonOff_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButtonOff.Checked)
             {
@@ -308,9 +306,8 @@ namespace Monolith_BGM
             }
         }
 
-        private async void generateXmlButton_Click(object sender, EventArgs e)
+        private async void GenerateXmlButton_Click(object sender, EventArgs e)
         {
-            var xmlLoader = new XmlService();
             try
             {
                 DateTime startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
@@ -318,11 +315,11 @@ namespace Monolith_BGM
 
                 var summaries = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate, endDate);
 
-                string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PurchaseOrders.xml");
+                string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
 
-                xmlLoader.GenerateXMLFiles(summaries, startDate, endDate);
+                _xmlService.GenerateXMLFiles(summaries, startDate, endDate);
 
-                MessageBox.Show($"XML file successfully created at {filePath}"); // TODO - consider showing a dialog with the file path
+                MessageBox.Show($"XML file successfully created at {localBaseDirectoryXmlCreatedPath}"); 
             }
             catch (Exception ex)
             {
@@ -330,58 +327,60 @@ namespace Monolith_BGM
             }
         }
 
-        private async void sendXmlButton_Click(object sender, EventArgs e)
+        private async void SendXmlButton_Click(object sender, EventArgs e)
         {
             try
             {
-                string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                                               "BGM_project", "RebexTinySftpServer-Binaries-Latest", "data", "Xmls_Created");
+                string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
 
                 // If using date pickers for dynamic file names
                 DateTime startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
                 DateTime endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
-                string fileName = $"PurchaseOrderSummaries_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
+                string fileName = $"PurchaseOrderSummariesGenerated_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
 
                 // Full path to the file
-                string filePath = Path.Combine(basePath, fileName);
+                string filePath = Path.Combine(localBaseDirectoryXmlCreatedPath, fileName);
 
                 // Construct the remote path
-                string remotePath = Path.Combine("/Uploaded/", fileName); // Ensure this path is correctly handled by your SFTP server
+                string remotePath = Path.Combine("/Uploaded/", fileName);
 
                 // Check if the file exists
                 if (File.Exists(filePath))
                 {
                     // Use SftpFileHandler to upload the file to a specific folder on the server
-                    await fileHandler.UploadFileAsync(filePath, remotePath);
-                    MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);// TODO - consider showing a dialog with the file path
+                    await _fileHandler.UploadFileAsync(filePath, remotePath);
+                    MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);// TODO - consider showing a dialog with the file path
+                    MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to send file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);// TODO - consider showing a dialog with the file path
+                MessageBox.Show("Failed to send file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void UploadAllHeaders()
         {
-            string localDirectoryPath = Path.Combine(localBaseDirectoryPath, "Headers");
-            string remoteDirectoryPath = "/Uploaded/";
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+            string localDirectoryPath = _fileManager.GetSpecificPath("Headers");
+
+            string remoteDirectoryPath = "/Uploaded/";  // RebexTinySftpServer\data\Uploaded
+
             DateTime? latestDate = null;
 
             try
             {
-                DirectoryInfo di = new DirectoryInfo(localDirectoryPath);
-                FileInfo[] files = di.GetFiles("PurchaseOrderHeader*.xml");
+                DirectoryInfo dir = new DirectoryInfo(localDirectoryPath);
+                FileInfo[] files = dir.GetFiles("PurchaseOrderHeader*.xml");
 
                 foreach (FileInfo file in files)
                 {
                     string localFilePath = file.FullName;
                     string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
-                    await fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
+                    await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
                     Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
 
                     // Extract PurchaseOrderID from the filename
@@ -409,9 +408,5 @@ namespace Monolith_BGM
                 MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
-
-
     }
 }

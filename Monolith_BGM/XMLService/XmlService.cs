@@ -1,11 +1,21 @@
 ﻿using Monolith_BGM.DataAccess.DTO;
+using Monolith_BGM.Src;
+using Monolith_BGM.XMLService;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
-public class XmlService
+public class XmlService : IXmlService
 {
+    private FileManager _fileManager;
+
+    // Inject FileManager through constructor
+    public XmlService(FileManager fileManager)
+    {
+        _fileManager = fileManager;
+    }
+
     // Define the method as generic with a type parameter T
     public T LoadFromXml<T>(string filePath)
     {
@@ -21,16 +31,17 @@ public class XmlService
         var serializer = new XmlSerializer(typeof(List<PurchaseOrderSummary>));
 
         // Base path including the current user's Documents folder
-        string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                                       "BGM_project", "RebexTinySftpServer-Binaries-Latest", "data", "Xmls_Created");
+        //string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+        //                               "BGM_project", "local", "data", "Xmls_Created");
+        string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
 
         // Ensure the directory exists
-        Directory.CreateDirectory(basePath);
+        Directory.CreateDirectory(localBaseDirectoryXmlCreatedPath);
 
         if (startDate.HasValue && endDate.HasValue)
         {
             // If date range is given, generate a single XML file for that range
-            string dateRangeFileName = Path.Combine(basePath, $"PurchaseOrderSummaries_{startDate.Value:yyyyMMdd}_to_{endDate.Value:yyyyMMdd}.xml");
+            string dateRangeFileName = Path.Combine(localBaseDirectoryXmlCreatedPath, $"PurchaseOrderSummariesGenerated_{startDate.Value:yyyyMMdd}_to_{endDate.Value:yyyyMMdd}.xml");
             using (var stream = new FileStream(dateRangeFileName, FileMode.Create))
             {
                 serializer.Serialize(stream, summaries);
@@ -41,7 +52,7 @@ public class XmlService
             // Generate multiple XML files, one per PurchaseOrderID
             foreach (var group in summaries.GroupBy(s => s.PurchaseOrderID))
             {
-                string fileName = Path.Combine(basePath, $"PurchaseOrderGenerated_{group.Key}.xml");
+                string fileName = Path.Combine(localBaseDirectoryXmlCreatedPath, $"PurchaseOrderGenerated_{group.Key}.xml");
                 using (var stream = new FileStream(fileName, FileMode.Create))
                 {
                     serializer.Serialize(stream, group.ToList());

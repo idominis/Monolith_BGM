@@ -163,7 +163,7 @@
             sendXmlButton.TabIndex = 11;
             sendXmlButton.Text = "Send XML";
             sendXmlButton.UseVisualStyleBackColor = true;
-            sendXmlButton.Click += sendXmlButton_Click;
+            sendXmlButton.Click += SendXmlButton_Click;
             // 
             // generateXmlButton
             // 
@@ -173,7 +173,7 @@
             generateXmlButton.TabIndex = 10;
             generateXmlButton.Text = "Generate XML";
             generateXmlButton.UseVisualStyleBackColor = true;
-            generateXmlButton.Click += generateXmlButton_Click;
+            generateXmlButton.Click += GenerateXmlButton_Click;
             // 
             // label2
             // 
@@ -233,7 +233,7 @@
             radioButtonOff.Text = "Off";
             radioButtonOff.UseMnemonic = false;
             radioButtonOff.UseVisualStyleBackColor = true;
-            radioButtonOff.CheckedChanged += radioButtonOff_CheckedChanged;
+            radioButtonOff.CheckedChanged += RadioButtonOff_CheckedChanged;
             // 
             // radioButtonOn
             // 
@@ -245,7 +245,7 @@
             radioButtonOn.TabStop = true;
             radioButtonOn.Text = "On";
             radioButtonOn.UseVisualStyleBackColor = true;
-            radioButtonOn.CheckedChanged += radioButtonOn_CheckedChanged;
+            radioButtonOn.CheckedChanged += RadioButtonOn_CheckedChanged;
             // 
             // MainForm
             // 

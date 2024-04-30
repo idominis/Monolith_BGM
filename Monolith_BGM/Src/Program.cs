@@ -5,64 +5,113 @@ using Monolith_BGM.Models;
 using Serilog;
 using BGM.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using BGM.SftpUtilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Monolith_BGM
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
+        public static IConfiguration Configuration { get; private set; }
+
         [STAThread]
+        //static void Main()
+        //{
+        //    Application.EnableVisualStyles();
+        //    Application.SetCompatibleTextRenderingDefault(false);
+
+        //    InitializeConfiguration();
+        //    ConfigureLogging();
+        //    ConfigureServicesAndRun();
+        //}
         static void Main()
         {
-            // Initialize application configuration for WinForms
-            ApplicationConfiguration.Initialize();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
 
-            // Configure Serilog
+            InitializeConfiguration();
+            ConfigureLogging();
+            var serviceProvider = Startup.ConfigureServices(Configuration);
+
+            var mainForm = serviceProvider.GetService<MainForm>();
+            ConfigureServicesAndRun();
+            Application.Run(mainForm);
+        }
+
+        private static void InitializeConfiguration()
+        {
+            Configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+        }
+
+        private static void ConfigureLogging()
+        {
+            string logFilePath = Configuration["Serilog:WriteTo:1:Args:path"]; // Adjust index based on the correct position in the JSON array
+
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug() // Set the minimum log level to Debug for detailed logs
-                .WriteTo.Console()    // Write logs to the console
-                .WriteTo.File(@"C:\Logs\Monolith_BGM.log", rollingInterval: RollingInterval.Day)
+                .ReadFrom.Configuration(Configuration)
+                .WriteTo.Console()
+                .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
-            // Log the start of the application
             Log.Information("Application Starting");
-
-            var statusUpdateService = new StatusUpdateService();
-
-            // Configure AutoMapper
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<PurchaseOrderDetailProfile>();
-                cfg.AddProfile<PurchaseOrderHeaderProfile>();
-                cfg.AddProfile<PurchaseOrderSummaryProfile>();
-                cfg.AddProfile<PurchaseOrderSentProfile>();
-            });
-            var mapper = config.CreateMapper();
-            //var dbContext = new BGM_dbContext(); // You'd typically have some setup or factory for DbContext
-            var errorHandler = new ErrorHandlerService();  // Instantiate the error handler
-            var optionsBuilder = new DbContextOptionsBuilder<BGM_dbContext>();
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=BGM_db;Trusted_Connection=True;MultipleActiveResultSets=true")
-            .EnableSensitiveDataLogging();
-            var dbContext = new BGM_dbContext(optionsBuilder.Options);
-
-            var dataService = new DataService(dbContext, mapper, errorHandler, statusUpdateService);
-
-            // Run the main form
-            try
-            {
-                Application.Run(new MainForm(mapper, dataService, errorHandler, statusUpdateService));
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "An unexpected error occurred while running the application.");
-            }
-            finally
-            {
-                // Ensure to flush and stop internal timers/threads before application exit
-                Log.CloseAndFlush();
-            }
         }
+
+        private static void ConfigureServicesAndRun()
+        {
+            var serviceProvider = Startup.ConfigureServices(Configuration);
+
+            // Ensure MainForm is correctly resolved along with its dependencies
+            var mainForm = serviceProvider.GetService<MainForm>();
+            Application.Run(mainForm);
+        }
+
+        //private static void ConfigureServicesAndRun()
+        //{
+        //    var mapper = SetupAutoMapper();
+        //    var dbContext = SetupDbContext();
+        //    var statusUpdateService = new StatusUpdateService();
+        //    var errorHandler = new ErrorHandlerService();
+        //    var dataService = new DataService(dbContext, mapper, errorHandler, statusUpdateService);
+        //    var sftpClientManager = new SftpClientManager(Configuration["Sftp:Host"], Configuration["Sftp:Username"], Configuration["Sftp:Password"]);
+
+        //    try
+        //    {
+        //        Application.Run(new MainForm(mapper, dataService, errorHandler, statusUpdateService));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Fatal(ex, "An unexpected error occurred while running the application.");
+        //    }
+        //    finally
+        //    {
+        //        Log.CloseAndFlush();
+        //    }
+        //}
+
+        //private static IMapper SetupAutoMapper()
+        //{
+        //    var config = new MapperConfiguration(cfg =>
+        //    {
+        //        cfg.AddProfile(new PurchaseOrderDetailProfile());
+        //        cfg.AddProfile(new PurchaseOrderHeaderProfile());
+        //        cfg.AddProfile(new PurchaseOrderSummaryProfile());
+        //        cfg.AddProfile(new PurchaseOrderSentProfile());
+        //    });
+
+        //    return config.CreateMapper();
+        //}
+
+        //private static BGM_dbContext SetupDbContext()
+        //{
+        //    var optionsBuilder = new DbContextOptionsBuilder<BGM_dbContext>();
+        //    optionsBuilder.UseSqlServer(Configuration.GetConnectionString("BGMDatabase"))
+        //        .EnableSensitiveDataLogging();
+
+        //    return new BGM_dbContext(optionsBuilder.Options);
+        //}
     }
 }
