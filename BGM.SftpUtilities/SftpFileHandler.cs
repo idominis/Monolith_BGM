@@ -43,6 +43,7 @@ namespace BGM.SftpUtilities
                     _clientManager.Disconnect(client);
                 }
                 Log.Information("File uploaded successfully: {LocalFilePath}", localFilePath);
+                _statusUpdateService.RaiseStatusUpdated("File uploaded successfully");
             }
             catch (Exception ex)
             {

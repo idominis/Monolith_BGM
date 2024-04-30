@@ -43,6 +43,7 @@ namespace Monolith_BGM
             _fileManager = new FileManager();
             _controller.DataInitialized += Controller_DataInitialized;
             _controller.ErrorOccurred += Controller_ErrorOccurred;
+            _statusUpdateService.StatusUpdated += UpdateStatusMessage;
             LoadDataAsync();
             comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
             comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;

@@ -30,9 +30,6 @@ public class XmlService : IXmlService
     {
         var serializer = new XmlSerializer(typeof(List<PurchaseOrderSummary>));
 
-        // Base path including the current user's Documents folder
-        //string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-        //                               "BGM_project", "local", "data", "Xmls_Created");
         string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
 
         // Ensure the directory exists
