@@ -44,6 +44,9 @@ namespace Monolith_BGM
             _controller.DatesInitialized += Controller_DatesInitialized;
             _controller.ErrorOccurred += Controller_ErrorOccurred;
             _statusUpdateService.StatusUpdated += UpdateStatusMessage;
+            _controller.LatestDateUpdated += UpdateLatestDate;
+            //_controller.StatusUpdated += UpdateStatusMessage;
+            _controller.ErrorOccurred += ShowErrorMessage;
             LoadDataAsync();
             comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
             comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;
@@ -68,6 +71,33 @@ namespace Monolith_BGM
         }
 
         private void Controller_ErrorOccurred(string message)
+        {
+            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void UpdateLatestDate(DateTime latestDate)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => UpdateLatestDate(latestDate)));
+                return;
+            }
+            autoSendTextBox.Text = latestDate.ToString("yyyy-MM-dd");
+        }
+
+        private void UpdateStatusMessage(string message)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => toolStripStatusLabel.Text = message));
+            }
+            else
+            {
+                toolStripStatusLabel.Text = message;
+            }
+        }
+
+        private void ShowErrorMessage(string message)
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -163,17 +193,17 @@ namespace Monolith_BGM
             base.OnFormClosing(e); // Call the base class method
         }
 
-        private void UpdateStatusMessage(string message)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action(() => toolStripStatusLabel.Text = message));
-            }
-            else
-            {
-                toolStripStatusLabel.Text = message;
-            }
-        }
+        //private void UpdateStatusMessage(string message)
+        //{
+        //    if (InvokeRequired)
+        //    {
+        //        Invoke(new Action(() => toolStripStatusLabel.Text = message));
+        //    }
+        //    else
+        //    {
+        //        toolStripStatusLabel.Text = message;
+        //    }
+        //}
 
         private void ServiceStartButton_Click(object sender, EventArgs e)
         {
@@ -323,7 +353,7 @@ namespace Monolith_BGM
             if (radioButtonOn.Checked)
             {
                 radioButtonOff.Checked = false;
-                UploadAllHeaders();
+                _controller.UploadAllHeaders();
             }
         }
 
@@ -362,51 +392,52 @@ namespace Monolith_BGM
             }
         }
 
-        private async void UploadAllHeaders()
-        {
-            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
-            string localDirectoryPath = _fileManager.GetSpecificPath("Headers");
+        //private async void UploadAllHeaders()
+        //{
+        //    string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+        //    string localDirectoryPath = _fileManager.GetSpecificPath("Headers");
 
-            string remoteDirectoryPath = "/Uploaded/";  // RebexTinySftpServer\data\Uploaded
+        //    string remoteDirectoryPath = "/Uploaded/";  // RebexTinySftpServer\data\Uploaded
 
-            DateTime? latestDate = null;
+        //    DateTime? latestDate = null;
 
-            try
-            {
-                DirectoryInfo dir = new DirectoryInfo(localDirectoryPath);
-                FileInfo[] files = dir.GetFiles("PurchaseOrderHeader*.xml");
+        //    try
+        //    {
+        //        DirectoryInfo dir = new DirectoryInfo(localDirectoryPath);
+        //        FileInfo[] files = dir.GetFiles("PurchaseOrderHeader*.xml");
 
-                foreach (FileInfo file in files)
-                {
-                    string localFilePath = file.FullName;
-                    string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
-                    await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
-                    Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
+        //        foreach (FileInfo file in files)
+        //        {
+        //            string localFilePath = file.FullName;
+        //            string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
+        //            await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
+        //            Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
 
-                    // Extract PurchaseOrderID from the filename
-                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
+        //            // Extract PurchaseOrderID from the filename
+        //            int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
 
-                    // Update the database with the upload status
-                    await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
+        //            // Update the database with the upload status
+        //            await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
 
-                    // Optionally update UI or handle latest date
-                    DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
-                    if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
-                    {
-                        latestDate = fileDate;
-                        Invoke(new Action(() => {
-                            autoSendTextBox.Text = latestDate.Value.ToString("yyyy-MM-dd");
-                        }));
-                    }
-                }
+        //            // Optionally update UI or handle latest date
+        //            DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
+        //            if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
+        //            {
+        //                latestDate = fileDate;
+        //                Invoke(new Action(() =>
+        //                {
+        //                    autoSendTextBox.Text = latestDate.Value.ToString("yyyy-MM-dd");
+        //                }));
+        //            }
+        //        }
 
-                MessageBox.Show("All files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error uploading files");
-                MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+        //        MessageBox.Show("All files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error(ex, "Error uploading files");
+        //        MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
     }
 }

@@ -140,7 +140,7 @@ public class DataService
 
     public async Task UpdatePurchaseOrderStatus(int purchaseOrderId, bool processed, bool sent, int channel)
     {
-        var orderSentDto = new PurchaseOrderSent
+        var orderSentDto = new PurchaseOrdersProcessedSent
         {
             PurchaseOrderId = purchaseOrderId,
             OrderProcessed = processed,
@@ -150,16 +150,16 @@ public class DataService
         };
 
         // Use AutoMapper to map the DTO to the entity
-        var orderSentEntry = _mapper.Map<PurchaseOrderSent>(orderSentDto);
+        var orderSentEntry = _mapper.Map<PurchaseOrdersProcessedSent>(orderSentDto);
 
-        _dbContext.PurchaseOrdersSents.Add(orderSentEntry);
+        _dbContext.PurchaseOrdersProcessedSents.Add(orderSentEntry);
         await _dbContext.SaveChangesAsync();
     }
 
 
     public async Task<List<int>> FetchPurchaseOrderIdGeneratedAsync()
     {
-        return await _dbContext.PurchaseOrdersSents
+        return await _dbContext.PurchaseOrdersProcessedSents
                                .Where(x => x.OrderProcessed)  // Filter for OrderProcessed = true
                                .Select(x => x.PurchaseOrderId)
                                .Distinct()
@@ -169,7 +169,7 @@ public class DataService
 
     public async Task<List<int>> FetchPurchaseOrderIdSentAsync()
     {
-        return await _dbContext.PurchaseOrdersSents
+        return await _dbContext.PurchaseOrdersProcessedSents
                                .Where(x => x.OrderSent)  // Filter for OrderSent = true
                                .Select(x => x.PurchaseOrderId)
                                .Distinct()

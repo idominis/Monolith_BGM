@@ -21,6 +21,7 @@ namespace Monolith_BGM.Controllers
         public event Action<List<DateTime>>? DatesInitialized;
         public event Action<List<int>>? DataInitialized;
         public event Action<string>? ErrorOccurred;
+        public event Action<DateTime> LatestDateUpdated;
 
         public MainFormController(DataService dataService, FileManager fileManager, IXmlService xmlService, ErrorHandlerService errorHandler, SftpFileHandler sftpFileHandler)
         {
@@ -275,8 +276,56 @@ namespace Monolith_BGM.Controllers
                 Log.Error(ex, "Error generating XML files");
                 return false;
             }
-
-
         }
+
+        public async void UploadAllHeaders()
+        {
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+            string localDirectoryPath = _fileManager.GetSpecificPath("Headers");
+
+            string remoteDirectoryPath = "/Uploaded/";  // RebexTinySftpServer\data\Uploaded
+
+            DateTime? latestDate = null;
+
+            try
+            {
+                DirectoryInfo dir = new DirectoryInfo(localDirectoryPath);
+                FileInfo[] files = dir.GetFiles("PurchaseOrderHeader*.xml");
+
+                foreach (FileInfo file in files)
+                {
+                    string localFilePath = file.FullName;
+                    string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
+                    await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
+                    Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
+
+                    // Extract PurchaseOrderID from the filename
+                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
+
+                    // Update the database with the upload status
+                    await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
+
+                    // Optionally update UI or handle latest date
+                    DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
+                    if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
+                    {
+                        latestDate = fileDate;
+                        //Invoke(new Action(() => {
+                        //    autoSendTextBox.Text = latestDate.Value.ToString("yyyy-MM-dd");
+                        //}));
+                        // Instead of Invoke, fire an event
+                        LatestDateUpdated?.Invoke(fileDate.Value);
+                    }
+                }
+
+                MessageBox.Show("All files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error uploading files");
+                MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
     }
 }

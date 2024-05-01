@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Monolith_BGM.Models
 {
-    public partial class PurchaseOrderSent
+    public partial class PurchaseOrdersProcessedSent
     {
         public int PurchaseOrderSentId { get; set; }
         public int PurchaseOrderId { get; set; }

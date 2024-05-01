@@ -24,7 +24,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[Purchasing].[PurchaseOrdersSent]",
+         "Name": "[Purchasing].[PurchaseOrdersProcessedSent]",
          "ObjectType": 0
       },
       {
