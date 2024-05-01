@@ -10,5 +10,7 @@ namespace BGM.Common
     {
         event Action<string> StatusUpdated;
         void RaiseStatusUpdated(string message);
+
+        void RaiseStatusUpdated(string message, Exception ex);
     }
 }

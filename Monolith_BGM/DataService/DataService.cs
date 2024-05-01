@@ -138,7 +138,7 @@ public class DataService
         return latestDate;
     }
 
-    public async Task UpdatePurchaseOrderSentStatus(int purchaseOrderId, bool processed, bool sent, int channel)
+    public async Task UpdatePurchaseOrderStatus(int purchaseOrderId, bool processed, bool sent, int channel)
     {
         var orderSentDto = new PurchaseOrderSent
         {
@@ -157,5 +157,24 @@ public class DataService
     }
 
 
+    public async Task<List<int>> FetchPurchaseOrderIdGeneratedAsync()
+    {
+        return await _dbContext.PurchaseOrdersSents
+                               .Where(x => x.OrderProcessed)  // Filter for OrderProcessed = true
+                               .Select(x => x.PurchaseOrderId)
+                               .Distinct()
+                               .OrderBy(id => id)  // Order by PurchaseOrderId
+                               .ToListAsync();
+    }
+
+    public async Task<List<int>> FetchPurchaseOrderIdSentAsync()
+    {
+        return await _dbContext.PurchaseOrdersSents
+                               .Where(x => x.OrderSent)  // Filter for OrderSent = true
+                               .Select(x => x.PurchaseOrderId)
+                               .Distinct()
+                               .OrderBy(id => id)  // Order by PurchaseOrderId
+                               .ToListAsync();
+    }
 
 }

@@ -134,7 +134,7 @@ namespace Monolith_BGM
 
         private void DownloadFiles(string remotePath, string localPath)
         {
-            // Add breakpoint here to check the state of _fileHandler
+            // State of _fileHandler
             if (_fileHandler == null)
                 throw new InvalidOperationException("File handler is not initialized.");
 
@@ -210,18 +210,18 @@ namespace Monolith_BGM
             List<PurchaseOrderDetailDto> allPurchaseOrderDetails = null;
             try
             {
-                allPurchaseOrderDetails = await _controller.FetchXmlDataAsync();
+                allPurchaseOrderDetails = await _controller.FetchXmlDetailsDataAsync();
                 if (allPurchaseOrderDetails == null || allPurchaseOrderDetails.Count == 0)
                 {
-                    MessageBox.Show("No XML data found to process.");
-                    _statusUpdateService.RaiseStatusUpdated("No XMLs found");
+                    MessageBox.Show("No Details XML data found to process.");
+                    _statusUpdateService.RaiseStatusUpdated("No Details XMLs found");
                     return;
                 }
             }
             catch (Exception ex)
             {
-                _errorHandler.LogError(ex, "Failed to load XML data.");
-                _statusUpdateService.RaiseStatusUpdated("Error loading XML data");
+                _errorHandler.LogError(ex, "Failed to load Details XML data.");
+                _statusUpdateService.RaiseStatusUpdated("Error loading Details XML data");
                 return;
             }
 
@@ -241,30 +241,26 @@ namespace Monolith_BGM
 
         private async void SavePOHToDbButton_Click(object sender, EventArgs e)
         {
-            List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
-            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
-            // Define the path to the 'Headers' directory inside the local base directory
-            string headersDirectoryPath = Path.Combine(localBaseDirectoryPath, "Headers");
+            List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = null;
+            try
+            {
+                allPurchaseOrderHeaders = await _controller.FetchXmlHeadersDataAsync();
+                if (allPurchaseOrderHeaders == null || allPurchaseOrderHeaders.Count == 0)
+                {
+                    MessageBox.Show("No Headers XML data found to process.");
+                    _statusUpdateService.RaiseStatusUpdated("No Headers XMLs found");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, "Failed to load Headers XML data.");
+                _statusUpdateService.RaiseStatusUpdated("Error loading Headers XML data");
+                return;
+            }
 
             try
             {
-                // Collect all PurchaseOrderHeaders from XML files within the 'Headers' directory
-                var xmlFiles = Directory.GetFiles(headersDirectoryPath, "*.xml", SearchOption.AllDirectories);
-                foreach (var xmlFile in xmlFiles)
-                {
-                    try
-                    {
-                        var purchaseOrderHeaders = _xmlService.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
-                        allPurchaseOrderHeaders.AddRange(purchaseOrderHeaders.Headers);
-                    }
-                    catch (Exception ex)
-                    {
-                        _errorHandler.LogError(ex, "Error loading POH XML data", xmlFile);
-                    }
-                }
-
-                // Save the purchase orders to the database
-                //if (await _dataService.AddPurchaseOrderHeadersAsync(allPurchaseOrderHeaders))
                 if (await _controller.FetchAndSavePOHeaders(allPurchaseOrderHeaders))
                     _statusUpdateService.RaiseStatusUpdated("POH files saved to DB!");
                 else
@@ -273,6 +269,7 @@ namespace Monolith_BGM
             catch (Exception ex)
             {
                 _errorHandler.LogError(ex, "Error processing POH XML files.");
+                _statusUpdateService.RaiseStatusUpdated("Error saving POH to database.", ex);
             }
         }
 
@@ -280,20 +277,49 @@ namespace Monolith_BGM
         {
             try
             {
-                var summaries = await _dataService.FetchPurchaseOrderSummaries();
-                _xmlService.GenerateXMLFiles(summaries);
-                _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
+                var success = await _controller.GenerateXmlFromDbAsync();
+
+                if (success)
+                    _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated("No data found to generate XML files.");
+                    _statusUpdateService.RaiseStatusUpdated("No data found to generate XML files");
+                }
             }
             catch (Exception ex)
             {
-                _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files");
+                _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files", ex);
             }
         }
 
+        private async void GenerateXmlByDateButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DateTime startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
+                DateTime endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
 
+                bool success = await _controller.GenerateXml(startDate, endDate);
+
+                if(success)
+                {
+                    _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
+                }
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated("No data found to generate XML files.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}");
+            }
+        }
 
         private void RadioButtonOn_CheckedChanged(object sender, EventArgs e)
         {
+            // Upload all Purchase Orders when the radio button is checked
             if (radioButtonOn.Checked)
             {
                 radioButtonOff.Checked = false;
@@ -309,59 +335,30 @@ namespace Monolith_BGM
             }
         }
 
-        private async void GenerateXmlButton_Click(object sender, EventArgs e)
+
+        private async void SendXmlDateGeneratedButton_Click(object sender, EventArgs e)
         {
             try
             {
                 DateTime startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
                 DateTime endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
 
-                var summaries = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate, endDate);
+                var success = await _controller.SendDateGeneratedXml(startDate, endDate);
 
-                string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
-
-                _xmlService.GenerateXMLFiles(summaries, startDate, endDate);
-
-                MessageBox.Show($"XML file successfully created at {localBaseDirectoryXmlCreatedPath}"); 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred: {ex.Message}");
-            }
-        }
-
-        private async void SendXmlButton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
-
-                // If using date pickers for dynamic file names
-                DateTime startDate = DateTime.Parse(comboBoxStartDate.SelectedItem.ToString());
-                DateTime endDate = DateTime.Parse(comboBoxEndDate.SelectedItem.ToString());
-                string fileName = $"PurchaseOrderSummariesGenerated_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
-
-                // Full path to the file
-                string filePath = Path.Combine(localBaseDirectoryXmlCreatedPath, fileName);
-
-                // Construct the remote path
-                string remotePath = Path.Combine("/Uploaded/", fileName);
-
-                // Check if the file exists
-                if (File.Exists(filePath))
+                if (success)
                 {
-                    // Use SftpFileHandler to upload the file to a specific folder on the server
-                    await _fileHandler.UploadFileAsync(filePath, remotePath);
-                    MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _statusUpdateService.RaiseStatusUpdated("XML files sent to remote directory successfully!");
                 }
                 else
                 {
-                    MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    _statusUpdateService.RaiseStatusUpdated("XML files not sent");
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to send file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _statusUpdateService.RaiseStatusUpdated("XML files not sent");
+                Log.Error(ex, "Failed to send XML files");
             }
         }
 
@@ -390,7 +387,7 @@ namespace Monolith_BGM
                     int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
 
                     // Update the database with the upload status
-                    await _dataService.UpdatePurchaseOrderSentStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
+                    await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
 
                     // Optionally update UI or handle latest date
                     DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
