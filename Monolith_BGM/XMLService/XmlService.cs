@@ -19,10 +19,17 @@ public class XmlService : IXmlService
     // Define the method as generic with a type parameter T
     public T LoadFromXml<T>(string filePath)
     {
-        XmlSerializer serializer = new XmlSerializer(typeof(T));
-        using (FileStream stream = new FileStream(filePath, FileMode.Open))
+        try
         {
-            return (T)serializer.Deserialize(stream);
+            XmlSerializer serializer = new XmlSerializer(typeof(T));
+            using (FileStream stream = new FileStream(filePath, FileMode.Open))
+            {
+                return (T)serializer.Deserialize(stream);
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new ApplicationException($"Error deserializing file {filePath}: {ex.Message}", ex);
         }
     }
 

@@ -41,7 +41,7 @@ namespace Monolith_BGM
             _errorHandler = errorHandler;
             _xmlService = xmlService;
             _fileManager = new FileManager();
-            _controller.DataInitialized += Controller_DataInitialized;
+            _controller.DatesInitialized += Controller_DatesInitialized;
             _controller.ErrorOccurred += Controller_ErrorOccurred;
             _statusUpdateService.StatusUpdated += UpdateStatusMessage;
             LoadDataAsync();
@@ -50,7 +50,7 @@ namespace Monolith_BGM
             
         }
 
-        private void Controller_DataInitialized(List<DateTime> orderDates)
+        private void Controller_DatesInitialized(List<DateTime> orderDates)
         {
             comboBoxStartDate.Items.Clear();
             comboBoxEndDate.Items.Clear();
@@ -77,7 +77,7 @@ namespace Monolith_BGM
             try
             {
                 var orderDates = await _dataService.FetchDistinctOrderDatesAsync();
-                Controller_DataInitialized(orderDates);
+                Controller_DatesInitialized(orderDates);
             }
             catch (Exception ex)
             {
@@ -207,27 +207,27 @@ namespace Monolith_BGM
 
         private async void SavePODToDbButton_Click(object sender, EventArgs e)
         {
-            List<PurchaseOrderDetailDto> allPurchaseOrderDetails = new List<PurchaseOrderDetailDto>();
-            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+            List<PurchaseOrderDetailDto> allPurchaseOrderDetails = null;
             try
             {
-                // Collect all PurchaseOrderDetails from XML files
-                var xmlFiles = Directory.GetFiles(localBaseDirectoryPath, "*.xml", SearchOption.AllDirectories);
-                foreach (var xmlFile in xmlFiles)
+                allPurchaseOrderDetails = await _controller.FetchXmlDataAsync();
+                if (allPurchaseOrderDetails == null || allPurchaseOrderDetails.Count == 0)
                 {
-                    try
-                    {
-                        var purchaseOrderDetails = _xmlService.LoadFromXml<PurchaseOrderDetails>(xmlFile);
-                        allPurchaseOrderDetails.AddRange(purchaseOrderDetails.Details);
-                    }
-                    catch (Exception ex)
-                    {
-                        _errorHandler.LogError(ex, "Error loading XML data", xmlFile);
-                    }
+                    MessageBox.Show("No XML data found to process.");
+                    _statusUpdateService.RaiseStatusUpdated("No XMLs found");
+                    return;
                 }
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, "Failed to load XML data.");
+                _statusUpdateService.RaiseStatusUpdated("Error loading XML data");
+                return;
+            }
 
-                // Save the purchase orders to the database
-                if (await _dataService.AddPurchaseOrderDetailsAsync(allPurchaseOrderDetails))
+            try
+            {
+                if (await _controller.FetchAndSavePODetails(allPurchaseOrderDetails))
                     _statusUpdateService.RaiseStatusUpdated("POD files saved to DB!");
                 else
                     _statusUpdateService.RaiseStatusUpdated("POD files failed saving to DB!");
@@ -235,6 +235,7 @@ namespace Monolith_BGM
             catch (Exception ex)
             {
                 _errorHandler.LogError(ex, "Error processing POD XML files.");
+                _statusUpdateService.RaiseStatusUpdated("Error saving POD to database.");
             }
         }
 
@@ -263,7 +264,8 @@ namespace Monolith_BGM
                 }
 
                 // Save the purchase orders to the database
-                if (await _dataService.AddPurchaseOrderHeadersAsync(allPurchaseOrderHeaders))
+                //if (await _dataService.AddPurchaseOrderHeadersAsync(allPurchaseOrderHeaders))
+                if (await _controller.FetchAndSavePOHeaders(allPurchaseOrderHeaders))
                     _statusUpdateService.RaiseStatusUpdated("POH files saved to DB!");
                 else
                     _statusUpdateService.RaiseStatusUpdated("POH files failed saving to DB!");
