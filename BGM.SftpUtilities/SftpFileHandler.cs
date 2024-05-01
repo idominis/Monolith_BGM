@@ -52,7 +52,7 @@ namespace BGM.SftpUtilities
             }
         }
 
-        public bool DownloadXmlFilesFromDirectory(string remoteDirectoryPath, string localBaseDirectoryPath)
+        public async Task<bool> DownloadXmlFilesFromDirectoryAsync(string remoteDirectoryPath, string localBaseDirectoryPath)
         {
             bool newFilesDownloaded = false;
             try
@@ -69,7 +69,7 @@ namespace BGM.SftpUtilities
                             string subDirectoryPath = Path.Combine(remoteDirectoryPath, entry.Name);
                             string localSubDirectoryPath = Path.Combine(localBaseDirectoryPath, entry.Name);
                             Directory.CreateDirectory(localSubDirectoryPath); // Ensure the directory exists locally
-                            newFilesDownloaded |= DownloadXmlFilesFromDirectory(subDirectoryPath, localSubDirectoryPath);
+                            newFilesDownloaded |= await DownloadXmlFilesFromDirectoryAsync(subDirectoryPath, localSubDirectoryPath);
                         }
                         else if (!entry.IsDirectory && !entry.Name.EndsWith(".processed"))
                         {

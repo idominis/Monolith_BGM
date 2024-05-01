@@ -1,5 +1,6 @@
 ﻿using BGM.Common;
 using BGM.SftpUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic.Logging;
 using Monolith_BGM.DataAccess.DTO;
 using Monolith_BGM.Src;
@@ -17,19 +18,21 @@ namespace Monolith_BGM.Controllers
         private readonly IXmlService _xmlService;
         private readonly ErrorHandlerService _errorHandler;
         private readonly SftpFileHandler _fileHandler;
+        private readonly IStatusUpdateService _statusUpdateService;
 
         public event Action<List<DateTime>>? DatesInitialized;
         public event Action<List<int>>? DataInitialized;
         public event Action<string>? ErrorOccurred;
         public event Action<DateTime> LatestDateUpdated;
 
-        public MainFormController(DataService dataService, FileManager fileManager, IXmlService xmlService, ErrorHandlerService errorHandler, SftpFileHandler sftpFileHandler)
+        public MainFormController(DataService dataService, FileManager fileManager, IXmlService xmlService, ErrorHandlerService errorHandler, SftpFileHandler sftpFileHandler, IStatusUpdateService statusUpdateService)
         {
             _dataService = dataService;
             _fileManager = fileManager;
             _xmlService = xmlService;
             _errorHandler = errorHandler;
             _fileHandler = sftpFileHandler;
+            _statusUpdateService = statusUpdateService;
         }
 
         public async void InitializeDataAsync()
@@ -199,9 +202,9 @@ namespace Monolith_BGM.Controllers
             return generated;
         }
 
-        private async Task<List<int>> AlreadySent()
+        private async Task<HashSet<int>> AlreadySent()
         {
-            var sent = await _dataService.FetchPurchaseOrderIdSentAsync();
+            var sent = await _dataService.FetchAlreadySentPurchaseOrderIdsAsync();
             return sent;
         }
 
@@ -240,50 +243,66 @@ namespace Monolith_BGM.Controllers
             }
         }
 
-
         public async Task<bool> SendDateGeneratedXml(DateTime? startDate = null, DateTime? endDate = null)
         {
             string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
+            string fileName = $"PurchaseOrderSummariesGenerated_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
+            string filePath = Path.Combine(localBaseDirectoryXmlCreatedPath, fileName);
 
             try
             {
-                string fileName = $"PurchaseOrderSummariesGenerated_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
-
-                // Full path to the file
-                string filePath = Path.Combine(localBaseDirectoryXmlCreatedPath, fileName);
-
-                // Construct the remote path
-                string remotePath = Path.Combine("/Uploaded/", fileName);
-
-                if (File.Exists(filePath))
-                {
-                    // Use SftpFileHandler to upload the file to a specific folder on the server
-                    await _fileHandler.UploadFileAsync(filePath, remotePath);
-                    MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    Log.Information("File sent successfully: {FileName}", fileName);
-                }
-                else
+                // Check if file exists
+                if (!File.Exists(filePath))
                 {
                     MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Log.Error("File not found: {FilePath}", filePath);
                     return false;
                 }
+
+                // Extract PurchaseOrderIDs from the XML
+                var orderIdsFromXml = _xmlService.ExtractPurchaseOrderIdsFromXml(filePath);
+
+                // Fetch already uploaded PurchaseOrderIDs
+                var alreadyUploadedIds = await _dataService.FetchAlreadySentPurchaseOrderIdsAsync(); //FetchAlreadySentPurchaseOrderIdsAsync();
+
+                // Determine which IDs need to be uploaded
+                var idsToUpload = orderIdsFromXml.Where(id => !alreadyUploadedIds.Contains(id)).ToList();
+                if (!idsToUpload.Any())
+                {
+                    MessageBox.Show("All Purchase Orders in the file have already been sent.", "Nothing to Send", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return false;
+                }
+
+                string remotePath = Path.Combine("/Uploaded/", fileName);
+
+                await _fileHandler.UploadFileAsync(filePath, remotePath);
+
+                // Update the database with the upload status for the newly uploaded IDs
+                foreach (var id in idsToUpload)
+                {
+                    await _dataService.UpdatePurchaseOrderStatus(id, true, true, 0);  // 0 - Auto, 1 - Custom
+                }
+
+                MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Log.Information("File sent successfully: {FileName}", fileName);
                 return true;
             }
             catch (Exception ex)
             {
-                ErrorOccurred?.Invoke($"Error generating XML files: {ex.Message}");
-                Log.Error(ex, "Error generating XML files");
+                ErrorOccurred?.Invoke($"Error sending XML file: {ex.Message}");
+                Log.Error(ex, "Error sending XML file");
                 return false;
             }
         }
+
 
         public async void UploadAllHeaders()
         {
             string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
             string localDirectoryPath = _fileManager.GetSpecificPath("Headers");
+            string remoteDirectoryPath = "/Uploaded/";
 
-            string remoteDirectoryPath = "/Uploaded/";  // RebexTinySftpServer\data\Uploaded
+            var alreadySentIds = await AlreadySent();
 
             DateTime? latestDate = null;
 
@@ -294,31 +313,32 @@ namespace Monolith_BGM.Controllers
 
                 foreach (FileInfo file in files)
                 {
+                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
+                    if (alreadySentIds.Contains(purchaseOrderId))
+                    {
+                        Log.Information($"Skipping upload for {file.Name} as it's already sent.");
+                        continue;  // Skip this file if it's already sent
+                    }
+
                     string localFilePath = file.FullName;
                     string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
                     await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
                     Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
 
-                    // Extract PurchaseOrderID from the filename
-                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
-
                     // Update the database with the upload status
-                    await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
+                    await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0); // Mark as sent + processed
 
                     // Optionally update UI or handle latest date
                     DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
                     if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
                     {
                         latestDate = fileDate;
-                        //Invoke(new Action(() => {
-                        //    autoSendTextBox.Text = latestDate.Value.ToString("yyyy-MM-dd");
-                        //}));
-                        // Instead of Invoke, fire an event
+                        // Instead of Invoke, use an event to update UI in MainForm
                         LatestDateUpdated?.Invoke(fileDate.Value);
                     }
                 }
 
-                MessageBox.Show("All files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("All applicable files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -327,5 +347,64 @@ namespace Monolith_BGM.Controllers
             }
         }
 
+
+        public async Task<List<DateTime>> FetchDistinctOrderDatesAsync()
+        {
+            return await _dataService.FetchDistinctOrderDatesAsync();
+        }
+
+        public async Task DownloadFilesPODAsync(string remotePath, string localPath)
+        {
+            try
+            {
+                if (_fileHandler == null)
+                    throw new InvalidOperationException("File handler is not initialized.");
+
+                bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
+                if (filesDownloaded)
+                {
+                    //StatusUpdated?.Invoke($"XML files from {remotePath} have been downloaded successfully!");
+                    _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
+                    Log.Information($"XML files from {remotePath} have been downloaded successfully!");
+                }
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
+                    Log.Information($"No new XML files in {remotePath}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
+                Log.Error(ex, "Error downloading files.");
+            }
+        }
+
+        public async Task DownloadFilesPOHAsync(string remotePath, string localPath)
+        {
+            try
+            {
+                if (_fileHandler == null)
+                    throw new InvalidOperationException("File handler is not initialized.");
+
+                bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
+                if (filesDownloaded)
+                {
+                    //StatusUpdated?.Invoke($"XML files from {remotePath} have been downloaded successfully!");
+                    _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
+                    Log.Information($"XML files from {remotePath} have been downloaded successfully!");
+                }
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
+                    Log.Information($"No new XML files in {remotePath}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
+                Log.Error(ex, "Error downloading files.");
+            }
+        }
     }
 }

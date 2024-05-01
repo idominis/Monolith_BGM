@@ -11,5 +11,7 @@ namespace Monolith_BGM.XMLService
     {
         T LoadFromXml<T>(string filePath);
         void GenerateXMLFiles(List<PurchaseOrderSummary> summaries, DateTime? startDate = null, DateTime? endDate = null);
+
+        List<int> ExtractPurchaseOrderIdsFromXml(string filePath);
     }
 }

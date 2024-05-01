@@ -45,12 +45,11 @@ namespace Monolith_BGM
             _controller.ErrorOccurred += Controller_ErrorOccurred;
             _statusUpdateService.StatusUpdated += UpdateStatusMessage;
             _controller.LatestDateUpdated += UpdateLatestDate;
-            //_controller.StatusUpdated += UpdateStatusMessage;
             _controller.ErrorOccurred += ShowErrorMessage;
             LoadDataAsync();
             comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
             comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;
-            
+
         }
 
         private void Controller_DatesInitialized(List<DateTime> orderDates)
@@ -106,7 +105,7 @@ namespace Monolith_BGM
         {
             try
             {
-                var orderDates = await _dataService.FetchDistinctOrderDatesAsync();
+                var orderDates = await _controller.FetchDistinctOrderDatesAsync();
                 Controller_DatesInitialized(orderDates);
             }
             catch (Exception ex)
@@ -125,6 +124,7 @@ namespace Monolith_BGM
             }
             timer.Enabled = true;
         }
+
 
         private void ComboBoxStartDate_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -151,34 +151,16 @@ namespace Monolith_BGM
             }
         }
 
-        private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
+        private async void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
             string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
             string localHeadersPath = _fileManager.GetSpecificPath("headers");
             string remoteDetailsDirectoryPath = _fileManager.GetRemoteDetailsDirectoryPath();
             string remoteHeadersDirectoryPath = _fileManager.GetRemoteHeadersDirectoryPath();
 
-            DownloadFiles(remoteDetailsDirectoryPath, localBaseDirectoryPath); // Download POD files
-            DownloadFiles(remoteHeadersDirectoryPath, localHeadersPath); // Download POH files
-        }
-
-        private void DownloadFiles(string remotePath, string localPath)
-        {
-            // State of _fileHandler
-            if (_fileHandler == null)
-                throw new InvalidOperationException("File handler is not initialized.");
-
-            bool filesDownloaded = _fileHandler.DownloadXmlFilesFromDirectory(remotePath, localPath);
-            if (filesDownloaded)
-            {
-                _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
-                Log.Information($"XML files from {remotePath} have been downloaded successfully!");
-            }
-            else
-            {
-                _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
-                Log.Information($"No new XML files in {remotePath}.");
-            }
+            // Asynchronously download files for POD and POH
+            await _controller.DownloadFilesPODAsync(remoteDetailsDirectoryPath, localBaseDirectoryPath); // Download POD files
+            await _controller.DownloadFilesPOHAsync(remoteHeadersDirectoryPath, localHeadersPath); // Download POH files
         }
 
         // Override the OnFormClosing method to clean up the timer
@@ -192,18 +174,6 @@ namespace Monolith_BGM
             _statusUpdateService.StatusUpdated -= UpdateStatusMessage;
             base.OnFormClosing(e); // Call the base class method
         }
-
-        //private void UpdateStatusMessage(string message)
-        //{
-        //    if (InvokeRequired)
-        //    {
-        //        Invoke(new Action(() => toolStripStatusLabel.Text = message));
-        //    }
-        //    else
-        //    {
-        //        toolStripStatusLabel.Text = message;
-        //    }
-        //}
 
         private void ServiceStartButton_Click(object sender, EventArgs e)
         {
@@ -392,52 +362,5 @@ namespace Monolith_BGM
             }
         }
 
-        //private async void UploadAllHeaders()
-        //{
-        //    string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
-        //    string localDirectoryPath = _fileManager.GetSpecificPath("Headers");
-
-        //    string remoteDirectoryPath = "/Uploaded/";  // RebexTinySftpServer\data\Uploaded
-
-        //    DateTime? latestDate = null;
-
-        //    try
-        //    {
-        //        DirectoryInfo dir = new DirectoryInfo(localDirectoryPath);
-        //        FileInfo[] files = dir.GetFiles("PurchaseOrderHeader*.xml");
-
-        //        foreach (FileInfo file in files)
-        //        {
-        //            string localFilePath = file.FullName;
-        //            string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
-        //            await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
-        //            Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
-
-        //            // Extract PurchaseOrderID from the filename
-        //            int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
-
-        //            // Update the database with the upload status
-        //            await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0);  // 0 - Auto, 1 - Custom
-
-        //            // Optionally update UI or handle latest date
-        //            DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
-        //            if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
-        //            {
-        //                latestDate = fileDate;
-        //                Invoke(new Action(() =>
-        //                {
-        //                    autoSendTextBox.Text = latestDate.Value.ToString("yyyy-MM-dd");
-        //                }));
-        //            }
-        //        }
-
-        //        MessageBox.Show("All files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Log.Error(ex, "Error uploading files");
-        //        MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    }
-        //}
     }
 }

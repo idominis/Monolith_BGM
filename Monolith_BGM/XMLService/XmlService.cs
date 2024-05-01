@@ -65,6 +65,17 @@ public class XmlService : IXmlService
         }
     }
 
-
+    public List<int> ExtractPurchaseOrderIdsFromXml(string filePath)
+    {
+        try
+        {
+            var summaries = LoadFromXml<PurchaseOrderSummaries>(filePath);
+            return summaries.Summaries.Select(s => s.PurchaseOrderID).Distinct().ToList();
+        }
+        catch (ApplicationException ex)
+        {
+            throw new ApplicationException("Failed to extract Purchase Order IDs.", ex);
+        }
+    }
 
 }

@@ -6,7 +6,7 @@ public class PurchaseOrderSentProfile : Profile
 {
     public PurchaseOrderSentProfile()
     {
-        CreateMap<PurchaseOrderSent, PurchaseOrderSentDto>()
+        CreateMap<PurchaseOrdersProcessedSent, PurchaseOrderSentDto>()
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

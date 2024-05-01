@@ -149,7 +149,7 @@ public class DataService
             ModifiedDate = DateTime.Now
         };
 
-        // Use AutoMapper to map the DTO to the entity
+        // Map the DTO to the entity
         var orderSentEntry = _mapper.Map<PurchaseOrdersProcessedSent>(orderSentDto);
 
         _dbContext.PurchaseOrdersProcessedSents.Add(orderSentEntry);
@@ -166,15 +166,31 @@ public class DataService
                                .OrderBy(id => id)  // Order by PurchaseOrderId
                                .ToListAsync();
     }
-
-    public async Task<List<int>> FetchPurchaseOrderIdSentAsync()
+    public async Task<HashSet<int>> FetchAlreadyGeneratedPurchaseOrderIdsAsync()
     {
-        return await _dbContext.PurchaseOrdersProcessedSents
-                               .Where(x => x.OrderSent)  // Filter for OrderSent = true
-                               .Select(x => x.PurchaseOrderId)
-                               .Distinct()
-                               .OrderBy(id => id)  // Order by PurchaseOrderId
-                               .ToListAsync();
+        return new HashSet<int>(await _dbContext.PurchaseOrdersProcessedSents
+            .Where(x => x.OrderProcessed) // Filter for OrderProcessed = true
+            .Select(x => x.PurchaseOrderId)
+            .ToListAsync());
     }
+
+    public async Task<HashSet<int>> FetchAlreadySentPurchaseOrderIdsAsync()
+    {
+        return new HashSet<int>(await _dbContext.PurchaseOrdersProcessedSents
+            .Where(x => x.OrderSent) // Filter for OrderSent = true
+            .Select(x => x.PurchaseOrderId)
+            .ToListAsync());
+    }
+
+    public async Task<List<int>> FetchAlreadySentPurchaseOrderIdsAsync(List<int> purchaseOrderIds)
+    {
+        var sentIds = await _dbContext.PurchaseOrdersProcessedSents
+                                      .Where(x => x.OrderSent && purchaseOrderIds.Contains(x.PurchaseOrderId))
+                                      .Select(x => x.PurchaseOrderId)
+                                      .Distinct()
+                                      .ToListAsync();
+        return sentIds;
+    }
+
 
 }
