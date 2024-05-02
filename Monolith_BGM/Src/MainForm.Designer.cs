@@ -47,20 +47,30 @@
             autoSendTextBox = new TextBox();
             radioButtonOff = new RadioButton();
             radioButtonOn = new RadioButton();
+            groupBox3 = new GroupBox();
+            label4 = new Label();
+            saveToDbRadioButtonOff = new RadioButton();
+            saveToDbRadioButtonOn = new RadioButton();
+            groupBox4 = new GroupBox();
+            label5 = new Label();
+            createXmlDbRadioButtonOff = new RadioButton();
+            createXmlDbRadioButtonOn = new RadioButton();
             statusStrip1.SuspendLayout();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
+            groupBox3.SuspendLayout();
+            groupBox4.SuspendLayout();
             SuspendLayout();
             // 
             // SavePODToDbButton
             // 
-            SavePODToDbButton.Location = new Point(12, 86);
+            SavePODToDbButton.Location = new Point(16, 22);
             SavePODToDbButton.Name = "SavePODToDbButton";
             SavePODToDbButton.Size = new Size(137, 23);
             SavePODToDbButton.TabIndex = 0;
             SavePODToDbButton.Text = "Save POD to DB";
             SavePODToDbButton.UseVisualStyleBackColor = true;
-            SavePODToDbButton.Click += SavePODToDbButton_Click;
+            //SavePODToDbButton.Click += SavePODToDbButton_Click;
             // 
             // ServiceStartButton
             // 
@@ -86,9 +96,9 @@
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel });
-            statusStrip1.Location = new Point(0, 428);
+            statusStrip1.Location = new Point(0, 398);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(800, 22);
+            statusStrip1.Size = new Size(636, 22);
             statusStrip1.TabIndex = 3;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -100,18 +110,18 @@
             // 
             // SavePOHToDbButton
             // 
-            SavePOHToDbButton.Location = new Point(12, 124);
+            SavePOHToDbButton.Location = new Point(16, 60);
             SavePOHToDbButton.Margin = new Padding(3, 2, 3, 2);
             SavePOHToDbButton.Name = "SavePOHToDbButton";
             SavePOHToDbButton.Size = new Size(137, 22);
             SavePOHToDbButton.TabIndex = 4;
             SavePOHToDbButton.Text = "Save POH to DB";
             SavePOHToDbButton.UseVisualStyleBackColor = true;
-            SavePOHToDbButton.Click += SavePOHToDbButton_Click;
+            //SavePOHToDbButton.Click += SavePOHToDbButton_Click;
             // 
             // Button
             // 
-            Button.Location = new Point(12, 182);
+            Button.Location = new Point(0, 39);
             Button.Margin = new Padding(3, 2, 3, 2);
             Button.Name = "Button";
             Button.Size = new Size(137, 22);
@@ -148,7 +158,7 @@
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(comboBoxStartDate);
             groupBox1.Controls.Add(comboBoxEndDate);
-            groupBox1.Location = new Point(368, 106);
+            groupBox1.Location = new Point(349, 65);
             groupBox1.Margin = new Padding(3, 2, 3, 2);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(3, 2, 3, 2);
@@ -203,14 +213,14 @@
             groupBox2.Controls.Add(autoSendTextBox);
             groupBox2.Controls.Add(radioButtonOff);
             groupBox2.Controls.Add(radioButtonOn);
-            groupBox2.Location = new Point(368, 262);
+            groupBox2.Location = new Point(349, 230);
             groupBox2.Margin = new Padding(3, 2, 3, 2);
             groupBox2.Name = "groupBox2";
             groupBox2.Padding = new Padding(3, 2, 3, 2);
             groupBox2.Size = new Size(267, 146);
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
-            groupBox2.Text = "Set AutoSend generated XMLs";
+            groupBox2.Text = "Set AutoSend created XMLs";
             // 
             // label3
             // 
@@ -256,19 +266,117 @@
             radioButtonOn.UseVisualStyleBackColor = true;
             radioButtonOn.CheckedChanged += RadioButtonOn_CheckedChanged;
             // 
+            // groupBox3
+            // 
+            groupBox3.Controls.Add(label4);
+            groupBox3.Controls.Add(saveToDbRadioButtonOff);
+            groupBox3.Controls.Add(saveToDbRadioButtonOn);
+            groupBox3.Controls.Add(SavePODToDbButton);
+            groupBox3.Controls.Add(SavePOHToDbButton);
+            groupBox3.Location = new Point(12, 65);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Size = new Size(280, 100);
+            groupBox3.TabIndex = 10;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "Save XMLs to DB";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(192, 30);
+            label4.Name = "label4";
+            label4.Size = new Size(33, 15);
+            label4.TabIndex = 5;
+            label4.Text = "Auto";
+            // 
+            // saveToDbRadioButtonOff
+            // 
+            saveToDbRadioButtonOff.AutoSize = true;
+            saveToDbRadioButtonOff.Location = new Point(221, 49);
+            saveToDbRadioButtonOff.Margin = new Padding(3, 2, 3, 2);
+            saveToDbRadioButtonOff.Name = "saveToDbRadioButtonOff";
+            saveToDbRadioButtonOff.Size = new Size(42, 19);
+            saveToDbRadioButtonOff.TabIndex = 4;
+            saveToDbRadioButtonOff.TabStop = true;
+            saveToDbRadioButtonOff.Text = "Off";
+            saveToDbRadioButtonOff.UseMnemonic = false;
+            saveToDbRadioButtonOff.UseVisualStyleBackColor = true;
+            saveToDbRadioButtonOff.CheckedChanged += saveToDbRadioButtonOff_CheckedChanged;
+            // 
+            // saveToDbRadioButtonOn
+            // 
+            saveToDbRadioButtonOn.AutoSize = true;
+            saveToDbRadioButtonOn.Location = new Point(174, 49);
+            saveToDbRadioButtonOn.Margin = new Padding(3, 2, 3, 2);
+            saveToDbRadioButtonOn.Name = "saveToDbRadioButtonOn";
+            saveToDbRadioButtonOn.Size = new Size(41, 19);
+            saveToDbRadioButtonOn.TabIndex = 4;
+            saveToDbRadioButtonOn.TabStop = true;
+            saveToDbRadioButtonOn.Text = "On";
+            saveToDbRadioButtonOn.UseVisualStyleBackColor = true;
+            saveToDbRadioButtonOn.CheckedChanged += saveToDbRadioButtonOn_CheckedChanged;
+            // 
+            // groupBox4
+            // 
+            groupBox4.Controls.Add(label5);
+            groupBox4.Controls.Add(createXmlDbRadioButtonOff);
+            groupBox4.Controls.Add(Button);
+            groupBox4.Controls.Add(createXmlDbRadioButtonOn);
+            groupBox4.Location = new Point(12, 230);
+            groupBox4.Name = "groupBox4";
+            groupBox4.Size = new Size(280, 74);
+            groupBox4.TabIndex = 11;
+            groupBox4.TabStop = false;
+            groupBox4.Text = "Create XMLs from DB";
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(192, 19);
+            label5.Name = "label5";
+            label5.Size = new Size(33, 15);
+            label5.TabIndex = 6;
+            label5.Text = "Auto";
+            // 
+            // createXmlDbRadioButtonOff
+            // 
+            createXmlDbRadioButtonOff.AutoSize = true;
+            createXmlDbRadioButtonOff.Location = new Point(221, 39);
+            createXmlDbRadioButtonOff.Margin = new Padding(3, 2, 3, 2);
+            createXmlDbRadioButtonOff.Name = "createXmlDbRadioButtonOff";
+            createXmlDbRadioButtonOff.Size = new Size(42, 19);
+            createXmlDbRadioButtonOff.TabIndex = 5;
+            createXmlDbRadioButtonOff.TabStop = true;
+            createXmlDbRadioButtonOff.Text = "Off";
+            createXmlDbRadioButtonOff.UseMnemonic = false;
+            createXmlDbRadioButtonOff.UseVisualStyleBackColor = true;
+            createXmlDbRadioButtonOff.CheckedChanged += createXmlDbRadioButtonOff_CheckedChanged;
+            // 
+            // createXmlDbRadioButtonOn
+            // 
+            createXmlDbRadioButtonOn.AutoSize = true;
+            createXmlDbRadioButtonOn.Location = new Point(174, 39);
+            createXmlDbRadioButtonOn.Margin = new Padding(3, 2, 3, 2);
+            createXmlDbRadioButtonOn.Name = "createXmlDbRadioButtonOn";
+            createXmlDbRadioButtonOn.Size = new Size(41, 19);
+            createXmlDbRadioButtonOn.TabIndex = 6;
+            createXmlDbRadioButtonOn.TabStop = true;
+            createXmlDbRadioButtonOn.Text = "On";
+            createXmlDbRadioButtonOn.UseVisualStyleBackColor = true;
+            createXmlDbRadioButtonOn.CheckedChanged += createXmlDbRadioButtonOn_CheckedChanged;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(636, 420);
+            Controls.Add(groupBox4);
+            Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
-            Controls.Add(Button);
-            Controls.Add(SavePOHToDbButton);
             Controls.Add(statusStrip1);
             Controls.Add(ServiceStopButton);
             Controls.Add(ServiceStartButton);
-            Controls.Add(SavePODToDbButton);
             Name = "MainForm";
             Text = "MainForm";
             statusStrip1.ResumeLayout(false);
@@ -277,6 +385,10 @@
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
+            groupBox3.ResumeLayout(false);
+            groupBox3.PerformLayout();
+            groupBox4.ResumeLayout(false);
+            groupBox4.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -302,5 +414,13 @@
         private RadioButton radioButtonOff;
         private RadioButton radioButtonOn;
         private Label label3;
+        private GroupBox groupBox3;
+        private GroupBox groupBox4;
+        private RadioButton saveToDbRadioButtonOff;
+        private RadioButton saveToDbRadioButtonOn;
+        private Label label4;
+        private Label label5;
+        private RadioButton createXmlDbRadioButtonOff;
+        private RadioButton createXmlDbRadioButtonOn;
     }
 }

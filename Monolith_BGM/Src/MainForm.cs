@@ -29,28 +29,34 @@ namespace Monolith_BGM
         private MainFormController _controller;
         private readonly IXmlService _xmlService;
         private FileManager _fileManager;
+        private System.Timers.Timer autoGenerateXmlTimer;
+        private System.Timers.Timer saveToDbTimer;
 
-        public MainForm(MainFormController controller, IMapper mapper, DataService dataService, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService, SftpFileHandler fileHandler, IXmlService xmlService)
+
+        public MainForm(MainFormController controller, IStatusUpdateService statusUpdateService)
         {
             InitializeComponent();
-            _mapper = mapper;
+            InitializeAutoGenerateXmlTimer();
+            InitializeSaveToDbTimer();
+            radioButtonOff.Checked = true;
+            createXmlDbRadioButtonOff.Checked = true;
+            saveToDbRadioButtonOff.Checked = true;
+
             _controller = controller;
-            _dataService = dataService;
             _statusUpdateService = statusUpdateService;
-            _fileHandler = fileHandler;
-            _errorHandler = errorHandler;
-            _xmlService = xmlService;
-            _fileManager = new FileManager();
+
             _controller.DatesInitialized += Controller_DatesInitialized;
             _controller.ErrorOccurred += Controller_ErrorOccurred;
-            _statusUpdateService.StatusUpdated += UpdateStatusMessage;
             _controller.LatestDateUpdated += UpdateLatestDate;
             _controller.ErrorOccurred += ShowErrorMessage;
+
             LoadDataAsync();
+            _statusUpdateService.StatusUpdated += UpdateStatusMessage;
             comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
             comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;
-
+            createXmlDbRadioButtonOn.CheckedChanged += createXmlDbRadioButtonOn_CheckedChanged;
         }
+
 
         private void Controller_DatesInitialized(List<DateTime> orderDates)
         {
@@ -125,6 +131,31 @@ namespace Monolith_BGM
             timer.Enabled = true;
         }
 
+        private void InitializeAutoGenerateXmlTimer()
+        {
+            autoGenerateXmlTimer = new System.Timers.Timer(10000); // Set interval to 10 seconds
+            autoGenerateXmlTimer.Elapsed += AutoGenerateXmlTimer_Elapsed;
+            autoGenerateXmlTimer.AutoReset = true; // Ensure the timer fires repeatedly every 10 seconds
+        }
+
+        private void InitializeSaveToDbTimer()
+        {
+            saveToDbTimer = new System.Timers.Timer(10000); // Set interval to 10 seconds
+            saveToDbTimer.Elapsed += SaveToDbTimer_Elapsed;
+            saveToDbTimer.AutoReset = true;
+        }
+
+        private async void SaveToDbTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!saveToDbRadioButtonOn.Checked)
+            {
+                saveToDbTimer.Stop();
+                return;
+            }
+
+            await SavePODToDb();
+            await SavePOHToDb();
+        }
 
         private void ComboBoxStartDate_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -153,14 +184,7 @@ namespace Monolith_BGM
 
         private async void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
-            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
-            string localHeadersPath = _fileManager.GetSpecificPath("headers");
-            string remoteDetailsDirectoryPath = _fileManager.GetRemoteDetailsDirectoryPath();
-            string remoteHeadersDirectoryPath = _fileManager.GetRemoteHeadersDirectoryPath();
-
-            // Asynchronously download files for POD and POH
-            await _controller.DownloadFilesPODAsync(remoteDetailsDirectoryPath, localBaseDirectoryPath); // Download POD files
-            await _controller.DownloadFilesPOHAsync(remoteHeadersDirectoryPath, localHeadersPath); // Download POH files
+            await _controller.DownloadFilesForPODAndPOHAsync();
         }
 
         // Override the OnFormClosing method to clean up the timer
@@ -205,28 +229,17 @@ namespace Monolith_BGM
             }
         }
 
-        private async void SavePODToDbButton_Click(object sender, EventArgs e)
+        private async Task SavePODToDb()
         {
-            List<PurchaseOrderDetailDto> allPurchaseOrderDetails = null;
             try
             {
-                allPurchaseOrderDetails = await _controller.FetchXmlDetailsDataAsync();
+                var allPurchaseOrderDetails = await _controller.FetchXmlDetailsDataAsync();
                 if (allPurchaseOrderDetails == null || allPurchaseOrderDetails.Count == 0)
                 {
-                    MessageBox.Show("No Details XML data found to process.");
                     _statusUpdateService.RaiseStatusUpdated("No Details XMLs found");
                     return;
                 }
-            }
-            catch (Exception ex)
-            {
-                _errorHandler.LogError(ex, "Failed to load Details XML data.");
-                _statusUpdateService.RaiseStatusUpdated("Error loading Details XML data");
-                return;
-            }
 
-            try
-            {
                 if (await _controller.FetchAndSavePODetails(allPurchaseOrderDetails))
                     _statusUpdateService.RaiseStatusUpdated("POD files saved to DB!");
                 else
@@ -239,28 +252,17 @@ namespace Monolith_BGM
             }
         }
 
-        private async void SavePOHToDbButton_Click(object sender, EventArgs e)
+        private async Task SavePOHToDb()
         {
-            List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = null;
             try
             {
-                allPurchaseOrderHeaders = await _controller.FetchXmlHeadersDataAsync();
+                var allPurchaseOrderHeaders = await _controller.FetchXmlHeadersDataAsync();
                 if (allPurchaseOrderHeaders == null || allPurchaseOrderHeaders.Count == 0)
                 {
-                    MessageBox.Show("No Headers XML data found to process.");
                     _statusUpdateService.RaiseStatusUpdated("No Headers XMLs found");
                     return;
                 }
-            }
-            catch (Exception ex)
-            {
-                _errorHandler.LogError(ex, "Failed to load Headers XML data.");
-                _statusUpdateService.RaiseStatusUpdated("Error loading Headers XML data");
-                return;
-            }
 
-            try
-            {
                 if (await _controller.FetchAndSavePOHeaders(allPurchaseOrderHeaders))
                     _statusUpdateService.RaiseStatusUpdated("POH files saved to DB!");
                 else
@@ -269,7 +271,7 @@ namespace Monolith_BGM
             catch (Exception ex)
             {
                 _errorHandler.LogError(ex, "Error processing POH XML files.");
-                _statusUpdateService.RaiseStatusUpdated("Error saving POH to database.", ex);
+                _statusUpdateService.RaiseStatusUpdated("Error saving POH to database.");
             }
         }
 
@@ -302,7 +304,7 @@ namespace Monolith_BGM
 
                 bool success = await _controller.GenerateXml(startDate, endDate);
 
-                if(success)
+                if (success)
                 {
                     _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
                 }
@@ -359,6 +361,81 @@ namespace Monolith_BGM
                 MessageBox.Show("Failed to send file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _statusUpdateService.RaiseStatusUpdated("XML files not sent");
                 Log.Error(ex, "Failed to send XML files");
+            }
+        }
+
+        private void createXmlDbRadioButtonOn_CheckedChanged(object sender, EventArgs e)
+        {
+            if (createXmlDbRadioButtonOn.Checked)
+            {
+                autoGenerateXmlTimer.Start();
+            }
+            else
+            {
+                autoGenerateXmlTimer.Stop();
+            }
+        }
+
+        private void createXmlDbRadioButtonOff_CheckedChanged(object sender, EventArgs e)
+        {
+            if (createXmlDbRadioButtonOff.Checked)
+            {
+                autoGenerateXmlTimer.Stop();
+            }
+            else
+            {
+                autoGenerateXmlTimer.Start();
+            }
+        }
+
+        private async void AutoGenerateXmlTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!createXmlDbRadioButtonOn.Checked)
+            {
+                autoGenerateXmlTimer.Stop();
+                return;
+            }
+
+            try
+            {
+                var success = await _controller.GenerateXmlFromDbAsync();
+                if (success)
+                {
+                    _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
+                }
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated("No data found to generate XML files.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files", ex);
+                Log.Error(ex, "Error generating XML files");
+            }
+        }
+
+        private void saveToDbRadioButtonOn_CheckedChanged(object sender, EventArgs e)
+        {
+            if (saveToDbRadioButtonOn.Checked)
+            {
+                saveToDbTimer.Start();
+            }
+            else
+            {
+                saveToDbTimer.Stop();
+            }
+        }
+
+        private void saveToDbRadioButtonOff_CheckedChanged(object sender, EventArgs e)
+        {
+            if (saveToDbRadioButtonOff.Checked)
+            {
+                saveToDbTimer.Stop();
+            }
+            else
+            {
+                saveToDbTimer.Start();
             }
         }
 

@@ -48,6 +48,25 @@ namespace Monolith_BGM.Controllers
             }
         }
 
+        public async Task DownloadFilesForPODAndPOHAsync()
+        {
+            try
+            {
+                string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+                string localHeadersPath = _fileManager.GetSpecificPath("headers");
+                string remoteDetailsDirectoryPath = _fileManager.GetRemoteDetailsDirectoryPath();
+                string remoteHeadersDirectoryPath = _fileManager.GetRemoteHeadersDirectoryPath();
+
+                await DownloadFilesPODAsync(remoteDetailsDirectoryPath, localBaseDirectoryPath); // Download POD files
+                await DownloadFilesPOHAsync(remoteHeadersDirectoryPath, localHeadersPath); // Download POH files
+            }
+            catch (Exception ex)
+            {
+                ErrorOccurred?.Invoke($"Error during file download: {ex.Message}");
+                Log.Error(ex, "Error during file operations");
+            }
+        }
+
         public async Task<List<PurchaseOrderDetailDto>> FetchXmlDetailsDataAsync()
         {
             return await Task.Run(() =>
