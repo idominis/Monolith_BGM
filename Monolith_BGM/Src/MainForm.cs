@@ -32,7 +32,11 @@ namespace Monolith_BGM
         private System.Timers.Timer autoGenerateXmlTimer;
         private System.Timers.Timer saveToDbTimer;
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainForm"/> class.
+        /// </summary>
+        /// <param name="controller">The controller.</param>
+        /// <param name="statusUpdateService">The status update service.</param>
         public MainForm(MainFormController controller, IStatusUpdateService statusUpdateService)
         {
             InitializeComponent();
@@ -58,6 +62,8 @@ namespace Monolith_BGM
         }
 
 
+        /// <summary>Controllers the dates initialized.</summary>
+        /// <param name="orderDates">The order dates.</param>
         private void Controller_DatesInitialized(List<DateTime> orderDates)
         {
             comboBoxStartDate.Items.Clear();

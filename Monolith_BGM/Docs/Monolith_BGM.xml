@@ -1,0 +1,874 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Monolith_BGM</name>
+    </assembly>
+    <members>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.PurchaseOrderId">
+            <summary>
+            Primary key. Foreign key to PurchaseOrderHeader.PurchaseOrderID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.PurchaseOrderDetailId">
+            <summary>
+            Primary key. One line number per purchased product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.DueDate">
+            <summary>
+            Date the product is expected to be received.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.OrderQty">
+            <summary>
+            Quantity ordered.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.ProductId">
+            <summary>
+            Product identification number. Foreign key to Product.ProductID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.UnitPrice">
+            <summary>
+            Vendor&apos;s selling price of a single product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.LineTotal">
+            <summary>
+            Per product subtotal. Computed as OrderQty * UnitPrice.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.ReceivedQty">
+            <summary>
+            Quantity actually received from the vendor.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.RejectedQty">
+            <summary>
+            Quantity rejected during inspection.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.StockedQty">
+            <summary>
+            Quantity accepted into inventory. Computed as ReceivedQty - RejectedQty.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderDetailDto.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.PurchaseOrderId">
+            <summary>
+            Primary key.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.RevisionNumber">
+            <summary>
+            Incremental number to track changes to the purchase order over time.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.Status">
+            <summary>
+            Order current status. 1 = Pending; 2 = Approved; 3 = Rejected; 4 = Complete
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.EmployeeId">
+            <summary>
+            Employee who created the purchase order. Foreign key to Employee.BusinessEntityID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.VendorId">
+            <summary>
+            Vendor with whom the purchase order is placed. Foreign key to Vendor.BusinessEntityID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.ShipMethodId">
+            <summary>
+            Shipping method. Foreign key to ShipMethod.ShipMethodID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.OrderDate">
+            <summary>
+            Purchase order creation date.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.ShipDate">
+            <summary>
+            Estimated shipment date from the vendor.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.SubTotal">
+            <summary>
+            Purchase order subtotal. Computed as SUM(PurchaseOrderDetail.LineTotal)for the appropriate PurchaseOrderID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.TaxAmt">
+            <summary>
+            Tax amount.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.Freight">
+            <summary>
+            Shipping cost.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.TotalDue">
+            <summary>
+            Total due to vendor. Computed as Subtotal + TaxAmt + Freight.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.BusinessEntity">
+            <summary>
+            Source of the ID that connects vendors, customers, and employees with address and contact information.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.BusinessEntity.BusinessEntityId">
+            <summary>
+            Primary key for all customers, vendors, and employees.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.BusinessEntity.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.BusinessEntity.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.DatabaseLog">
+            <summary>
+            Audit table tracking all DDL changes made to the AdventureWorks database. Data is captured by the database trigger ddlDatabaseTriggerLog.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.DatabaseLogId">
+            <summary>
+            Primary key for DatabaseLog records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.PostTime">
+            <summary>
+            The date and time the DDL change occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.DatabaseUser">
+            <summary>
+            The user who implemented the DDL change.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.Event">
+            <summary>
+            The type of DDL statement that was executed.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.Schema">
+            <summary>
+            The schema to which the changed object belongs.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.Object">
+            <summary>
+            The object that was changed by the DDL statment.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.Tsql">
+            <summary>
+            The exact Transact-SQL statement that was executed.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.DatabaseLog.XmlEvent">
+            <summary>
+            The raw XML data generated by database trigger.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.Employee">
+            <summary>
+            Employee information such as salary, department, and title.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.BusinessEntityId">
+            <summary>
+            Primary key for Employee records.  Foreign key to BusinessEntity.BusinessEntityID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.NationalIdnumber">
+            <summary>
+            Unique national identification number such as a social security number.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.LoginId">
+            <summary>
+            Network login.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.OrganizationLevel">
+            <summary>
+            The depth of the employee in the corporate hierarchy.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.JobTitle">
+            <summary>
+            Work title such as Buyer or Sales Representative.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.BirthDate">
+            <summary>
+            Date of birth.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.MaritalStatus">
+            <summary>
+            M = Married, S = Single
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.Gender">
+            <summary>
+            M = Male, F = Female
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.HireDate">
+            <summary>
+            Employee hired on this date.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.SalariedFlag">
+            <summary>
+            Job classification. 0 = Hourly, not exempt from collective bargaining. 1 = Salaried, exempt from collective bargaining.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.VacationHours">
+            <summary>
+            Number of available vacation hours.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.SickLeaveHours">
+            <summary>
+            Number of available sick leave hours.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.CurrentFlag">
+            <summary>
+            0 = Inactive, 1 = Active
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Employee.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.ErrorLog">
+            <summary>
+            Audit table tracking errors in the the AdventureWorks database that are caught by the CATCH block of a TRY...CATCH construct. Data is inserted by stored procedure dbo.uspLogError when it is executed from inside the CATCH block of a TRY...CATCH construct.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorLogId">
+            <summary>
+            Primary key for ErrorLog records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorTime">
+            <summary>
+            The date and time at which the error occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.UserName">
+            <summary>
+            The user who executed the batch in which the error occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorNumber">
+            <summary>
+            The error number of the error that occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorSeverity">
+            <summary>
+            The severity of the error that occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorState">
+            <summary>
+            The state number of the error that occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorProcedure">
+            <summary>
+            The name of the stored procedure or trigger where the error occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorLine">
+            <summary>
+            The line number at which the error occurred.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ErrorLog.ErrorMessage">
+            <summary>
+            The message text of the error that occurred.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.Person">
+            <summary>
+            Human beings involved with AdventureWorks: employees, customer contacts, and vendor contacts.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.BusinessEntityId">
+            <summary>
+            Primary key for Person records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.PersonType">
+            <summary>
+            Primary type of person: SC = Store Contact, IN = Individual (retail) customer, SP = Sales person, EM = Employee (non-sales), VC = Vendor contact, GC = General contact
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.NameStyle">
+            <summary>
+            0 = The data in FirstName and LastName are stored in western style (first name, last name) order.  1 = Eastern style (last name, first name) order.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.Title">
+            <summary>
+            A courtesy title. For example, Mr. or Ms.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.FirstName">
+            <summary>
+            First name of the person.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.MiddleName">
+            <summary>
+            Middle name or middle initial of the person.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.LastName">
+            <summary>
+            Last name of the person.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.Suffix">
+            <summary>
+            Surname suffix. For example, Sr. or Jr.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.EmailPromotion">
+            <summary>
+            0 = Contact does not wish to receive e-mail promotions, 1 = Contact does wish to receive e-mail promotions from AdventureWorks, 2 = Contact does wish to receive e-mail promotions from AdventureWorks and selected partners. 
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.AdditionalContactInfo">
+            <summary>
+            Additional contact information about the person stored in xml format. 
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.Demographics">
+            <summary>
+            Personal information such as hobbies, and income collected from online shoppers. Used for sales analysis.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Person.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.Product">
+            <summary>
+            Products sold or used in the manfacturing of sold products.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ProductId">
+            <summary>
+            Primary key for Product records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.Name">
+            <summary>
+            Name of the product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ProductNumber">
+            <summary>
+            Unique product identification number.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.MakeFlag">
+            <summary>
+            0 = Product is purchased, 1 = Product is manufactured in-house.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.FinishedGoodsFlag">
+            <summary>
+            0 = Product is not a salable item. 1 = Product is salable.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.Color">
+            <summary>
+            Product color.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.SafetyStockLevel">
+            <summary>
+            Minimum inventory quantity. 
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ReorderPoint">
+            <summary>
+            Inventory level that triggers a purchase order or work order. 
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.StandardCost">
+            <summary>
+            Standard cost of the product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ListPrice">
+            <summary>
+            Selling price.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.Size">
+            <summary>
+            Product size.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.SizeUnitMeasureCode">
+            <summary>
+            Unit of measure for Size column.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.WeightUnitMeasureCode">
+            <summary>
+            Unit of measure for Weight column.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.Weight">
+            <summary>
+            Product weight.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.DaysToManufacture">
+            <summary>
+            Number of days required to manufacture the product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ProductLine">
+            <summary>
+            R = Road, M = Mountain, T = Touring, S = Standard
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.Class">
+            <summary>
+            H = High, M = Medium, L = Low
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.Style">
+            <summary>
+            W = Womens, M = Mens, U = Universal
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ProductSubcategoryId">
+            <summary>
+            Product is a member of this product subcategory. Foreign key to ProductSubCategory.ProductSubCategoryID. 
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ProductModelId">
+            <summary>
+            Product is a member of this product model. Foreign key to ProductModel.ProductModelID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.SellStartDate">
+            <summary>
+            Date the product was available for sale.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.SellEndDate">
+            <summary>
+            Date the product was no longer available for sale.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.DiscontinuedDate">
+            <summary>
+            Date the product was discontinued.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Product.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.ProductCategory">
+            <summary>
+            High-level product categorization.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductCategory.ProductCategoryId">
+            <summary>
+            Primary key for ProductCategory records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductCategory.Name">
+            <summary>
+            Category description.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductCategory.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductCategory.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.ProductModel">
+            <summary>
+            Product model classification.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductModel.ProductModelId">
+            <summary>
+            Primary key for ProductModel records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductModel.Name">
+            <summary>
+            Product model description.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductModel.CatalogDescription">
+            <summary>
+            Detailed product catalog information in xml format.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductModel.Instructions">
+            <summary>
+            Manufacturing instructions in xml format.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductModel.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductModel.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.ProductSubcategory">
+            <summary>
+            Product subcategories. See ProductCategory table.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductSubcategory.ProductSubcategoryId">
+            <summary>
+            Primary key for ProductSubcategory records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductSubcategory.ProductCategoryId">
+            <summary>
+            Product category identification number. Foreign key to ProductCategory.ProductCategoryID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductSubcategory.Name">
+            <summary>
+            Subcategory description.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductSubcategory.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ProductSubcategory.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.PurchaseOrderDetail">
+            <summary>
+            Individual products associated with a specific purchase order. See PurchaseOrderHeader.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.PurchaseOrderId">
+            <summary>
+            Primary key. Foreign key to PurchaseOrderHeader.PurchaseOrderID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.PurchaseOrderDetailId">
+            <summary>
+            Primary key. One line number per purchased product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.DueDate">
+            <summary>
+            Date the product is expected to be received.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.OrderQty">
+            <summary>
+            Quantity ordered.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.ProductId">
+            <summary>
+            Product identification number. Foreign key to Product.ProductID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.UnitPrice">
+            <summary>
+            Vendor&apos;s selling price of a single product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.LineTotal">
+            <summary>
+            Per product subtotal. Computed as OrderQty * UnitPrice.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.ReceivedQty">
+            <summary>
+            Quantity actually received from the vendor.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.RejectedQty">
+            <summary>
+            Quantity rejected during inspection.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.StockedQty">
+            <summary>
+            Quantity accepted into inventory. Computed as ReceivedQty - RejectedQty.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderDetail.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.PurchaseOrderHeader">
+            <summary>
+            General purchase order information. See PurchaseOrderDetail.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.PurchaseOrderId">
+            <summary>
+            Primary key.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.RevisionNumber">
+            <summary>
+            Incremental number to track changes to the purchase order over time.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.Status">
+            <summary>
+            Order current status. 1 = Pending; 2 = Approved; 3 = Rejected; 4 = Complete
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.EmployeeId">
+            <summary>
+            Employee who created the purchase order. Foreign key to Employee.BusinessEntityID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.VendorId">
+            <summary>
+            Vendor with whom the purchase order is placed. Foreign key to Vendor.BusinessEntityID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.ShipMethodId">
+            <summary>
+            Shipping method. Foreign key to ShipMethod.ShipMethodID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.OrderDate">
+            <summary>
+            Purchase order creation date.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.ShipDate">
+            <summary>
+            Estimated shipment date from the vendor.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.SubTotal">
+            <summary>
+            Purchase order subtotal. Computed as SUM(PurchaseOrderDetail.LineTotal)for the appropriate PurchaseOrderID.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.TaxAmt">
+            <summary>
+            Tax amount.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.Freight">
+            <summary>
+            Shipping cost.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.TotalDue">
+            <summary>
+            Total due to vendor. Computed as Subtotal + TaxAmt + Freight.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.PurchaseOrderHeader.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.ShipMethod">
+            <summary>
+            Shipping company lookup table.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ShipMethod.ShipMethodId">
+            <summary>
+            Primary key for ShipMethod records.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ShipMethod.Name">
+            <summary>
+            Shipping company name.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ShipMethod.ShipBase">
+            <summary>
+            Minimum shipping charge.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ShipMethod.ShipRate">
+            <summary>
+            Shipping charge per pound.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ShipMethod.Rowguid">
+            <summary>
+            ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.ShipMethod.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.UnitMeasure">
+            <summary>
+            Unit of measure lookup table.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.UnitMeasure.UnitMeasureCode">
+            <summary>
+            Primary key.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.UnitMeasure.Name">
+            <summary>
+            Unit of measure description.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.UnitMeasure.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="T:Monolith_BGM.Models.Vendor">
+            <summary>
+            Companies from whom Adventure Works Cycles purchases parts or other goods.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.BusinessEntityId">
+            <summary>
+            Primary key for Vendor records.  Foreign key to BusinessEntity.BusinessEntityID
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.AccountNumber">
+            <summary>
+            Vendor account (identification) number.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.Name">
+            <summary>
+            Company name.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.CreditRating">
+            <summary>
+            1 = Superior, 2 = Excellent, 3 = Above average, 4 = Average, 5 = Below average
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.PreferredVendorStatus">
+            <summary>
+            0 = Do not use if another vendor is available. 1 = Preferred over other vendors supplying the same product.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.ActiveFlag">
+            <summary>
+            0 = Vendor no longer used. 1 = Vendor is actively used.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.PurchasingWebServiceUrl">
+            <summary>
+            Vendor URL.
+            </summary>
+        </member>
+        <member name="P:Monolith_BGM.Models.Vendor.ModifiedDate">
+            <summary>
+            Date and time the record was last updated.
+            </summary>
+        </member>
+        <member name="M:Monolith_BGM.MainForm.#ctor(Monolith_BGM.Controllers.MainFormController,BGM.Common.IStatusUpdateService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Monolith_BGM.MainForm"/> class.
+            </summary>
+            <param name="controller">The controller.</param>
+            <param name="statusUpdateService">The status update service.</param>
+        </member>
+        <member name="M:Monolith_BGM.MainForm.Controller_DatesInitialized(System.Collections.Generic.List{System.DateTime})">
+            <summary>Controllers the dates initialized.</summary>
+            <param name="orderDates">The order dates.</param>
+        </member>
+        <member name="F:Monolith_BGM.MainForm.components">
+            <summary>
+             Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Monolith_BGM.MainForm.Dispose(System.Boolean)">
+            <summary>
+             Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Monolith_BGM.MainForm.InitializeComponent">
+            <summary>
+             Required method for Designer support - do not modify
+             the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="M:Monolith_BGM.Controllers.MainFormController.DownloadFilesForPODAndPOHAsync">
+            <summary>Downloads the files for PurchaseOrderDetails and PurchaseOrderHeaders asynchronous.</summary>
+        </member>
+    </members>
+</doc>
