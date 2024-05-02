@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Monolith_BGM")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9c49c833787d1c2f4cd56b107dcaff2cb80b45ae")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a55624efa7240bc630f3683edd29d1e435b37f07")]
 [assembly: System.Reflection.AssemblyProductAttribute("Monolith_BGM")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Monolith_BGM")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
