@@ -8,7 +8,8 @@ GO
 
 CREATE VIEW Purchasing.vPurchaseOrderSummary AS
 SELECT 
-    POH.PurchaseOrderID, 
+    POH.PurchaseOrderID,
+    POD.PurchaseOrderDetailID,
     POH.OrderDate, 
     POH.VendorID, 
     V.Name AS VendorName, 

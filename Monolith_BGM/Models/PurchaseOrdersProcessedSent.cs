@@ -9,6 +9,7 @@ namespace Monolith_BGM.Models
     {
         public int PurchaseOrderSentId { get; set; }
         public int PurchaseOrderId { get; set; }
+        public int PurchaseOrderDetailId { get; set; }
         public bool OrderProcessed { get; set; }
         public bool OrderSent { get; set; }
         public int Channel { get; set; }

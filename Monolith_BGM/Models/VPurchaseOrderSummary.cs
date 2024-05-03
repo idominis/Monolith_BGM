@@ -8,6 +8,7 @@ namespace Monolith_BGM.Models
     public partial class VPurchaseOrderSummary
     {
         public int PurchaseOrderId { get; set; }
+        public int PurchaseOrderDetailId { get; set; }
         public DateTime OrderDate { get; set; }
         public int VendorId { get; set; }
         public string VendorName { get; set; }

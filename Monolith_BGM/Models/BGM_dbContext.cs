@@ -150,7 +150,7 @@ namespace Monolith_BGM.Models
             modelBuilder.Entity<PurchaseOrdersProcessedSent>(entity =>
             {
                 entity.HasKey(e => e.PurchaseOrderSentId)
-                    .HasName("PK__Purchase__A1D7951FDB4CCD54");
+                    .HasName("PK__Purchase__A1D7951F74F97194");
 
                 entity.ToTable("PurchaseOrdersProcessedSent", "Purchasing");
 
@@ -178,6 +178,8 @@ namespace Monolith_BGM.Models
                 entity.Property(e => e.ProductNumber)
                     .IsRequired()
                     .HasMaxLength(25);
+
+                entity.Property(e => e.PurchaseOrderDetailId).HasColumnName("PurchaseOrderDetailID");
 
                 entity.Property(e => e.PurchaseOrderId).HasColumnName("PurchaseOrderID");
 

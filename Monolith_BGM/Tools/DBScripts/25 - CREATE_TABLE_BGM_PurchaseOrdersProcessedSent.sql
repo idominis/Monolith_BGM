@@ -11,6 +11,7 @@ GO
 CREATE TABLE [Purchasing].[PurchaseOrdersProcessedSent](
 	[PurchaseOrderSentId] [int] PRIMARY KEY IDENTITY(1,1),
 	[PurchaseOrderId] [int] NOT NULL,
+	[PurchaseOrderDetailId] [int] NOT NULL,
 	[OrderProcessed] [bit] NOT NULL,
 	[OrderSent] [bit] NOT NULL,
 	[Channel] [int] NOT NULL,

@@ -9,6 +9,7 @@ namespace Monolith_BGM.DataAccess.DTO
     public class PurchaseOrderSummary
     {
         public int PurchaseOrderID { get; set; }
+        public int PurchaseOrderDetailID { get; set; }
         public DateTime OrderDate { get; set; }
         public int VendorID { get; set; }
         public string VendorName { get; set; }
