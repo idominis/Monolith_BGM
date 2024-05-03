@@ -140,22 +140,56 @@ public class DataService
 
     public async Task UpdatePurchaseOrderStatus(int purchaseOrderId, int purchaseOrderDetailId, bool processed, bool sent, int channel)
     {
-        var orderSentDto = new PurchaseOrdersProcessedSent
+        var existingEntity = await _dbContext.PurchaseOrdersProcessedSents
+            .FirstOrDefaultAsync(e => e.PurchaseOrderDetailId == purchaseOrderDetailId);
+
+        if (existingEntity != null)
         {
-            PurchaseOrderId = purchaseOrderId,
-            PurchaseOrderDetailId = purchaseOrderDetailId,
-            OrderProcessed = processed,
-            OrderSent = sent,
-            Channel = channel,
-            ModifiedDate = DateTime.Now
-        };
+            // update existing entity
+            existingEntity.OrderProcessed = processed;
+            existingEntity.OrderSent = sent;
+            existingEntity.Channel = channel;
+            existingEntity.ModifiedDate = DateTime.Now;
+        }
+        else
+        {
+            // add new entity
+            var orderSentDto = new PurchaseOrdersProcessedSent
+            {
+                PurchaseOrderId = purchaseOrderId,
+                PurchaseOrderDetailId = purchaseOrderDetailId,
+                OrderProcessed = processed,
+                OrderSent = sent,
+                Channel = channel,
+                ModifiedDate = DateTime.Now
+            };
 
-        // Map the DTO to the entity
-        var orderSentEntry = _mapper.Map<PurchaseOrdersProcessedSent>(orderSentDto);
+            var orderSentEntry = _mapper.Map<PurchaseOrdersProcessedSent>(orderSentDto);
+            _dbContext.PurchaseOrdersProcessedSents.Add(orderSentEntry);
+        }
 
-        _dbContext.PurchaseOrdersProcessedSents.Add(orderSentEntry);
         await _dbContext.SaveChangesAsync();
     }
+
+
+    //public async Task UpdatePurchaseOrderStatus(int purchaseOrderId, int purchaseOrderDetailId, bool processed, bool sent, int channel)
+    //{
+    //    var orderSentDto = new PurchaseOrdersProcessedSent
+    //    {
+    //        PurchaseOrderId = purchaseOrderId,
+    //        PurchaseOrderDetailId = purchaseOrderDetailId,
+    //        OrderProcessed = processed,
+    //        OrderSent = sent,
+    //        Channel = channel,
+    //        ModifiedDate = DateTime.Now
+    //    };
+
+    //    // Map the DTO to the entity
+    //    var orderSentEntry = _mapper.Map<PurchaseOrdersProcessedSent>(orderSentDto);
+
+    //    _dbContext.PurchaseOrdersProcessedSents.Add(orderSentEntry);
+    //    await _dbContext.SaveChangesAsync();
+    //}
 
 
     public async Task<List<int>> FetchPurchaseOrderIdGeneratedAsync()

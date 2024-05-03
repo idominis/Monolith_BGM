@@ -207,7 +207,14 @@ namespace Monolith_BGM.Controllers
 
                 foreach (var summary in summariesToGenerate) // Update the status of the generated POs
                 {
-                    await _dataService.UpdatePurchaseOrderStatus(summary.PurchaseOrderID, summary.PurchaseOrderDetailID, true, false, 0);  // 0 - Auto, 1 - Custom
+                    try
+                    {
+                        await _dataService.UpdatePurchaseOrderStatus(summary.PurchaseOrderID, summary.PurchaseOrderDetailID, true, false, 0);  // 0 - Auto, 1 - Custom
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error updating purchase order status");
+                    }
                 }
                 Log.Information("XML files generated successfully!");
                 return true;
@@ -344,11 +351,16 @@ namespace Monolith_BGM.Controllers
                             string localFilePath = Path.Combine(localBaseDirectoryPath, fileName);
                             string remoteFilePath = Path.Combine(remoteDirectoryPath, fileName);
                             await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
+
+                            foreach (var detailsId in _xmlService.ExtractPurchaseOrderDetailIdsFromXml(filePath)) 
+                            {
+                                await _dataService.UpdatePurchaseOrderStatus(id, detailsId, true, true, 0);  // 0 - Auto, 1 - Custom
+                            }
+                            //await _dataService.UpdatePurchaseOrderStatus(id, true, true, 0);  // 0 - Auto, 1 - Custom
                             Log.Information($"PurchaseOrderId sent: {id}");
                         }
                     }
                     _statusUpdateService.RaiseStatusUpdated("All headers have been uploaded successfully.");
-                    MessageBox.Show("All applicable files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(orderId);
                     if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))

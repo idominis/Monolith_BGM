@@ -23,7 +23,7 @@ public class Startup
             cfg.AddProfile(new PurchaseOrderDetailProfile());
             cfg.AddProfile(new PurchaseOrderHeaderProfile());
             cfg.AddProfile(new PurchaseOrderSummaryProfile());
-            cfg.AddProfile(new PurchaseOrderSentProfile());
+            cfg.AddProfile(new PurchaseOrderProcessedSentProfile());
         });
         IMapper mapper = mapperConfig.CreateMapper();
         services.AddSingleton(mapper);

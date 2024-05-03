@@ -149,10 +149,12 @@ namespace Monolith_BGM.Models
 
             modelBuilder.Entity<PurchaseOrdersProcessedSent>(entity =>
             {
-                entity.HasKey(e => e.PurchaseOrderSentId)
-                    .HasName("PK__Purchase__A1D7951F74F97194");
+                entity.HasKey(e => e.PurchaseOrderDetailId)
+                    .HasName("PK__Purchase__5026B6986F3ECF87");
 
                 entity.ToTable("PurchaseOrdersProcessedSent", "Purchasing");
+
+                entity.Property(e => e.PurchaseOrderDetailId).ValueGeneratedNever();
 
                 entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
             });
