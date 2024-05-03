@@ -206,7 +206,7 @@ namespace Monolith_BGM.Controllers
 
                 foreach (var summary in summariesToGenerate) // Update the status of the generated POs
                 {
-                    await _dataService.UpdatePurchaseOrderStatus(summary.PurchaseOrderID, true, false, 0);  // 0 - Auto, 1 - Custom
+                    await _dataService.UpdatePurchaseOrderStatus(summary.PurchaseOrderID, summary.PurchaseOrderDetailID, true, false, 0);  // 0 - Auto, 1 - Custom
                 }
                 Log.Information("XML files generated successfully!");
                 return true;
@@ -243,7 +243,7 @@ namespace Monolith_BGM.Controllers
             {
                 foreach (var summary in summariesToGenerate)
                 {
-                    await _dataService.UpdatePurchaseOrderStatus(summary.PurchaseOrderID, true, false, 1);  // Mark as processed, not sent, custom channel
+                    await _dataService.UpdatePurchaseOrderStatus(summary.PurchaseOrderID, summary.PurchaseOrderDetailID, true, false, 1);  // Mark as processed, not sent, custom channel
                 }
 
                 _xmlService.GenerateXMLFiles(summariesToGenerate, startDate, endDate);
@@ -299,7 +299,7 @@ namespace Monolith_BGM.Controllers
                 // Update the database with the upload status for the newly uploaded IDs
                 foreach (var id in idsToUpload)
                 {
-                    await _dataService.UpdatePurchaseOrderStatus(id, true, true, 0);  // 0 - Auto, 1 - Custom
+                //    await _dataService.UpdatePurchaseOrderStatus(id, true, true, 0);  // 0 - Auto, 1 - Custom
                 }
 
                 MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -332,7 +332,7 @@ namespace Monolith_BGM.Controllers
 
                 foreach (FileInfo file in files)
                 {
-                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", ""));
+                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", "")); // FileName ext != PurchaseOrderID
                     if (alreadySentIds.Contains(purchaseOrderId))
                     {
                         Log.Information($"Skipping upload for {file.Name} as it's already sent.");
@@ -345,7 +345,7 @@ namespace Monolith_BGM.Controllers
                     Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
 
                     // Update the database with the upload status
-                    await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, true, true, 0); // Mark as sent + processed
+                   // await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, purchaseOrderDetailId, true, true, 0);  *************
 
                     // Optionally update UI or handle latest date
                     DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);

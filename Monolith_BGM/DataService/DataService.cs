@@ -138,11 +138,12 @@ public class DataService
         return latestDate;
     }
 
-    public async Task UpdatePurchaseOrderStatus(int purchaseOrderId, bool processed, bool sent, int channel)
+    public async Task UpdatePurchaseOrderStatus(int purchaseOrderId, int purchaseOrderDetailId, bool processed, bool sent, int channel)
     {
         var orderSentDto = new PurchaseOrdersProcessedSent
         {
             PurchaseOrderId = purchaseOrderId,
+            PurchaseOrderDetailId = purchaseOrderDetailId,
             OrderProcessed = processed,
             OrderSent = sent,
             Channel = channel,
