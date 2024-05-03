@@ -7,6 +7,7 @@ using Monolith_BGM.Src;
 using Monolith_BGM.XMLService;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Log = Serilog.Log;
 
 namespace Monolith_BGM.Controllers
@@ -317,38 +318,39 @@ namespace Monolith_BGM.Controllers
 
         public async void UploadAllHeaders()
         {
-            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
-            string localDirectoryPath = _fileManager.GetSpecificPath("Headers");
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
             string remoteDirectoryPath = "/Uploaded/";
 
             var alreadySentIds = await AlreadySent();
+            var alreadyGeneratedIds = await _dataService.FetchAlreadyGeneratedPurchaseOrderIdsAsync();
 
             DateTime? latestDate = null;
 
             try
             {
-                DirectoryInfo dir = new DirectoryInfo(localDirectoryPath);
-                FileInfo[] files = dir.GetFiles("PurchaseOrderHeader*.xml");
-
-                foreach (FileInfo file in files)
+                foreach (var orderId in alreadyGeneratedIds)
                 {
-                    int purchaseOrderId = int.Parse(Path.GetFileNameWithoutExtension(file.Name).Replace("PurchaseOrderHeader", "")); // FileName ext != PurchaseOrderID
-                    if (alreadySentIds.Contains(purchaseOrderId))
+                    string fileName = $"PurchaseOrderGenerated_{orderId}.xml";
+                    string filePath = Path.Combine(localBaseDirectoryPath, fileName);
+
+                    foreach (var id in _xmlService.ExtractPurchaseOrderIdsFromXml(filePath))
                     {
-                        Log.Information($"Skipping upload for {file.Name} as it's already sent.");
-                        continue;  // Skip this file if it's already sent
+                        if (alreadySentIds.Contains(id))
+                        {
+                            Log.Information($"PurchaseOrderId already sent: {id}");
+                        }
+                        else
+                        {
+                            string localFilePath = Path.Combine(localBaseDirectoryPath, fileName);
+                            string remoteFilePath = Path.Combine(remoteDirectoryPath, fileName);
+                            await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
+                            Log.Information($"PurchaseOrderId sent: {id}");
+                        }
                     }
+                    _statusUpdateService.RaiseStatusUpdated("All headers have been uploaded successfully.");
+                    MessageBox.Show("All applicable files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    string localFilePath = file.FullName;
-                    string remoteFilePath = Path.Combine(remoteDirectoryPath, file.Name);
-                    await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
-                    Log.Information($"Uploaded {file.Name} to {remoteFilePath}");
-
-                    // Update the database with the upload status
-                   // await _dataService.UpdatePurchaseOrderStatus(purchaseOrderId, purchaseOrderDetailId, true, true, 0);  *************
-
-                    // Optionally update UI or handle latest date
-                    DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(purchaseOrderId);
+                    DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(orderId);
                     if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
                     {
                         latestDate = fileDate;
@@ -356,8 +358,6 @@ namespace Monolith_BGM.Controllers
                         LatestDateUpdated?.Invoke(fileDate.Value);
                     }
                 }
-
-                MessageBox.Show("All applicable files have been successfully uploaded.", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -365,7 +365,6 @@ namespace Monolith_BGM.Controllers
                 MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
 
         public async Task<List<DateTime>> FetchDistinctOrderDatesAsync()
         {
