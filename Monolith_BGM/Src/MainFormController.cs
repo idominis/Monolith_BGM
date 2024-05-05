@@ -270,30 +270,33 @@ namespace Monolith_BGM.Controllers
             }
         }
 
+        /// <summary>Sends the date generated XML.</summary>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
         public async Task<bool> SendDateGeneratedXml(DateTime? startDate = null, DateTime? endDate = null)
         {
             string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
             string fileName = $"PurchaseOrderSummariesGenerated_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
             string filePath = Path.Combine(localBaseDirectoryXmlCreatedPath, fileName);
 
+            // Check if file exists
+            if (!File.Exists(filePath))
+            {
+                MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Log.Error("File not found: {FilePath}", filePath);
+                return false;
+            }
+
             try
             {
-                // Check if file exists
-                if (!File.Exists(filePath))
-                {
-                    MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Log.Error("File not found: {FilePath}", filePath);
-                    return false;
-                }
-
-                // Extract PurchaseOrderIDs from the XML
                 var orderIdsFromXml = _xmlService.ExtractPurchaseOrderIdsFromXml(filePath);
+                var alreadyUploadedIds = await _dataService.FetchAlreadySentPurchaseOrderIdsAsync();
 
-                // Fetch already uploaded PurchaseOrderIDs
-                var alreadyUploadedIds = await _dataService.FetchAlreadySentPurchaseOrderIdsAsync(); //FetchAlreadySentPurchaseOrderIdsAsync();
-
-                // Determine which IDs need to be uploaded
                 var idsToUpload = orderIdsFromXml.Where(id => !alreadyUploadedIds.Contains(id)).ToList();
+
                 if (!idsToUpload.Any())
                 {
                     MessageBox.Show("All Purchase Orders in the file have already been sent.", "Nothing to Send", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -301,13 +304,16 @@ namespace Monolith_BGM.Controllers
                 }
 
                 string remotePath = Path.Combine("/Uploaded/", fileName);
-
                 await _fileHandler.UploadFileAsync(filePath, remotePath);
 
                 // Update the database with the upload status for the newly uploaded IDs
                 foreach (var id in idsToUpload)
                 {
-                //    await _dataService.UpdatePurchaseOrderStatus(id, true, true, 0);  // 0 - Auto, 1 - Custom
+                    var detailIds = _xmlService.ExtractPurchaseOrderDetailIdsFromXml(filePath);
+                    foreach (var detailsId in detailIds)
+                    {
+                        await _dataService.UpdatePurchaseOrderStatus(id, detailsId, true, true, 0);  // 0 - Auto, 1 - Custom
+                    }
                 }
 
                 MessageBox.Show("File successfully sent: " + fileName, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -322,8 +328,8 @@ namespace Monolith_BGM.Controllers
             }
         }
 
-
-        public async void UploadAllHeaders()
+        /// <summary>Uploads all headers.</summary>
+        public async Task UploadAllHeaders()
         {
             string localBaseDirectoryPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
             string remoteDirectoryPath = "/Uploaded/";
@@ -340,36 +346,40 @@ namespace Monolith_BGM.Controllers
                     string fileName = $"PurchaseOrderGenerated_{orderId}.xml";
                     string filePath = Path.Combine(localBaseDirectoryPath, fileName);
 
-                    foreach (var id in _xmlService.ExtractPurchaseOrderIdsFromXml(filePath))
+                    if (!File.Exists(filePath))
+                    {
+                        Log.Warning($"File not found: {filePath}");
+                        continue;
+                    }
+
+                    var orderIdsFromXml = _xmlService.ExtractPurchaseOrderIdsFromXml(filePath);
+                    foreach (var id in orderIdsFromXml)
                     {
                         if (alreadySentIds.Contains(id))
                         {
                             Log.Information($"PurchaseOrderId already sent: {id}");
+                            continue;
                         }
-                        else
-                        {
-                            string localFilePath = Path.Combine(localBaseDirectoryPath, fileName);
-                            string remoteFilePath = Path.Combine(remoteDirectoryPath, fileName);
-                            await _fileHandler.UploadFileAsync(localFilePath, remoteFilePath);
 
-                            foreach (var detailsId in _xmlService.ExtractPurchaseOrderDetailIdsFromXml(filePath)) 
-                            {
-                                await _dataService.UpdatePurchaseOrderStatus(id, detailsId, true, true, 0);  // 0 - Auto, 1 - Custom
-                            }
-                            //await _dataService.UpdatePurchaseOrderStatus(id, true, true, 0);  // 0 - Auto, 1 - Custom
-                            Log.Information($"PurchaseOrderId sent: {id}");
+                        string remoteFilePath = Path.Combine(remoteDirectoryPath, fileName);
+                        await _fileHandler.UploadFileAsync(filePath, remoteFilePath);
+
+                        var detailIds = _xmlService.ExtractPurchaseOrderDetailIdsFromXml(filePath);
+                        foreach (var detailsId in detailIds)
+                        {
+                            await _dataService.UpdatePurchaseOrderStatus(id, detailsId, true, true, 0);
                         }
+                        Log.Information($"PurchaseOrderId sent: {id}");
                     }
-                    _statusUpdateService.RaiseStatusUpdated("All headers have been uploaded successfully.");
 
                     DateTime? fileDate = await _dataService.GetLatestDateForPurchaseOrder(orderId);
                     if (fileDate.HasValue && (latestDate == null || fileDate > latestDate))
                     {
                         latestDate = fileDate;
-                        // Instead of Invoke, use an event to update UI in MainForm
                         LatestDateUpdated?.Invoke(fileDate.Value);
                     }
                 }
+                _statusUpdateService.RaiseStatusUpdated("All headers have been uploaded successfully.");
             }
             catch (Exception ex)
             {
@@ -377,6 +387,7 @@ namespace Monolith_BGM.Controllers
                 MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
         public async Task<List<DateTime>> FetchDistinctOrderDatesAsync()
         {
