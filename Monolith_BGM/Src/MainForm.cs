@@ -191,8 +191,6 @@ namespace Monolith_BGM
         private async void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
             await _controller.DownloadFilesForPODAndPOHAsync();
-            //var allPurchaseOrderDetails = await _controller.FetchXmlDetailsDataAsync();
-            //var validDetails = await _controller.ValidateDownloadedXml(await _controller.FetchXmlDetailsDataAsync());
         }
 
         // Override the OnFormClosing method to clean up the timer

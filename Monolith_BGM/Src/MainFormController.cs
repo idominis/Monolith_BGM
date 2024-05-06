@@ -90,31 +90,47 @@ namespace Monolith_BGM.Controllers
                     try
                     {
                         var purchaseOrderDetails = _xmlService.LoadFromXml<PurchaseOrderDetails>(xmlFile);
-                        var validator = new PurchaseOrderDetailValidator();
+                        if (purchaseOrderDetails == null)
+                        {
+                            MoveInvalidFile(xmlFile, invalidDataDirectoryPath);
+                            continue;
+                        }
 
+                        bool hasInvalidEntries = false;
                         foreach (var detail in purchaseOrderDetails.Details)
                         {
-                            ValidationResult results = validator.Validate(detail);
+                            ValidationResult results = new PurchaseOrderDetailValidator().Validate(detail);
                             if (!results.IsValid)
                             {
-                                // Move invalid XML file to the invalid data directory
-                                string targetPath = Path.Combine(invalidDataDirectoryPath, Path.GetFileName(xmlFile));
-                                File.Move(xmlFile, targetPath, true);
-                                Log.Information($"Invalid XML moved to {targetPath}. Reason: {results.Errors.Select(e => e.ErrorMessage).Aggregate((a, b) => a + "; " + b)}");
-                                continue; // Skip adding this detail to the list
+                                Log.Information($"Validation failed for {xmlFile}. Reason: {string.Join("; ", results.Errors.Select(e => e.ErrorMessage))}");
+                                hasInvalidEntries = true;
                             }
+                            else
+                            {
+                                allPurchaseOrderDetails.Add(detail);
+                            }
+                        }
 
-                            allPurchaseOrderDetails.Add(detail);
+                        if (hasInvalidEntries)
+                        {
+                            MoveInvalidFile(xmlFile, invalidDataDirectoryPath);
                         }
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error loading XML data: {FilePath}", xmlFile);
+                        Log.Error(ex, "Error loading or processing XML data: {FilePath}", xmlFile);
                     }
                 }
             }
 
             return allPurchaseOrderDetails;
+        }
+
+        private void MoveInvalidFile(string sourceFilePath, string targetDirectory)
+        {
+            string targetPath = Path.Combine(targetDirectory, Path.GetFileName(sourceFilePath));
+            File.Move(sourceFilePath, targetPath, true);
+            Log.Information($"Moved invalid XML file to {targetPath}");
         }
 
         public async Task<List<PurchaseOrderHeaderDto>> FetchXmlHeadersDataAsync()

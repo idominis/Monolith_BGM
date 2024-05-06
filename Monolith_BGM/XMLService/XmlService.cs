@@ -1,58 +1,75 @@
 ﻿using Monolith_BGM.DataAccess.DTO;
 using Monolith_BGM.Src;
 using Monolith_BGM.XMLService;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Schema;
+using System.Xml;
 using System.Xml.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 public class XmlService : IXmlService
 {
     private FileManager _fileManager;
 
-    // Inject FileManager through constructor
     public XmlService(FileManager fileManager)
     {
         _fileManager = fileManager;
     }
 
-    // Define the method as generic with a type parameter T
-    //public T LoadFromXml<T>(string filePath)
-    //{
-    //    try
-    //    {
-    //        XmlSerializer serializer = new XmlSerializer(typeof(T));
-    //        using (FileStream stream = new FileStream(filePath, FileMode.Open))
-    //        {
-    //            return (T)serializer.Deserialize(stream);
-    //        }
-    //    }
-    //    catch (InvalidOperationException ex)
-    //    {
-    //        throw new ApplicationException($"Error deserializing file {filePath}: {ex.Message}", ex);
-    //    }
-    //}
-    public T LoadFromXml<T>(string filePath)  // testing validation
+    public T LoadFromXml<T>(string filePath) where T : class
     {
+        XmlSchemaSet schemas = new XmlSchemaSet();
+        schemas.Add("", "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Tools\\purchaseOrderDetails.xsd");
+
+        XmlReaderSettings settings = new XmlReaderSettings();
+        settings.ValidationType = ValidationType.Schema;
+        settings.Schemas = schemas;
+        settings.ValidationEventHandler += ValidationEventHandler; // This will now log instead of throwing
+
         try
         {
             using (var stream = File.OpenRead(filePath))
+            using (XmlReader reader = XmlReader.Create(stream, settings))
+            {
+                while (reader.Read()) { } // Validate the XML structure against the schema
+            }
+
+            using (var stream = File.OpenRead(filePath))
             {
                 var serializer = new XmlSerializer(typeof(T));
-                return (T)serializer.Deserialize(stream);
+                return (T)serializer.Deserialize(stream); // Deserialize if the file is structurally correct
             }
+
+        }
+        catch (XmlException xmlEx)
+        {
+            Log.Error($"XML format error in {filePath}: {xmlEx.Message}");
+            return null; // Return null or default(T) to indicate an issue with this specific file
         }
         catch (InvalidOperationException ex) when (ex.InnerException is FormatException)
         {
-            throw new ApplicationException($"Error in XML document {filePath}: Due date is empty or invalid format. Detailed error: {ex.Message}", ex);
+            Log.Error($"Schema validation error in {filePath}: {ex.InnerException.Message}");
+            return null; // Return null or default(T) for handling downstream
         }
         catch (Exception ex)
         {
-            throw new ApplicationException($"General error processing file {filePath}. Detailed error: {ex.Message}", ex);
+            Log.Error($"General error processing file {filePath}: {ex.Message}");
+            return null; // General error fallback
         }
     }
 
+    private static void ValidationEventHandler([NotNull] object sender, ValidationEventArgs e)
+    {
+        //if (sender == null) throw new ArgumentNullException(nameof(sender));
 
+        if (e.Severity == XmlSeverityType.Error || e.Severity == XmlSeverityType.Warning)
+        {
+            Log.Warning($"Validation warning/error: {e.Message}"); // Log the warning/error instead of throwing an exception
+        }
+    }
 
     public void GenerateXMLFiles(List<PurchaseOrderSummary> summaries, DateTime? startDate = null, DateTime? endDate = null)
     {

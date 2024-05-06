@@ -76,17 +76,6 @@ namespace BGM.SftpUtilities
                             SftpFile file = entry as SftpFile;
                             if (file != null)
                             {
-                                string localFilePath = Path.Combine(localBaseDirectoryPath, file.Name);
-
-                                if (File.Exists(localFilePath))
-                                {
-                                    Log.Information($"Skipping download, file already exists: {localFilePath}");
-                                }
-                                using (var fileStream = File.OpenWrite(localFilePath)) // Ensures the stream is closed and disposed
-                                {
-                                    client.DownloadFile(remoteDirectoryPath + "/" + file.Name, fileStream);
-                                }
-
                                 newFilesDownloaded |= ProcessFilesInDirectory(client, new[] { file }, localBaseDirectoryPath, remoteDirectoryPath);
                             }
                         }
