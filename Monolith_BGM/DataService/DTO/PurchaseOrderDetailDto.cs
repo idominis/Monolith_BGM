@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FluentValidation;
+using Monolith_BGM.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +27,7 @@ namespace Monolith_BGM.DataAccess.DTO
         /// Date the product is expected to be received.
         /// </summary>
         [XmlElement("DueDate")]
-        public DateTime DueDate { get; set; }
+        public DateTime? DueDate { get; set; }
         /// <summary>
         /// Quantity ordered.
         /// </summary>
@@ -66,5 +68,15 @@ namespace Monolith_BGM.DataAccess.DTO
         /// </summary>
         [XmlElement("ModifiedDate")]
         public DateTime ModifiedDate { get; set; }
+    }
+
+    public class PurchaseOrderDetailValidator : AbstractValidator<PurchaseOrderDetailDto>
+    {
+        public PurchaseOrderDetailValidator()
+        {
+            RuleFor(x => x.DueDate).NotEmpty().WithMessage("Due date is required.");
+            RuleFor(x => x.PurchaseOrderDetailId).NotEmpty().WithMessage("PurchaseOrderDetailId is required.");
+            RuleFor(x => x.PurchaseOrderId).NotEmpty().WithMessage("PurchaseOrderId is required.");
+        }
     }
 }

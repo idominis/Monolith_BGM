@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="PurchaseOrderDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PurchaseOrderDetail">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:dateTime" name="DueDate" minOccurs="0" nillable="true"/>
+							<xs:element type="xs:int" name="OrderQty"/>
+							<xs:element type="xs:int" name="ProductID"/>
+							<xs:element type="xs:decimal" name="UnitPrice"/>
+							<xs:element type="xs:decimal" name="LineTotal"/>
+							<xs:element type="xs:decimal" name="ReceivedQty"/>
+							<xs:element type="xs:decimal" name="RejectedQty"/>
+							<xs:element type="xs:decimal" name="StockedQty"/>
+							<xs:element type="xs:dateTime" name="ModifiedDate"/>
+						</xs:sequence>
+						<xs:attribute type="xs:int" name="PurchaseOrderID" use="required"/>
+						<xs:attribute type="xs:int" name="PurchaseOrderDetailID" use="required"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

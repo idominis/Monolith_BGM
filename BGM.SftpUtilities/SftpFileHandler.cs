@@ -48,7 +48,7 @@ namespace BGM.SftpUtilities
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to upload file: {LocalFilePath}", localFilePath);
-                throw; // Consider handling this more gracefully depending on your application's error handling strategy
+                throw;
             }
         }
 
@@ -71,22 +71,33 @@ namespace BGM.SftpUtilities
                             Directory.CreateDirectory(localSubDirectoryPath); // Ensure the directory exists locally
                             newFilesDownloaded |= await DownloadXmlFilesFromDirectoryAsync(subDirectoryPath, localSubDirectoryPath);
                         }
-                        else if (!entry.IsDirectory && !entry.Name.EndsWith(".processed"))
+                        if (!entry.IsDirectory && !entry.Name.EndsWith(".processed"))
                         {
-                            // Process files directly in the current directory
-                            SftpFile file = entry as SftpFile; // Explicitly cast to SftpFile
+                            SftpFile file = entry as SftpFile;
                             if (file != null)
                             {
+                                string localFilePath = Path.Combine(localBaseDirectoryPath, file.Name);
+
+                                if (File.Exists(localFilePath))
+                                {
+                                    Log.Information($"Skipping download, file already exists: {localFilePath}");
+                                }
+                                using (var fileStream = File.OpenWrite(localFilePath)) // Ensures the stream is closed and disposed
+                                {
+                                    client.DownloadFile(remoteDirectoryPath + "/" + file.Name, fileStream);
+                                }
+
                                 newFilesDownloaded |= ProcessFilesInDirectory(client, new[] { file }, localBaseDirectoryPath, remoteDirectoryPath);
                             }
                         }
+
                     }
                 }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to download XML files from directory: {DirectoryPath}", remoteDirectoryPath);
-                throw; // Optionally rethrow to handle these exceptions further up the call stack
+                throw;
             }
 
             return newFilesDownloaded;

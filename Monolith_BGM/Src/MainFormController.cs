@@ -1,8 +1,12 @@
-﻿using BGM.Common;
+﻿using AutoMapper;
+using BGM.Common;
 using BGM.SftpUtilities;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic.Logging;
 using Monolith_BGM.DataAccess.DTO;
+using Monolith_BGM.Models;
 using Monolith_BGM.Src;
 using Monolith_BGM.XMLService;
 using System;
@@ -70,41 +74,47 @@ namespace Monolith_BGM.Controllers
 
         public async Task<List<PurchaseOrderDetailDto>> FetchXmlDetailsDataAsync()
         {
-            return await Task.Run(() =>
+            List<PurchaseOrderDetailDto> allPurchaseOrderDetails = new List<PurchaseOrderDetailDto>();
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+            string invalidDataDirectoryPath = Path.Combine(localBaseDirectoryPath, "data_received_invalid");
+            Directory.CreateDirectory(invalidDataDirectoryPath);  // Ensure the invalid directory exists
+
+            IEnumerable<string> directories = Directory.GetDirectories(localBaseDirectoryPath, "*", SearchOption.AllDirectories);
+            foreach (string dir in directories)
             {
-                List<PurchaseOrderDetailDto> allPurchaseOrderDetails = new List<PurchaseOrderDetailDto>();
-                string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+                if (dir.EndsWith("headers")) continue;  // Skip the headers directory
 
-                try
+                var xmlFiles = Directory.GetFiles(dir, "*.xml");
+                foreach (var xmlFile in xmlFiles)
                 {
-                    IEnumerable<string> directories = Directory.GetDirectories(localBaseDirectoryPath, "*", SearchOption.AllDirectories);
-                    foreach (string dir in directories)
+                    try
                     {
-                        if (dir.EndsWith("headers")) continue;  // Skip the headers directory
+                        var purchaseOrderDetails = _xmlService.LoadFromXml<PurchaseOrderDetails>(xmlFile);
+                        var validator = new PurchaseOrderDetailValidator();
 
-                        var xmlFiles = Directory.GetFiles(dir, "*.xml");
-                        foreach (var xmlFile in xmlFiles)
+                        foreach (var detail in purchaseOrderDetails.Details)
                         {
-                            try
+                            ValidationResult results = validator.Validate(detail);
+                            if (!results.IsValid)
                             {
-                                var purchaseOrderDetails = _xmlService.LoadFromXml<PurchaseOrderDetails>(xmlFile);
-                                allPurchaseOrderDetails.AddRange(purchaseOrderDetails.Details);
+                                // Move invalid XML file to the invalid data directory
+                                string targetPath = Path.Combine(invalidDataDirectoryPath, Path.GetFileName(xmlFile));
+                                File.Move(xmlFile, targetPath, true);
+                                Log.Information($"Invalid XML moved to {targetPath}. Reason: {results.Errors.Select(e => e.ErrorMessage).Aggregate((a, b) => a + "; " + b)}");
+                                continue; // Skip adding this detail to the list
                             }
-                            catch (Exception ex)
-                            {
-                                ErrorOccurred?.Invoke($"Failed to load order details: {ex.Message}");
-                                _errorHandler.LogError(ex, "Error loading XML data", xmlFile);
-                            }
+
+                            allPurchaseOrderDetails.Add(detail);
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error loading XML data: {FilePath}", xmlFile);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    ErrorOccurred?.Invoke($"Failed to process XML files: {ex.Message}");
-                }
+            }
 
-                return allPurchaseOrderDetails;
-            });
+            return allPurchaseOrderDetails;
         }
 
         public async Task<List<PurchaseOrderHeaderDto>> FetchXmlHeadersDataAsync()
@@ -402,6 +412,10 @@ namespace Monolith_BGM.Controllers
                     throw new InvalidOperationException("File handler is not initialized.");
 
                 bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
+
+                // Validation
+                var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
+                
                 if (filesDownloaded)
                 {
                     //StatusUpdated?.Invoke($"XML files from {remotePath} have been downloaded successfully!");
@@ -429,7 +443,9 @@ namespace Monolith_BGM.Controllers
                     throw new InvalidOperationException("File handler is not initialized.");
 
                 bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
+
                 if (filesDownloaded)
+                //if (true)
                 {
                     //StatusUpdated?.Invoke($"XML files from {remotePath} have been downloaded successfully!");
                     _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");

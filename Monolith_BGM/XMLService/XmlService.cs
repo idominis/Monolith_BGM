@@ -17,21 +17,42 @@ public class XmlService : IXmlService
     }
 
     // Define the method as generic with a type parameter T
-    public T LoadFromXml<T>(string filePath)
+    //public T LoadFromXml<T>(string filePath)
+    //{
+    //    try
+    //    {
+    //        XmlSerializer serializer = new XmlSerializer(typeof(T));
+    //        using (FileStream stream = new FileStream(filePath, FileMode.Open))
+    //        {
+    //            return (T)serializer.Deserialize(stream);
+    //        }
+    //    }
+    //    catch (InvalidOperationException ex)
+    //    {
+    //        throw new ApplicationException($"Error deserializing file {filePath}: {ex.Message}", ex);
+    //    }
+    //}
+    public T LoadFromXml<T>(string filePath)  // testing validation
     {
         try
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(T));
-            using (FileStream stream = new FileStream(filePath, FileMode.Open))
+            using (var stream = File.OpenRead(filePath))
             {
+                var serializer = new XmlSerializer(typeof(T));
                 return (T)serializer.Deserialize(stream);
             }
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException ex) when (ex.InnerException is FormatException)
         {
-            throw new ApplicationException($"Error deserializing file {filePath}: {ex.Message}", ex);
+            throw new ApplicationException($"Error in XML document {filePath}: Due date is empty or invalid format. Detailed error: {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"General error processing file {filePath}. Detailed error: {ex.Message}", ex);
         }
     }
+
+
 
     public void GenerateXMLFiles(List<PurchaseOrderSummary> summaries, DateTime? startDate = null, DateTime? endDate = null)
     {
