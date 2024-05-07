@@ -23,7 +23,7 @@ namespace Monolith_BGM
         private SftpFileHandler fileHandler;
         private readonly IMapper _mapper;
         private readonly DataService _dataService;
-        private ErrorHandlerService _errorHandler;
+        private readonly ErrorHandlerService _errorHandler;
         private readonly IStatusUpdateService _statusUpdateService;
         private SftpFileHandler _fileHandler;
         private MainFormController _controller;
@@ -37,7 +37,7 @@ namespace Monolith_BGM
         /// </summary>
         /// <param name="controller">The controller.</param>
         /// <param name="statusUpdateService">The status update service.</param>
-        public MainForm(MainFormController controller, IStatusUpdateService statusUpdateService)
+        public MainForm(MainFormController controller, IStatusUpdateService statusUpdateService, ErrorHandlerService errorHandlerService)
         {
             InitializeComponent();
             InitializeAutoGenerateXmlTimer();
@@ -48,6 +48,7 @@ namespace Monolith_BGM
 
             _controller = controller;
             _statusUpdateService = statusUpdateService;
+            _errorHandler = errorHandlerService;
 
             _controller.DatesInitialized += Controller_DatesInitialized;
             _controller.ErrorOccurred += Controller_ErrorOccurred;
@@ -59,6 +60,8 @@ namespace Monolith_BGM
             comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
             comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;
             createXmlDbRadioButtonOn.CheckedChanged += createXmlDbRadioButtonOn_CheckedChanged;
+            SavePODToDbButton.Click += SavePODToDbButton_Click;
+            SavePOHToDbButton.Click += SavePOHToDbButton_Click;
         }
 
 
@@ -122,6 +125,7 @@ namespace Monolith_BGM
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Failed to load order dates.");
                 Controller_ErrorOccurred("Failed to load order dates: " + ex.Message);
             }
         }
@@ -291,12 +295,12 @@ namespace Monolith_BGM
                     _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
                 else
                 {
-                    _statusUpdateService.RaiseStatusUpdated("No data found to generate XML files.");
                     _statusUpdateService.RaiseStatusUpdated("No data found to generate XML files");
                 }
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "An error occurred generating XML files.");
                 _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files", ex);
             }
         }
@@ -321,6 +325,7 @@ namespace Monolith_BGM
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "An error occurred while generating XML files by date.");
                 MessageBox.Show($"An error occurred: {ex.Message}");
             }
         }
@@ -343,7 +348,6 @@ namespace Monolith_BGM
             }
         }
 
-
         private async void SendXmlDateGeneratedButton_Click(object sender, EventArgs e)
         {
             try
@@ -364,6 +368,7 @@ namespace Monolith_BGM
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Failed to send XML files.");
                 MessageBox.Show("Failed to send file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _statusUpdateService.RaiseStatusUpdated("XML files not sent");
                 Log.Error(ex, "Failed to send XML files");
@@ -416,6 +421,7 @@ namespace Monolith_BGM
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Error generating XML files.");
                 _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files", ex);
                 Log.Error(ex, "Error generating XML files");
             }
@@ -445,5 +451,14 @@ namespace Monolith_BGM
             }
         }
 
+        private async void SavePODToDbButton_Click(object sender, EventArgs e)
+        {
+            await SavePODToDb();
+        }
+
+        private async void SavePOHToDbButton_Click(object sender, EventArgs e)
+        {
+            await SavePOHToDb();
+        }
     }
 }

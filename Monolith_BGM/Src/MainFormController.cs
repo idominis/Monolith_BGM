@@ -49,7 +49,9 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
-                ErrorOccurred?.Invoke($"Failed to load order dates: {ex.Message}");
+                string message = "Failed to load order dates";
+                _errorHandler.LogError(ex, message, null, "Initialization");
+                ErrorOccurred?.Invoke($"{message}: {ex.Message}");
             }
         }
         /// <summary>Downloads the files for PurchaseOrderDetails and PurchaseOrderHeaders asynchronous.</summary>
@@ -67,8 +69,8 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Error during file download", null, "FileDownload");
                 ErrorOccurred?.Invoke($"Error during file download: {ex.Message}");
-                Log.Error(ex, "Error during file operations");
             }
         }
 
@@ -118,7 +120,7 @@ namespace Monolith_BGM.Controllers
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error loading or processing XML data: {FilePath}", xmlFile);
+                        _errorHandler.LogError(ex, "Error loading or processing XML data", xmlFile, "XMLProcessing");
                     }
                 }
             }
@@ -154,9 +156,7 @@ namespace Monolith_BGM.Controllers
                             }
                             catch (Exception ex)
                             {
-                                //ErrorOccurred?.Invoke($"Failed to load order headers: {ex.Message}");
-                                Log.Error(ex, "Error loading XML data: {XmlFile}", xmlFile);
-                                _errorHandler.LogError(ex, "Error loading XML data", xmlFile);
+                                _errorHandler.LogError(ex, "Error loading XML data", xmlFile, "XMLProcessing");
                             }
                         }
                     }
@@ -167,6 +167,7 @@ namespace Monolith_BGM.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _errorHandler.LogError(ex, "Failed to process XML files", null, "XMLProcessing");
                     ErrorOccurred?.Invoke($"Failed to process XML files: {ex.Message}");
                 }
 
@@ -193,6 +194,7 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Error processing Purchase Order Details data", null, "Database");
                 ErrorOccurred?.Invoke($"Error processing data: {ex.Message}");
                 return false;
             }
@@ -216,6 +218,7 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Error processing Purchase Order Headers data", null, "Database");
                 ErrorOccurred?.Invoke($"Error processing data: {ex.Message}");
                 return false;
             }
@@ -239,7 +242,7 @@ namespace Monolith_BGM.Controllers
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error updating purchase order status");
+                        _errorHandler.LogError(ex, "Error updating purchase order status", null, "Database");
                     }
                 }
                 Log.Information("XML files generated successfully!");
@@ -251,14 +254,12 @@ namespace Monolith_BGM.Controllers
 
         private async Task<List<int>> AlreadyGenerated()
         {
-            var generated = await _dataService.FetchPurchaseOrderIdGeneratedAsync();
-            return generated;
+            return await _dataService.FetchPurchaseOrderIdGeneratedAsync();           
         }
 
         private async Task<HashSet<int>> AlreadySent()
         {
-            var sent = await _dataService.FetchAlreadySentPurchaseOrderIdsAsync();
-            return sent;
+            return await _dataService.FetchAlreadySentPurchaseOrderIdsAsync();          
         }
 
         public async Task<bool> GenerateXml(DateTime? startDate = null, DateTime? endDate = null)
@@ -290,7 +291,7 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error generating XML files for dates {StartDate} to {EndDate}", startDate, endDate);
+                _errorHandler.LogError(ex, "Error generating XML files");
                 ErrorOccurred?.Invoke($"Error generating XML files: {ex.Message}");
                 return false;
             }
@@ -311,7 +312,7 @@ namespace Monolith_BGM.Controllers
             // Check if file exists
             if (!File.Exists(filePath))
             {
-                MessageBox.Show("File not found: " + filePath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorOccurred?.Invoke("File not found: " + filePath);
                 Log.Error("File not found: {FilePath}", filePath);
                 return false;
             }
@@ -348,8 +349,8 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Error sending XML file", null, "FileUpload");
                 ErrorOccurred?.Invoke($"Error sending XML file: {ex.Message}");
-                Log.Error(ex, "Error sending XML file");
                 return false;
             }
         }
@@ -409,8 +410,8 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error uploading files");
-                MessageBox.Show("Failed to upload files: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _errorHandler.LogError(ex, "Error uploading files", null, "FileUpload");
+                ErrorOccurred?.Invoke("Failed to upload files: " + ex.Message);
             }
         }
 
@@ -446,8 +447,8 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Failed to download files", null, "FileDownload");
                 ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
-                Log.Error(ex, "Error downloading files.");
             }
         }
 
@@ -475,8 +476,8 @@ namespace Monolith_BGM.Controllers
             }
             catch (Exception ex)
             {
+                _errorHandler.LogError(ex, "Failed to download files", null, "FileDownload");
                 ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
-                Log.Error(ex, "Error downloading files.");
             }
         }
     }

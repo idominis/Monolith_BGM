@@ -70,7 +70,7 @@
             SavePODToDbButton.TabIndex = 0;
             SavePODToDbButton.Text = "Save POD to DB";
             SavePODToDbButton.UseVisualStyleBackColor = true;
-            //SavePODToDbButton.Click += SavePODToDbButton_Click;
+            SavePODToDbButton.Click += SavePODToDbButton_Click;
             // 
             // ServiceStartButton
             // 
@@ -117,7 +117,7 @@
             SavePOHToDbButton.TabIndex = 4;
             SavePOHToDbButton.Text = "Save POH to DB";
             SavePOHToDbButton.UseVisualStyleBackColor = true;
-            //SavePOHToDbButton.Click += SavePOHToDbButton_Click;
+            SavePOHToDbButton.Click += SavePOHToDbButton_Click;
             // 
             // Button
             // 
