@@ -26,7 +26,6 @@ namespace Monolith_BGM
             var serviceProvider = Startup.ConfigureServices(Configuration);
 
             var mainForm = serviceProvider.GetService<MainForm>();
-            ConfigureServicesAndRun();
             Application.Run(mainForm);
         }
 
@@ -49,15 +48,6 @@ namespace Monolith_BGM
                 .CreateLogger();
 
             Log.Information("Application Starting");
-        }
-
-        private static void ConfigureServicesAndRun()
-        {
-            var serviceProvider = Startup.ConfigureServices(Configuration);
-
-            // Ensure MainForm is correctly resolved along with its dependencies
-            var mainForm = serviceProvider.GetService<MainForm>();
-            Application.Run(mainForm);
         }
     }
 }

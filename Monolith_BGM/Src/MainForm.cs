@@ -10,7 +10,6 @@ using Log = Serilog.Log;
 using Microsoft.EntityFrameworkCore;
 using BGM.Common;
 using System.Data;
-using Monolith_BGM.Controllers;
 using Monolith_BGM.XMLService;
 using Monolith_BGM.Src;
 
@@ -31,6 +30,8 @@ namespace Monolith_BGM
         private FileManager _fileManager;
         private System.Timers.Timer autoGenerateXmlTimer;
         private System.Timers.Timer saveToDbTimer;
+
+        private static readonly object _lockObj = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainForm"/> class.
@@ -60,8 +61,6 @@ namespace Monolith_BGM
             comboBoxStartDate.SelectedIndexChanged += ComboBoxStartDate_SelectedIndexChanged;
             comboBoxEndDate.SelectedIndexChanged += ComboBoxEndDate_SelectedIndexChanged;
             createXmlDbRadioButtonOn.CheckedChanged += createXmlDbRadioButtonOn_CheckedChanged;
-            SavePODToDbButton.Click += SavePODToDbButton_Click;
-            SavePOHToDbButton.Click += SavePOHToDbButton_Click;
         }
 
 
@@ -163,8 +162,27 @@ namespace Monolith_BGM
                 return;
             }
 
-            await SavePODToDb();
-            await SavePOHToDb();
+            var fetchingHeaderXmlData = await _controller.FetchXmlHeadersDataAsync();
+            var fetchingDetailXmlData = await _controller.FetchXmlDetailsDataAsync();
+
+            var isDetailSaved = await SavePODToDb(fetchingDetailXmlData);
+            if (isDetailSaved)
+            {
+                _statusUpdateService.RaiseStatusUpdated("POD files saved to DB!");
+            }
+            else
+            {
+                _statusUpdateService.RaiseStatusUpdated("No POD files to save to DB!");
+            }
+            var isHeaderSaved = await SavePOHToDb(fetchingHeaderXmlData);
+            if (isHeaderSaved)
+            {
+                _statusUpdateService.RaiseStatusUpdated("POH files saved to DB!");
+            }
+            else
+            {
+                _statusUpdateService.RaiseStatusUpdated("No POH files to save to DB!");
+            }
         }
 
         private void ComboBoxStartDate_SelectedIndexChanged(object sender, EventArgs e)
@@ -194,10 +212,36 @@ namespace Monolith_BGM
 
         private async void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
-            await _controller.DownloadFilesForPODAndPOHAsync();
+            // Stop the timer to prevent further invocations while handling errors
+            timer.Stop();
+
+            try
+            {
+                await _controller.DownloadFilesForPODAndPOHAsync();
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, "Error during file download", null, "FileDownload");
+
+                // Show a MessageBox to ask whether the user wants to retry or exit
+                DialogResult result = MessageBox.Show(
+                    "An error occurred during file download. Do you want to retry or exit the application?",
+                    "File Download Error",
+                    MessageBoxButtons.RetryCancel,
+                    MessageBoxIcon.Error);
+
+                if (result == DialogResult.Cancel)
+                {
+                    // Exit the application if the user chooses to cancel
+                    Application.Exit();
+                    return;
+                }
+            }
+
+            // If retry is selected or no errors occurred, restart the timer
+            timer.Start();
         }
 
-        // Override the OnFormClosing method to clean up the timer
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (timer != null)
@@ -239,50 +283,73 @@ namespace Monolith_BGM
             }
         }
 
-        private async Task SavePODToDb()
+        private async Task<bool> SavePODToDb(List<PurchaseOrderDetailDto> allPurchaseOrderDetails)
         {
+
+            bool isSuccess = false;
+            string statusMessage;
+
+            //var res = await _controller.SavePODetailsToDb(allPurchaseOrderDetails);
+
             try
             {
-                var allPurchaseOrderDetails = await _controller.FetchXmlDetailsDataAsync();
                 if (allPurchaseOrderDetails == null || allPurchaseOrderDetails.Count == 0)
                 {
-                    _statusUpdateService.RaiseStatusUpdated("No Details XMLs found");
-                    return;
+                    statusMessage = "No Details XMLs found";
                 }
-
-                if (await _controller.FetchAndSavePODetails(allPurchaseOrderDetails))
-                    _statusUpdateService.RaiseStatusUpdated("POD files saved to DB!");
+                //else if (_controller.SavePOHeadersToDb(allPurchaseOrderHeaders).Result)
+                else if (await _controller.SavePODetailsToDb(allPurchaseOrderDetails))
+                {
+                    statusMessage = "POD files saved to DB!";
+                    isSuccess = true;
+                }
                 else
-                    _statusUpdateService.RaiseStatusUpdated("POD files failed saving to DB!");
+                {
+                    statusMessage = "No POD files to save to DB!";
+                }
             }
             catch (Exception ex)
             {
                 _errorHandler.LogError(ex, "Error processing POD XML files.");
-                _statusUpdateService.RaiseStatusUpdated("Error saving POD to database.");
+                statusMessage = "Error saving POD to database.";
             }
+
+            _statusUpdateService.RaiseStatusUpdated(statusMessage);
+            return isSuccess;
+
         }
 
-        private async Task SavePOHToDb()
-        {
+        private async Task<bool> SavePOHToDb(List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders)
+        {         
+            bool isSuccess = false;
+            string statusMessage;
+
             try
-            {
-                var allPurchaseOrderHeaders = await _controller.FetchXmlHeadersDataAsync();
-                if (allPurchaseOrderHeaders == null || allPurchaseOrderHeaders.Count == 0)
                 {
-                    _statusUpdateService.RaiseStatusUpdated("No Headers XMLs found");
-                    return;
+                    if (allPurchaseOrderHeaders == null || allPurchaseOrderHeaders.Count == 0)
+                    {
+                        statusMessage = "No Headers XMLs found";
+                    }
+                    else if (_controller.SavePOHeadersToDb(allPurchaseOrderHeaders).Result)
+                    //else if (res)
+                    {
+                        statusMessage = "POH files saved to DB!";
+                        isSuccess = true;
+                    }
+                    else
+                    {
+                        statusMessage = "POH files failed saving to DB!";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _errorHandler.LogError(ex, "Error processing POH XML files.");
+                    statusMessage = "Error saving POH to database.";
                 }
 
-                if (await _controller.FetchAndSavePOHeaders(allPurchaseOrderHeaders))
-                    _statusUpdateService.RaiseStatusUpdated("POH files saved to DB!");
-                else
-                    _statusUpdateService.RaiseStatusUpdated("POH files failed saving to DB!");
-            }
-            catch (Exception ex)
-            {
-                _errorHandler.LogError(ex, "Error processing POH XML files.");
-                _statusUpdateService.RaiseStatusUpdated("Error saving POH to database.");
-            }
+                _statusUpdateService.RaiseStatusUpdated(statusMessage);
+                return isSuccess;
+            
         }
 
         private async void CreatePOSXMLsButton_ClickAsync(object sender, EventArgs e)
@@ -453,12 +520,56 @@ namespace Monolith_BGM
 
         private async void SavePODToDbButton_Click(object sender, EventArgs e)
         {
-            await SavePODToDb();
+            //await SavePODToDb();
+            // TESTING PURPOSES ONLY
+            // Disable the button to prevent multiple clicks
+            SavePODToDbButton.Enabled = false;
+
+            try
+            {
+                var fetchingDetailXmlData = await _controller.FetchXmlDetailsDataAsync(); // Separate responsibility
+                var isSaved = await SavePODToDb(fetchingDetailXmlData);
+                if (isSaved)
+                {
+                    _statusUpdateService.RaiseStatusUpdated("POD files saved to DB!");
+                }
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated("No POD files to save to DB!");
+                }
+            }
+            finally
+            {
+                // Re-enable the button after execution
+                SavePODToDbButton.Enabled = true;
+            }
         }
 
         private async void SavePOHToDbButton_Click(object sender, EventArgs e)
         {
-            await SavePOHToDb();
+            // TESTING PURPOSES ONLY
+            // Disable the button to prevent multiple clicks
+            SavePOHToDbButton.Enabled = false;
+
+            try
+            {
+                var fetchingHeaderXmlData = await _controller.FetchXmlHeadersDataAsync(); // Separate responsibility
+                var isSaved = await SavePOHToDb(fetchingHeaderXmlData);
+                if (isSaved)
+                {
+                    _statusUpdateService.RaiseStatusUpdated("POH files saved to DB!");
+                }
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated("No POH files to save to DB!");
+                }
+            }
+            finally
+            {
+                // Re-enable the button after execution
+                SavePOHToDbButton.Enabled = true;
+            }
         }
+
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Monolith_BGM.Controllers;
-//using Monolith_BGM.Services;
 using BGM.Common;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -28,11 +26,19 @@ public class Startup
         IMapper mapper = mapperConfig.CreateMapper();
         services.AddSingleton(mapper);
 
-        // Entity Framework DbContext
+        // Entity Framework DbContext - AddScoped ensures a separate DbContext instance per request
+        //services.AddDbContext<BGM_dbContext>(options =>
+        //    options.UseSqlServer(configuration.GetConnectionString("BGMDatabase")), ServiceLifetime.Scoped);
         services.AddDbContext<BGM_dbContext>(options =>
+        {
+            options.UseSqlServer(configuration.GetConnectionString("BGMDatabase"));
+            options.EnableSensitiveDataLogging();
+        }, ServiceLifetime.Scoped);
+        services.AddDbContextFactory<BGM_dbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("BGMDatabase")));
 
-        // SFTP Configuration
+
+        // SFTP Configuration remains Singleton since it's a shared resource
         services.AddSingleton<SftpClientManager>(provider =>
             new SftpClientManager(
                 configuration["SftpConfig:Host"],
@@ -40,7 +46,7 @@ public class Startup
                 configuration["SftpConfig:Password"]
             ));
 
-        // SFTP File Handler
+        // SFTP File Handler - retains Singleton since it may manage shared connections
         services.AddSingleton<SftpFileHandler>(provider =>
         {
             var clientManager = provider.GetRequiredService<SftpClientManager>();
@@ -49,16 +55,14 @@ public class Startup
         });
 
         // Common Services
-        services.AddSingleton<IStatusUpdateService, StatusUpdateService>();
-        services.AddSingleton<IXmlService, XmlService>();
-        services.AddSingleton<FileManager>();
-        services.AddSingleton<ErrorHandlerService>();
-        services.AddSingleton<DataService>();
-        services.AddSingleton<MainFormController>();
+        services.AddScoped<IStatusUpdateService, StatusUpdateService>();
+        services.AddScoped<IXmlService, XmlService>();
+        services.AddScoped<FileManager>();
+        services.AddScoped<ErrorHandlerService>();
+        services.AddScoped<DataService>();
+        services.AddScoped<MainFormController>();
         services.AddSingleton<MainForm>();
 
         return services.BuildServiceProvider();
     }
-
-
 }

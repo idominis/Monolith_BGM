@@ -7,94 +7,107 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using BGM.Common;
+using Microsoft.EntityFrameworkCore.Internal;
+using System.Configuration;
+using System.Reflection.PortableExecutable;
 
 public class DataService
 {
     private readonly BGM_dbContext _dbContext;
+    private readonly IDbContextFactory<BGM_dbContext> _contextFactory;
     private readonly IMapper _mapper;
     private readonly ErrorHandlerService _errorHandler;
     public delegate void StatusUpdateHandler(string message);
     public event StatusUpdateHandler StatusUpdated;
     private readonly IStatusUpdateService _statusUpdateService;
 
-    public DataService(BGM_dbContext dbContext, IMapper mapper, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService)
+    public DataService(BGM_dbContext dbContext, IDbContextFactory<BGM_dbContext> contextFactory, IMapper mapper, ErrorHandlerService errorHandler, IStatusUpdateService statusUpdateService)
     {
         _dbContext = dbContext;
+        _contextFactory = contextFactory;
         _mapper = mapper;
         _errorHandler = errorHandler;
         _statusUpdateService = statusUpdateService;
     }
 
-
-    public async Task <bool> AddPurchaseOrderDetailsAsync(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
+    public async Task<bool> AddPurchaseOrderDetailsToDbAsync(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
     {
-        // Fetch existing IDs from the database
-        var existingIds = new HashSet<int>(_dbContext.PurchaseOrderDetails.Select(p => p.PurchaseOrderDetailId));
+        bool isSuccess = false;
+        string logMessage;
 
-        // Filter DTOs first before mapping
-        var filteredDtos = purchaseOrderDetailsDto.Where(dto => !existingIds.Contains(dto.PurchaseOrderDetailId)).ToList();
-        var allDetails = filteredDtos.Select(dto => _mapper.Map<PurchaseOrderDetail>(dto)).ToList();
+        using var dbContext = _contextFactory.CreateDbContext();  // Create a new DbContext instance
+        var existingIds = new HashSet<int>(dbContext.PurchaseOrderDetails.Select(p => p.PurchaseOrderDetailId));
 
-        // Filter out details that already exist in the database
-        var newDetails = allDetails.Where(d => !existingIds.Contains(d.PurchaseOrderDetailId)).ToList();
+        var newDetails = purchaseOrderDetailsDto
+            .Where(dto => !existingIds.Contains(dto.PurchaseOrderDetailId))
+            .Select(dto => _mapper.Map<PurchaseOrderDetail>(dto))
+            .ToList();
 
-        // Add and save new entries
         if (newDetails.Any())
         {
-            _dbContext.PurchaseOrderDetails.AddRange(newDetails);
-            await _dbContext.SaveChangesAsync();
-            Log.Information("Purchase orders details loaded and saved successfully!");
-            return true;
+            dbContext.PurchaseOrderDetails.AddRange(newDetails);
+
+            try
+            {
+                dbContext.SaveChanges();
+                string detailIds = string.Join(", ", newDetails.Select(h => h.PurchaseOrderDetailId));
+                logMessage = string.Format("Purchase order details: {0} loaded and saved successfully!", detailIds);
+                isSuccess = true;
+            }
+            catch (DbUpdateException ex)
+            {
+                logMessage = "Error updating the database with new purchase order details.";
+                Log.Error(ex, logMessage);
+            }
         }
         else
         {
-            Log.Information("No new purchase orders details to save.");
-            return false;
+            logMessage = "No new purchase orders details to save.";
         }
+
+        Log.Information(logMessage);
+        return isSuccess;
     }
-
-    public async Task<bool> AddPurchaseOrderHeadersAsync(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
-{
-    _dbContext.ChangeTracker.Clear(); // Clear the change tracker to avoid conflicts
-
-    // Fetch existing IDs from the database to avoid attaching duplicates
-    var existingIds = await _dbContext.PurchaseOrderHeaders
-                                      .AsNoTracking()
-                                      .Select(p => p.PurchaseOrderId)
-                                      .ToListAsync();
-
-    var newHeaders = new List<PurchaseOrderHeader>();
-
-    foreach (var dto in purchaseOrderHeadersDto)
+  
+    public async Task<bool> AddPurchaseOrderHeadersToDbAsync(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
     {
-        if (!existingIds.Contains(dto.PurchaseOrderId))
+        bool isSuccess = false;
+        string logMessage;
+
+        using var dbContext = _contextFactory.CreateDbContext();  // Create a new DbContext instance
+        var existingIds = new HashSet<int>(dbContext.PurchaseOrderHeaders.Select(p => p.PurchaseOrderId));
+
+        var newHeaders = purchaseOrderHeadersDto
+            .Where(dto => !existingIds.Contains(dto.PurchaseOrderId))
+            .Select(dto => _mapper.Map<PurchaseOrderHeader>(dto))
+            .ToList();
+
+        if (newHeaders.Any())
         {
-            var newHeader = _mapper.Map<PurchaseOrderHeader>(dto);
-            newHeaders.Add(newHeader);
-        }
-    }
+            dbContext.PurchaseOrderHeaders.AddRange(newHeaders);
 
-    if (newHeaders.Any())
-    {
-            //_dbContext.PurchaseOrderHeaders.AddRange(newHeaders);
-            for (int i = 0; i < newHeaders.Count; i++)
+            try
             {
-                _dbContext.PurchaseOrderHeaders.Add(newHeaders[i]); // TESTING PURPOSES
-                await _dbContext.SaveChangesAsync();
+                dbContext.SaveChanges();
+                string headerIds = string.Join(", ", newHeaders.Select(h => h.PurchaseOrderId));
+                logMessage = string.Format("Purchase order headers: {0} loaded and saved successfully!", headerIds);
+                isSuccess = true;
             }
+            catch (DbUpdateException ex)
+            {
+                logMessage = "Error updating the database with new purchase order headers.";
+                Log.Error(ex, logMessage);
+            }
+        }
+        else
+        {
+            logMessage = "No new purchase orders headers to save.";
+        }
 
-            await _dbContext.SaveChangesAsync();
-        Log.Information("Purchase orders headers loaded and saved successfully!");
-        return true;
+        Log.Information(logMessage);
+        return isSuccess;
     }
-    else
-    {
-        Log.Information("No new purchase orders headers to save.");
-        return false;
-    }
-}
-
-
+ 
     protected virtual void OnStatusUpdated(string message)
     {
         StatusUpdated?.Invoke(message);
@@ -102,10 +115,8 @@ public class DataService
 
     public async Task<List<PurchaseOrderSummary>> FetchPurchaseOrderSummaries()
     {
-        // Fetch data from the database view
         var viewData = await _dbContext.VPurchaseOrderSummaries.ToListAsync();
 
-        // Map data from view model to DTO
         return _mapper.Map<List<PurchaseOrderSummary>>(viewData);
     }
 
@@ -124,7 +135,6 @@ public class DataService
             .Where(p => p.OrderDate >= startDate && p.OrderDate <= endDate)
             .ToListAsync();
 
-        // Map data from entity to DTO
         return _mapper.Map<List<PurchaseOrderSummary>>(viewData);
     }
 
@@ -203,6 +213,5 @@ public class DataService
                                       .ToListAsync();
         return sentIds;
     }
-
 
 }

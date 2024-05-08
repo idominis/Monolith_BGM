@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Log = Serilog.Log;
 
-namespace Monolith_BGM.Controllers
+namespace Monolith_BGM.Src
 {
     public class MainFormController
     {
@@ -137,92 +137,94 @@ namespace Monolith_BGM.Controllers
 
         public async Task<List<PurchaseOrderHeaderDto>> FetchXmlHeadersDataAsync()
         {
-            return await Task.Run(() =>
-            {
-                List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
-                string headersDirectoryPath = Path.Combine(_fileManager.GetBaseDirectoryPath(), "headers");
+ 
+            List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
+            string headersDirectoryPath = Path.Combine(_fileManager.GetBaseDirectoryPath(), "headers");
 
-                try
-                {
-                    if (Directory.Exists(headersDirectoryPath))  // Check if the headers directory exists
-                    {
-                        var xmlFiles = Directory.GetFiles(headersDirectoryPath, "*.xml", SearchOption.TopDirectoryOnly);
-                        foreach (var xmlFile in xmlFiles)
-                        {
-                            try
-                            {
-                                var purchaseOrderHeaders = _xmlService.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
-                                allPurchaseOrderHeaders.AddRange(purchaseOrderHeaders.Headers);
-                            }
-                            catch (Exception ex)
-                            {
-                                _errorHandler.LogError(ex, "Error loading XML data", xmlFile, "XMLProcessing");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ErrorOccurred?.Invoke("Headers directory does not exist.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _errorHandler.LogError(ex, "Failed to process XML files", null, "XMLProcessing");
-                    ErrorOccurred?.Invoke($"Failed to process XML files: {ex.Message}");
-                }
-
-                return allPurchaseOrderHeaders;
-            });
-        }
-
-
-        public async Task<bool> FetchAndSavePODetails(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
-        {
             try
             {
-                var isSuccess = await _dataService.AddPurchaseOrderDetailsAsync(purchaseOrderDetailsDto);
-                if (isSuccess)
+                if (Directory.Exists(headersDirectoryPath))  // Check if the headers directory exists
                 {
-                    DataInitialized?.Invoke(purchaseOrderDetailsDto.Select(d => d.PurchaseOrderDetailId).ToList());
-                    return true;
+                    var xmlFiles = Directory.GetFiles(headersDirectoryPath, "*.xml", SearchOption.TopDirectoryOnly);
+                    foreach (var xmlFile in xmlFiles)
+                    {
+                        try
+                        {
+                            var purchaseOrderHeaders = _xmlService.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
+                            allPurchaseOrderHeaders.AddRange(purchaseOrderHeaders.Headers);
+                        }
+                        catch (Exception ex)
+                        {
+                            _errorHandler.LogError(ex, "Error loading XML data", xmlFile, "XMLProcessing");
+                        }
+                    }
                 }
                 else
                 {
-                    Log.Error("No Purchase Order details saved.");
-                    return false;
+                    ErrorOccurred?.Invoke("Headers directory does not exist.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, "Failed to process XML files", null, "XMLProcessing");
+                ErrorOccurred?.Invoke($"Failed to process XML files: {ex.Message}");
+            }
+
+        return allPurchaseOrderHeaders;
+        }
+
+        public async Task<bool> SavePODetailsToDb(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
+        {
+            bool isSuccess = false;
+
+            try
+            {
+                isSuccess = await _dataService.AddPurchaseOrderDetailsToDbAsync(purchaseOrderDetailsDto);
+                if (isSuccess)
+                {
+                    //DataInitialized?.Invoke(purchaseOrderHeadersDto.Select(d => d.PurchaseOrderId).ToList());
+                    MessageBox.Show("Purchase Order Details saved successfully.");
+                }
+                else
+                {
+                    Log.Error("No Purchase Order Details saved.");
                 }
             }
             catch (Exception ex)
             {
                 _errorHandler.LogError(ex, "Error processing Purchase Order Details data", null, "Database");
                 ErrorOccurred?.Invoke($"Error processing data: {ex.Message}");
-                return false;
             }
+
+            return isSuccess;
         }
 
-        public async Task<bool> FetchAndSavePOHeaders(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
+        public async Task<bool> SavePOHeadersToDb(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
         {
+            bool isSuccess = false;
+
             try
             {
-                var isSuccess = await _dataService.AddPurchaseOrderHeadersAsync(purchaseOrderHeadersDto);
+                isSuccess = await _dataService.AddPurchaseOrderHeadersToDbAsync(purchaseOrderHeadersDto);
                 if (isSuccess)
                 {
-                    DataInitialized?.Invoke(purchaseOrderHeadersDto.Select(d => d.PurchaseOrderId).ToList());
-                    return true;
+                    //DataInitialized?.Invoke(purchaseOrderHeadersDto.Select(d => d.PurchaseOrderId).ToList());
+                    MessageBox.Show("Purchase Order Headers saved successfully.");
                 }
                 else
                 {
                     Log.Error("No Purchase Order Headers saved.");
-                    return false;
                 }
             }
             catch (Exception ex)
             {
                 _errorHandler.LogError(ex, "Error processing Purchase Order Headers data", null, "Database");
                 ErrorOccurred?.Invoke($"Error processing data: {ex.Message}");
-                return false;
             }
+
+            return isSuccess;
         }
+
         public async Task<bool> GenerateXmlFromDbAsync()  // CreatePOSXMLsButton_ClickAsync
         {
             var alreadyGeneratedIds = await AlreadyGenerated();
@@ -423,61 +425,102 @@ namespace Monolith_BGM.Controllers
 
         public async Task DownloadFilesPODAsync(string remotePath, string localPath)
         {
-            try
-            {
-                if (_fileHandler == null)
-                    throw new InvalidOperationException("File handler is not initialized.");
+            bool shouldRetry = true;
 
-                bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
-
-                // Validation
-                var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
-                
-                if (filesDownloaded)
-                {
-                    //StatusUpdated?.Invoke($"XML files from {remotePath} have been downloaded successfully!");
-                    _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
-                    Log.Information($"XML files from {remotePath} have been downloaded successfully!");
-                }
-                else
-                {
-                    _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
-                    Log.Information($"No new XML files in {remotePath}.");
-                }
-            }
-            catch (Exception ex)
+            while (shouldRetry)
             {
-                _errorHandler.LogError(ex, "Failed to download files", null, "FileDownload");
-                ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
+                try
+                {
+                    if (_fileHandler == null)
+                        throw new InvalidOperationException("File handler is not initialized.");
+
+                    bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
+
+                    // Validation
+                    var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
+
+                    if (filesDownloaded)
+                    {
+                        _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
+                        Log.Information($"XML files from {remotePath} have been downloaded successfully!");
+                    }
+                    else
+                    {
+                        _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
+                        Log.Information($"No new XML files in {remotePath}.");
+                    }
+
+                    // Exit the loop after a successful download
+                    shouldRetry = false;
+                }
+                catch (Exception ex)
+                {
+                    _errorHandler.LogError(ex, "Failed to download files", null, "FileDownload");
+                    ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
+
+                    // Display a message box to let the user choose whether to retry or exit
+                    DialogResult result = MessageBox.Show(
+                        "Failed to download files. Do you want to retry or exit the application?",
+                        "Download Error",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (result == DialogResult.Cancel)
+                    {
+                        // Exit the application if the user chooses to cancel
+                        Application.Exit();
+                        return;
+                    }
+                }
             }
         }
 
         public async Task DownloadFilesPOHAsync(string remotePath, string localPath)
         {
-            try
-            {
-                if (_fileHandler == null)
-                    throw new InvalidOperationException("File handler is not initialized.");
+            bool shouldRetry = true;
 
-                bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
-
-                if (filesDownloaded)
-                //if (true)
-                {
-                    //StatusUpdated?.Invoke($"XML files from {remotePath} have been downloaded successfully!");
-                    _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
-                    Log.Information($"XML files from {remotePath} have been downloaded successfully!");
-                }
-                else
-                {
-                    _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
-                    Log.Information($"No new XML files in {remotePath}.");
-                }
-            }
-            catch (Exception ex)
+            while (shouldRetry)
             {
-                _errorHandler.LogError(ex, "Failed to download files", null, "FileDownload");
-                ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
+                try
+                {
+                    if (_fileHandler == null)
+                        throw new InvalidOperationException("File handler is not initialized.");
+
+                    bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
+
+                    if (filesDownloaded)
+                    {
+                        _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
+                        Log.Information($"XML files from {remotePath} have been downloaded successfully!");
+                    }
+                    else
+                    {
+                        _statusUpdateService.RaiseStatusUpdated($"No new XML files in {remotePath}.");
+                        Log.Information($"No new XML files in {remotePath}.");
+                    }
+
+                    // Exit the loop after a successful download
+                    shouldRetry = false;
+                }
+                catch (Exception ex)
+                {
+                    _errorHandler.LogError(ex, "Failed to download files", null, "FileDownload");
+                    ErrorOccurred?.Invoke($"Failed to download files: {ex.Message}");
+
+                    // Display a message box to let the user choose whether to retry or exit
+                    DialogResult result = MessageBox.Show(
+                        "Failed to download files. Do you want to retry or exit the application?",
+                        "Download Error",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (result == DialogResult.Cancel)
+                    {
+                        // Exit the application if the user chooses to cancel
+                        Application.Exit();
+                        return;
+                    }
+                }
             }
         }
     }

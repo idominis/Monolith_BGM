@@ -18,6 +18,19 @@
           }
         }
       },
+      "FluentValidation/11.9.1": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/FluentValidation.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/FluentValidation.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Humanizer.Core/2.8.26": {
         "type": "package",
         "compile": {
@@ -1102,6 +1115,7 @@
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
           "BGM.Common": "1.0.0",
+          "FluentValidation": "11.9.1",
           "SSH.NET": "2024.0.0",
           "Serilog": "3.1.1",
           "Serilog.Sinks.Console": "5.0.1",
@@ -1130,6 +1144,31 @@
         "icon.png",
         "lib/net6.0/AutoMapper.dll",
         "lib/net6.0/AutoMapper.xml"
+      ]
+    },
+    "FluentValidation/11.9.1": {
+      "sha512": "C+PqISSMdlOZZJx0Hx25atW32tv4vbpsaiQB+PLjK+ZGLzOFuHl1fUJ3Lny77mIZ31ZtYtNG0JgUjxa3wwLsWg==",
+      "type": "package",
+      "path": "fluentvalidation/11.9.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "fluent-validation-icon.png",
+        "fluentvalidation.11.9.1.nupkg.sha512",
+        "fluentvalidation.nuspec",
+        "lib/net5.0/FluentValidation.dll",
+        "lib/net5.0/FluentValidation.xml",
+        "lib/net6.0/FluentValidation.dll",
+        "lib/net6.0/FluentValidation.xml",
+        "lib/net7.0/FluentValidation.dll",
+        "lib/net7.0/FluentValidation.xml",
+        "lib/net8.0/FluentValidation.dll",
+        "lib/net8.0/FluentValidation.xml",
+        "lib/netstandard2.0/FluentValidation.dll",
+        "lib/netstandard2.0/FluentValidation.xml",
+        "lib/netstandard2.1/FluentValidation.dll",
+        "lib/netstandard2.1/FluentValidation.xml"
       ]
     },
     "Humanizer.Core/2.8.26": {
@@ -2870,6 +2909,7 @@
       "AutoMapper >= 13.0.1",
       "BGM.Common >= 1.0.0",
       "BGM.SftpUtilities >= 1.0.0",
+      "FluentValidation >= 11.9.1",
       "Microsoft.EntityFrameworkCore >= 6.0.29",
       "Microsoft.EntityFrameworkCore.Design >= 6.0.29",
       "Microsoft.EntityFrameworkCore.SqlServer >= 6.0.29",
@@ -2884,23 +2924,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Ivan\\.nuget\\packages\\": {},
+    "C:\\Users\\ido\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Ivan\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Monolith_BGM.csproj",
+      "projectUniqueName": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Monolith_BGM.csproj",
       "projectName": "Monolith_BGM",
-      "projectPath": "C:\\Users\\Ivan\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Monolith_BGM.csproj",
-      "packagesPath": "C:\\Users\\Ivan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Ivan\\source\\repos\\Monolith_BGM\\Monolith_BGM\\obj\\",
+      "projectPath": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Monolith_BGM.csproj",
+      "packagesPath": "C:\\Users\\ido\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Ivan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ido\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2916,11 +2956,11 @@
         "net6.0-windows7.0": {
           "targetAlias": "net6.0-windows",
           "projectReferences": {
-            "C:\\Users\\Ivan\\source\\repos\\Monolith_BGM\\BGM.Common\\BGM.Common.csproj": {
-              "projectPath": "C:\\Users\\Ivan\\source\\repos\\Monolith_BGM\\BGM.Common\\BGM.Common.csproj"
+            "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.Common\\BGM.Common.csproj": {
+              "projectPath": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.Common\\BGM.Common.csproj"
             },
-            "C:\\Users\\Ivan\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\BGM.SftpUtilities.csproj": {
-              "projectPath": "C:\\Users\\Ivan\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\BGM.SftpUtilities.csproj"
+            "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\BGM.SftpUtilities.csproj": {
+              "projectPath": "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\BGM.SftpUtilities\\BGM.SftpUtilities.csproj"
             }
           }
         }
@@ -2943,6 +2983,10 @@
           "AutoMapper": {
             "target": "Package",
             "version": "[13.0.1, )"
+          },
+          "FluentValidation": {
+            "target": "Package",
+            "version": "[11.9.1, )"
           },
           "Microsoft.EntityFrameworkCore": {
             "target": "Package",
