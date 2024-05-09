@@ -55,31 +55,50 @@ namespace BGM.SftpUtilities
         public async Task<bool> DownloadXmlFilesFromDirectoryAsync(string remoteDirectoryPath, string localBaseDirectoryPath)
         {
             bool newFilesDownloaded = false;
+
             try
             {
                 using (var client = _clientManager.Connect())
                 {
                     var entries = client.ListDirectory(remoteDirectoryPath);
 
+                    if (!Directory.Exists(localBaseDirectoryPath))
+                    {
+                        Directory.CreateDirectory(localBaseDirectoryPath);
+                    }
+
                     foreach (var entry in entries)
                     {
                         if (entry.IsDirectory && entry.Name != "." && entry.Name != "..")
                         {
-                            // Recursively handle subdirectories
                             string subDirectoryPath = Path.Combine(remoteDirectoryPath, entry.Name);
                             string localSubDirectoryPath = Path.Combine(localBaseDirectoryPath, entry.Name);
-                            Directory.CreateDirectory(localSubDirectoryPath); // Ensure the directory exists locally
+
+                            if (!Directory.Exists(localSubDirectoryPath))
+                            {
+                                Directory.CreateDirectory(localSubDirectoryPath);
+                            }
+
                             newFilesDownloaded |= await DownloadXmlFilesFromDirectoryAsync(subDirectoryPath, localSubDirectoryPath);
                         }
-                        if (!entry.IsDirectory && !entry.Name.EndsWith(".processed"))
+                        else if (!entry.IsDirectory && !entry.Name.EndsWith(".processed"))
                         {
                             SftpFile file = entry as SftpFile;
                             if (file != null)
                             {
-                                newFilesDownloaded |= ProcessFilesInDirectory(client, new[] { file }, localBaseDirectoryPath, remoteDirectoryPath);
+                                // Check if file exists locally and matches the remote file's size
+                                string localFilePath = Path.Combine(localBaseDirectoryPath, entry.Name);
+
+                                bool fileExists = File.Exists(localFilePath);
+                                bool sizeMatches = fileExists && new FileInfo(localFilePath).Length == entry.Attributes.Size;
+
+                                if (!fileExists || !sizeMatches)
+                                {
+                                    // File missing or incomplete, download it
+                                    newFilesDownloaded |= ProcessFilesInDirectory(client, new[] { file }, localBaseDirectoryPath, remoteDirectoryPath);
+                                }
                             }
                         }
-
                     }
                 }
             }
@@ -91,7 +110,6 @@ namespace BGM.SftpUtilities
 
             return newFilesDownloaded;
         }
-
 
         private bool ProcessFilesInDirectory(SftpClient client, IEnumerable<SftpFile> files, string localDirectoryPath, string remoteDirectoryPath)
         {
