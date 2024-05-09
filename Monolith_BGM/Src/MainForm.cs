@@ -425,13 +425,13 @@ namespace Monolith_BGM
             }
         }
 
-        private void RadioButtonOn_CheckedChanged(object sender, EventArgs e)
+        private async void RadioButtonOn_CheckedChanged(object sender, EventArgs e)
         {
             // Upload all Purchase Orders when the radio button is checked
             if (radioButtonOn.Checked)
             {
                 radioButtonOff.Checked = false;
-                _controller.UploadAllHeaders();
+                await _controller.UploadAllHeaders();
             }
         }
 

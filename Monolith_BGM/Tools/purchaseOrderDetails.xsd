@@ -51,4 +51,33 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+
+	<!-- Schema for Purchase Order Summary -->
+	<xs:element name="ArrayOfPurchaseOrderSummary">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PurchaseOrderSummary" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:int" name="PurchaseOrderID"/>
+							<xs:element type="xs:int" name="PurchaseOrderDetailID"/>
+							<xs:element type="xs:dateTime" name="OrderDate"/>
+							<xs:element type="xs:int" name="VendorID"/>
+							<xs:element type="xs:string" name="VendorName"/>
+							<xs:element type="xs:int" name="ProductID"/>
+							<xs:element type="xs:string" name="ProductNumber"/>
+							<xs:element type="xs:string" name="ProductName"/>
+							<xs:element type="xs:int" name="OrderQty"/>
+							<xs:element type="xs:decimal" name="UnitPrice"/>
+							<xs:element type="xs:decimal" name="LineTotal"/>
+							<xs:element type="xs:decimal" name="SubTotal"/>
+							<xs:element type="xs:decimal" name="TaxAmt"/>
+							<xs:element type="xs:decimal" name="Freight"/>
+							<xs:element type="xs:decimal" name="TotalDue"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>
