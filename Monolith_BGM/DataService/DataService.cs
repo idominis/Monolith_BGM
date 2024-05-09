@@ -150,13 +150,15 @@ public class DataService
 
     public async Task UpdatePurchaseOrderStatus(int purchaseOrderId, int purchaseOrderDetailId, bool processed, bool sent, int channel)
     {
-        var existingEntity = await _dbContext.PurchaseOrdersProcessedSents
+        using var dbContext = _contextFactory.CreateDbContext();  // Create a new DbContext instance
+
+        var existingEntity = await dbContext.PurchaseOrdersProcessedSents
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.PurchaseOrderDetailId == purchaseOrderDetailId);
 
         if (existingEntity != null)
         {
-            _dbContext.PurchaseOrdersProcessedSents.Attach(existingEntity);
+            dbContext.PurchaseOrdersProcessedSents.Attach(existingEntity);
             existingEntity.OrderProcessed = processed;
             existingEntity.OrderSent = sent;
             existingEntity.Channel = channel;
@@ -173,10 +175,10 @@ public class DataService
                 Channel = channel,
                 ModifiedDate = DateTime.Now
             };
-            _dbContext.PurchaseOrdersProcessedSents.Add(newEntity);
+            dbContext.PurchaseOrdersProcessedSents.Add(newEntity);
         }
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<List<int>> FetchPurchaseOrderIdGeneratedAsync()
