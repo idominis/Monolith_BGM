@@ -55,6 +55,8 @@
             label5 = new Label();
             createXmlDbRadioButtonOff = new RadioButton();
             createXmlDbRadioButtonOn = new RadioButton();
+            richTextBoxLogs = new RichTextBox();
+            label6 = new Label();
             statusStrip1.SuspendLayout();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
@@ -96,9 +98,9 @@
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel });
-            statusStrip1.Location = new Point(0, 398);
+            statusStrip1.Location = new Point(0, 481);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(636, 22);
+            statusStrip1.Size = new Size(925, 22);
             statusStrip1.TabIndex = 3;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -158,11 +160,11 @@
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(comboBoxStartDate);
             groupBox1.Controls.Add(comboBoxEndDate);
-            groupBox1.Location = new Point(349, 65);
+            groupBox1.Location = new Point(326, 95);
             groupBox1.Margin = new Padding(3, 2, 3, 2);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(3, 2, 3, 2);
-            groupBox1.Size = new Size(267, 140);
+            groupBox1.Size = new Size(280, 140);
             groupBox1.TabIndex = 8;
             groupBox1.TabStop = false;
             groupBox1.Text = "XMLs Interval Creation";
@@ -213,11 +215,11 @@
             groupBox2.Controls.Add(autoSendTextBox);
             groupBox2.Controls.Add(radioButtonOff);
             groupBox2.Controls.Add(radioButtonOn);
-            groupBox2.Location = new Point(349, 230);
+            groupBox2.Location = new Point(637, 103);
             groupBox2.Margin = new Padding(3, 2, 3, 2);
             groupBox2.Name = "groupBox2";
             groupBox2.Padding = new Padding(3, 2, 3, 2);
-            groupBox2.Size = new Size(267, 146);
+            groupBox2.Size = new Size(266, 132);
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
             groupBox2.Text = "Set AutoSend created XMLs";
@@ -322,7 +324,7 @@
             groupBox4.Controls.Add(createXmlDbRadioButtonOff);
             groupBox4.Controls.Add(Button);
             groupBox4.Controls.Add(createXmlDbRadioButtonOn);
-            groupBox4.Location = new Point(12, 230);
+            groupBox4.Location = new Point(12, 185);
             groupBox4.Name = "groupBox4";
             groupBox4.Size = new Size(280, 74);
             groupBox4.TabIndex = 11;
@@ -365,11 +367,32 @@
             createXmlDbRadioButtonOn.UseVisualStyleBackColor = true;
             createXmlDbRadioButtonOn.CheckedChanged += createXmlDbRadioButtonOn_CheckedChanged;
             // 
+            // richTextBoxLogs
+            // 
+            richTextBoxLogs.Location = new Point(12, 288);
+            richTextBoxLogs.Name = "richTextBoxLogs";
+            richTextBoxLogs.ReadOnly = true;
+            richTextBoxLogs.ScrollBars = RichTextBoxScrollBars.Vertical;
+            richTextBoxLogs.Size = new Size(891, 190);
+            richTextBoxLogs.TabIndex = 12;
+            richTextBoxLogs.Text = "";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(12, 270);
+            label6.Name = "label6";
+            label6.Size = new Size(75, 15);
+            label6.TabIndex = 13;
+            label6.Text = "Info Window";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(636, 420);
+            ClientSize = new Size(925, 503);
+            Controls.Add(label6);
+            Controls.Add(richTextBoxLogs);
             Controls.Add(groupBox4);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);
@@ -422,5 +445,7 @@
         private Label label5;
         private RadioButton createXmlDbRadioButtonOff;
         private RadioButton createXmlDbRadioButtonOn;
+        private RichTextBox richTextBoxLogs;
+        private Label label6;
     }
 }

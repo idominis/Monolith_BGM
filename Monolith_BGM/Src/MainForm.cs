@@ -30,8 +30,8 @@ namespace Monolith_BGM
         private FileManager _fileManager;
         private System.Timers.Timer autoGenerateXmlTimer;
         private System.Timers.Timer saveToDbTimer;
-
-        private static readonly object _lockObj = new object();
+        private RichTextBox _richTextBoxLogs;
+        private ErrorHandlerService _errorHandlerService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainForm"/> class.
@@ -43,9 +43,12 @@ namespace Monolith_BGM
             InitializeComponent();
             InitializeAutoGenerateXmlTimer();
             InitializeSaveToDbTimer();
+            InitializeRichTextBoxLogs();
+            ConfigureLogging();
             radioButtonOff.Checked = true;
             createXmlDbRadioButtonOff.Checked = true;
             saveToDbRadioButtonOff.Checked = true;
+            this.StartPosition = FormStartPosition.CenterScreen;
 
             _controller = controller;
             _statusUpdateService = statusUpdateService;
@@ -144,7 +147,7 @@ namespace Monolith_BGM
         {
             autoGenerateXmlTimer = new System.Timers.Timer(10000); // Set interval to 10 seconds
             autoGenerateXmlTimer.Elapsed += AutoGenerateXmlTimer_Elapsed;
-            autoGenerateXmlTimer.AutoReset = true; // Ensure the timer fires repeatedly every 10 seconds
+            autoGenerateXmlTimer.AutoReset = true;
         }
 
         private void InitializeSaveToDbTimer()
@@ -154,6 +157,31 @@ namespace Monolith_BGM
             saveToDbTimer.AutoReset = true;
         }
 
+        private void InitializeRichTextBoxLogs()
+        {
+            _richTextBoxLogs = new RichTextBox
+            {
+                Multiline = true,
+                ReadOnly = true,
+                ScrollBars = RichTextBoxScrollBars.Vertical,
+                Dock = DockStyle.Fill
+            };
+            Controls.Add(_richTextBoxLogs);
+        }
+
+        private void ConfigureLogging()
+        {
+            var richTextBoxSink = new RichTextBoxSink(richTextBoxLogs);
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console() // Optional, keeps logging to console if needed
+                .WriteTo.File("log.txt") // Optional, keeps writing to file
+                .WriteTo.Sink(richTextBoxSink) // Custom sink for RichTextBox
+                .CreateLogger();
+
+            _errorHandlerService = new ErrorHandlerService();
+        }
         private async void SaveToDbTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (!saveToDbRadioButtonOn.Checked)
@@ -569,6 +597,25 @@ namespace Monolith_BGM
                 // Re-enable the button after execution
                 SavePOHToDbButton.Enabled = true;
             }
+        }
+
+        public void AppendLog(string message, bool isError = false)
+        {
+            richTextBoxLogs.Invoke(new Action(() =>
+            {
+                if (isError)
+                {
+                    richTextBoxLogs.SelectionColor = Color.Red;
+                }
+                else
+                {
+                    richTextBoxLogs.SelectionColor = Color.Black;
+                }
+
+                richTextBoxLogs.AppendText($"{DateTime.Now}: {message}{Environment.NewLine}");
+                richTextBoxLogs.SelectionStart = richTextBoxLogs.Text.Length;
+                richTextBoxLogs.ScrollToCaret(); // Auto-scroll to bottom
+            }));
         }
 
     }
