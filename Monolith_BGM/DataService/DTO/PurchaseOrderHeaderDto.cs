@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentValidation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,5 +76,15 @@ namespace Monolith_BGM.DataAccess.DTO
         /// </summary>
         [XmlElement("ModifiedDate")]
         public DateTime ModifiedDate { get; set; }
+
+        public class PurchaseOrderHeaderValidator : AbstractValidator<PurchaseOrderHeaderDto>
+        {
+            public PurchaseOrderHeaderValidator()
+            {
+                RuleFor(x => x.VendorId).NotEmpty().WithMessage("VendorId is required.");
+                RuleFor(x => x.TotalDue).NotEmpty().WithMessage("TotalDue is required.");
+                RuleFor(x => x.PurchaseOrderId).NotEmpty().WithMessage("PurchaseOrderId is required.");
+            }
+        }
     }
 }

@@ -12,6 +12,7 @@ using Monolith_BGM.XMLService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Monolith_BGM.DataAccess.DTO.PurchaseOrderHeaderDto;
 using Log = Serilog.Log;
 
 namespace Monolith_BGM.Src
@@ -66,6 +67,10 @@ namespace Monolith_BGM.Src
 
                 await DownloadFilesPODAsync(remoteDetailsDirectoryPath, localBaseDirectoryPath); // Download POD files
                 await DownloadFilesPOHAsync(remoteHeadersDirectoryPath, localHeadersPath); // Download POH files
+
+                // Validation
+                var validatePurchaseOrderDetails = await FetchXmlDetailsDataAsync();
+                var validatePurchaseOrderHeaderss = await FetchXmlHeadersDataAsync();
             }
             catch (Exception ex)
             {
@@ -134,44 +139,105 @@ namespace Monolith_BGM.Src
             File.Move(sourceFilePath, targetPath, true);
             Log.Information($"Moved invalid XML file to {targetPath}");
         }
-
         public async Task<List<PurchaseOrderHeaderDto>> FetchXmlHeadersDataAsync()
         {
- 
             List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
-            string headersDirectoryPath = Path.Combine(_fileManager.GetBaseDirectoryPath(), "headers");
+            string localBaseDirectoryPath = _fileManager.GetBaseDirectoryPath();
+            string invalidDataDirectoryPath = Path.Combine(localBaseDirectoryPath, "data_received_invalid");
+            Directory.CreateDirectory(invalidDataDirectoryPath); // Ensure the invalid directory exists
+            string headersDirectoryPath = Path.Combine(localBaseDirectoryPath, "headers");
 
-            try
+            if (Directory.Exists(headersDirectoryPath)) // Check if the headers directory exists
             {
-                if (Directory.Exists(headersDirectoryPath))  // Check if the headers directory exists
+                var xmlFiles = Directory.GetFiles(headersDirectoryPath, "*.xml", SearchOption.TopDirectoryOnly);
+
+                foreach (var xmlFile in xmlFiles)
                 {
-                    var xmlFiles = Directory.GetFiles(headersDirectoryPath, "*.xml", SearchOption.TopDirectoryOnly);
-                    foreach (var xmlFile in xmlFiles)
+                    try
                     {
-                        try
+                        var purchaseOrderHeaders = _xmlService.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
+
+                        if (purchaseOrderHeaders == null)
                         {
-                            var purchaseOrderHeaders = _xmlService.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
-                            allPurchaseOrderHeaders.AddRange(purchaseOrderHeaders.Headers);
+                            MoveInvalidFile(xmlFile, invalidDataDirectoryPath);
+                            continue;
                         }
-                        catch (Exception ex)
+
+                        bool hasInvalidEntries = false;
+
+                        foreach (var header in purchaseOrderHeaders.Headers)
                         {
-                            _errorHandler.LogError(ex, "Error loading XML data", xmlFile, "XMLProcessing");
+                            ValidationResult results = new PurchaseOrderHeaderValidator().Validate(header);
+                            if (!results.IsValid)
+                            {
+                                Log.Information($"Validation failed for {xmlFile}. Reason: {string.Join("; ", results.Errors.Select(e => e.ErrorMessage))}");
+                                hasInvalidEntries = true;
+                            }
+                            else
+                            {
+                                allPurchaseOrderHeaders.Add(header);
+                            }
+                        }
+
+                        // If there are any invalid entries, move the whole file to the invalid directory
+                        if (hasInvalidEntries)
+                        {
+                            MoveInvalidFile(xmlFile, invalidDataDirectoryPath);
                         }
                     }
-                }
-                else
-                {
-                    ErrorOccurred?.Invoke("Headers directory does not exist.");
+                    catch (Exception ex)
+                    {
+                        _errorHandler.LogError(ex, "Error loading or processing XML data", xmlFile, "XMLProcessing");
+                        MoveInvalidFile(xmlFile, invalidDataDirectoryPath);
+                    }
                 }
             }
-            catch (Exception ex)
+            else
             {
-                _errorHandler.LogError(ex, "Failed to process XML files", null, "XMLProcessing");
-                ErrorOccurred?.Invoke($"Failed to process XML files: {ex.Message}");
+                ErrorOccurred?.Invoke("Headers directory does not exist.");
+                Log.Warning("Headers directory does not exist: {DirectoryPath}", headersDirectoryPath);
             }
 
-        return allPurchaseOrderHeaders;
+            return allPurchaseOrderHeaders;
         }
+
+        //public async Task<List<PurchaseOrderHeaderDto>> FetchXmlHeadersDataAsync()
+        //{
+
+        //    List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
+        //    string headersDirectoryPath = Path.Combine(_fileManager.GetBaseDirectoryPath(), "headers");
+
+        //    try
+        //    {
+        //        if (Directory.Exists(headersDirectoryPath))  // Check if the headers directory exists
+        //        {
+        //            var xmlFiles = Directory.GetFiles(headersDirectoryPath, "*.xml", SearchOption.TopDirectoryOnly);
+        //            foreach (var xmlFile in xmlFiles)
+        //            {
+        //                try
+        //                {
+        //                    var purchaseOrderHeaders = _xmlService.LoadFromXml<PurchaseOrderHeaders>(xmlFile);
+        //                    allPurchaseOrderHeaders.AddRange(purchaseOrderHeaders.Headers);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    _errorHandler.LogError(ex, "Error loading XML data", xmlFile, "XMLProcessing");
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            ErrorOccurred?.Invoke("Headers directory does not exist.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _errorHandler.LogError(ex, "Failed to process XML files", null, "XMLProcessing");
+        //        ErrorOccurred?.Invoke($"Failed to process XML files: {ex.Message}");
+        //    }
+
+        //return allPurchaseOrderHeaders;
+        //}
 
         public async Task<bool> SavePODetailsToDb(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
         {
@@ -437,7 +503,7 @@ namespace Monolith_BGM.Src
                     bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
 
                     // Validation
-                    var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
+                    //var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
 
                     if (filesDownloaded)
                     {
@@ -450,6 +516,8 @@ namespace Monolith_BGM.Src
                         Log.Information($"No new XML files in {remotePath}.");
                     }
 
+                    // Validation
+                    //var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
                     // Exit the loop after a successful download
                     shouldRetry = false;
                 }
