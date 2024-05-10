@@ -320,6 +320,7 @@ namespace Monolith_BGM.Src
             return false;
         }
 
+
         private async Task<List<int>> AlreadyGenerated()
         {
             return await _dataService.FetchPurchaseOrderIdGeneratedAsync();           
@@ -591,5 +592,13 @@ namespace Monolith_BGM.Src
                 }
             }
         }
+
+        public async Task<List<PurchaseOrderSummary>> SearchPurchaseOrdersWithinDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            var purchaseOrders = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate, endDate);
+
+            return purchaseOrders;
+        }   
+
     }
 }

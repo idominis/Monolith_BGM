@@ -32,6 +32,8 @@ namespace Monolith_BGM
         private System.Timers.Timer saveToDbTimer;
         private RichTextBox _richTextBoxLogs;
         private ErrorHandlerService _errorHandlerService;
+        private DateTime _startDate;
+        private DateTime _endDate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainForm"/> class.
@@ -348,36 +350,36 @@ namespace Monolith_BGM
         }
 
         private async Task<bool> SavePOHToDb(List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders)
-        {         
+        {
             bool isSuccess = false;
             string statusMessage;
 
             try
+            {
+                if (allPurchaseOrderHeaders == null || allPurchaseOrderHeaders.Count == 0)
                 {
-                    if (allPurchaseOrderHeaders == null || allPurchaseOrderHeaders.Count == 0)
-                    {
-                        statusMessage = "No Headers XMLs found";
-                    }
-                    else if (_controller.SavePOHeadersToDb(allPurchaseOrderHeaders).Result)
-                    //else if (res)
-                    {
-                        statusMessage = "POH files saved to DB!";
-                        isSuccess = true;
-                    }
-                    else
-                    {
-                        statusMessage = "POH files failed saving to DB!";
-                    }
+                    statusMessage = "No Headers XMLs found";
                 }
-                catch (Exception ex)
+                else if (_controller.SavePOHeadersToDb(allPurchaseOrderHeaders).Result)
+                //else if (res)
                 {
-                    _errorHandler.LogError(ex, "Error processing POH XML files.");
-                    statusMessage = "Error saving POH to database.";
+                    statusMessage = "POH files saved to DB!";
+                    isSuccess = true;
                 }
+                else
+                {
+                    statusMessage = "POH files failed saving to DB!";
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, "Error processing POH XML files.");
+                statusMessage = "Error saving POH to database.";
+            }
 
-                _statusUpdateService.RaiseStatusUpdated(statusMessage);
-                return isSuccess;
-            
+            _statusUpdateService.RaiseStatusUpdated(statusMessage);
+            return isSuccess;
+
         }
 
         private async void CreatePOSXMLsButton_ClickAsync(object sender, EventArgs e)
@@ -617,6 +619,93 @@ namespace Monolith_BGM
                 richTextBoxLogs.ScrollToCaret(); // Auto-scroll to bottom
             }));
         }
+        
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            _startDate = dateTimePicker1.Value;
+            if (_startDate != DateTime.MinValue && _endDate != DateTime.MinValue)
+            {
+                SearchPOWithinDateRange();
+            }
+        }
 
+        private void dateTimePicker2_ValueChanged(object sender, EventArgs e)
+        {
+            _endDate = dateTimePicker2.Value;
+            if (_startDate != DateTime.MinValue && _endDate != DateTime.MinValue)
+            {
+                SearchPOWithinDateRange();
+            }
+        }
+
+        private async void SearchPOWithinDateRange()
+        {
+            try
+            {
+                if (_startDate > _endDate)
+                {
+                    MessageBox.Show("Start date must be before or equal to the end date.", "Invalid Date Range", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var purchaseOrders = await _controller.SearchPurchaseOrdersWithinDateRangeAsync(_startDate, _endDate);
+
+                if (purchaseOrders != null && purchaseOrders.Count > 0)
+                {
+                    AppendLog($"{purchaseOrders.Count} purchase orders found for the date range {_startDate:yyyy-MM-dd} to {_endDate:yyyy-MM-dd}");
+                }
+                else
+                {
+                    AppendLog($"No purchase orders found for the date range {_startDate:yyyy-MM-dd} to {_endDate:yyyy-MM-dd}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, $"Failed to fetch purchase orders for the date range {_startDate:yyyy-MM-dd} to {_endDate:yyyy-MM-dd}");
+                AppendLog($"Error fetching purchase orders for the date range {_startDate:yyyy-MM-dd} to {_endDate:yyyy-MM-dd}: {ex.Message}", true);
+            }
+        }
+
+        private async void CreateDataRangePOS_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_startDate > _endDate)
+                {
+                    MessageBox.Show("Start date must be before or equal to the end date.", "Invalid Date Range", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var success = await _controller.GenerateXml(_startDate, _endDate);
+
+                if (success)
+                    _statusUpdateService.RaiseStatusUpdated("XML files generated successfully!");
+                else
+                {
+                    _statusUpdateService.RaiseStatusUpdated("No data found to generate XML files or files already generated!");
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorHandler.LogError(ex, "An error occurred generating XML files.");
+                _statusUpdateService.RaiseStatusUpdated("An error occurred generating XML files", ex);
+            }
+        }
+
+        private void exitAppButton_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(
+                "Are you sure you want to exit the application?",
+                "Exit Application",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+        }
+    
     }
 }

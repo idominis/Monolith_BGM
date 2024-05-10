@@ -52,11 +52,15 @@
             saveToDbRadioButtonOff = new RadioButton();
             saveToDbRadioButtonOn = new RadioButton();
             groupBox4 = new GroupBox();
+            CreateDataRangePOS = new Button();
+            dateTimePicker2 = new DateTimePicker();
+            dateTimePicker1 = new DateTimePicker();
             label5 = new Label();
             createXmlDbRadioButtonOff = new RadioButton();
             createXmlDbRadioButtonOn = new RadioButton();
             richTextBoxLogs = new RichTextBox();
             label6 = new Label();
+            exitAppButton = new Button();
             statusStrip1.SuspendLayout();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
@@ -66,7 +70,7 @@
             // 
             // SavePODToDbButton
             // 
-            SavePODToDbButton.Location = new Point(16, 22);
+            SavePODToDbButton.Location = new Point(16, 35);
             SavePODToDbButton.Name = "SavePODToDbButton";
             SavePODToDbButton.Size = new Size(137, 23);
             SavePODToDbButton.TabIndex = 0;
@@ -112,7 +116,7 @@
             // 
             // SavePOHToDbButton
             // 
-            SavePOHToDbButton.Location = new Point(16, 60);
+            SavePOHToDbButton.Location = new Point(16, 73);
             SavePOHToDbButton.Margin = new Padding(3, 2, 3, 2);
             SavePOHToDbButton.Name = "SavePOHToDbButton";
             SavePOHToDbButton.Size = new Size(137, 22);
@@ -123,19 +127,19 @@
             // 
             // Button
             // 
-            Button.Location = new Point(0, 39);
+            Button.Location = new Point(16, 34);
             Button.Margin = new Padding(3, 2, 3, 2);
             Button.Name = "Button";
             Button.Size = new Size(137, 22);
             Button.TabIndex = 5;
-            Button.Text = "Create POS XMLs";
+            Button.Text = "Create All POS XMLs";
             Button.UseVisualStyleBackColor = true;
             Button.Click += CreatePOSXMLsButton_ClickAsync;
             // 
             // comboBoxStartDate
             // 
             comboBoxStartDate.FormattingEnabled = true;
-            comboBoxStartDate.Location = new Point(25, 49);
+            comboBoxStartDate.Location = new Point(25, 43);
             comboBoxStartDate.Margin = new Padding(3, 2, 3, 2);
             comboBoxStartDate.Name = "comboBoxStartDate";
             comboBoxStartDate.Size = new Size(104, 23);
@@ -145,7 +149,7 @@
             // comboBoxEndDate
             // 
             comboBoxEndDate.FormattingEnabled = true;
-            comboBoxEndDate.Location = new Point(134, 49);
+            comboBoxEndDate.Location = new Point(134, 43);
             comboBoxEndDate.Margin = new Padding(3, 2, 3, 2);
             comboBoxEndDate.Name = "comboBoxEndDate";
             comboBoxEndDate.Size = new Size(104, 23);
@@ -160,18 +164,18 @@
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(comboBoxStartDate);
             groupBox1.Controls.Add(comboBoxEndDate);
-            groupBox1.Location = new Point(326, 95);
+            groupBox1.Location = new Point(322, 41);
             groupBox1.Margin = new Padding(3, 2, 3, 2);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(3, 2, 3, 2);
-            groupBox1.Size = new Size(280, 140);
+            groupBox1.Size = new Size(270, 128);
             groupBox1.TabIndex = 8;
             groupBox1.TabStop = false;
             groupBox1.Text = "XMLs Interval Creation";
             // 
             // sendXmlButton
             // 
-            sendXmlButton.Location = new Point(134, 76);
+            sendXmlButton.Location = new Point(134, 70);
             sendXmlButton.Margin = new Padding(3, 2, 3, 2);
             sendXmlButton.Name = "sendXmlButton";
             sendXmlButton.Size = new Size(103, 42);
@@ -182,7 +186,7 @@
             // 
             // generateXmlButton
             // 
-            generateXmlButton.Location = new Point(25, 76);
+            generateXmlButton.Location = new Point(25, 70);
             generateXmlButton.Margin = new Padding(3, 2, 3, 2);
             generateXmlButton.Name = "generateXmlButton";
             generateXmlButton.Size = new Size(103, 42);
@@ -194,7 +198,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(134, 32);
+            label2.Location = new Point(134, 26);
             label2.Name = "label2";
             label2.Size = new Size(54, 15);
             label2.TabIndex = 9;
@@ -203,7 +207,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(25, 32);
+            label1.Location = new Point(25, 26);
             label1.Name = "label1";
             label1.Size = new Size(58, 15);
             label1.TabIndex = 8;
@@ -215,19 +219,19 @@
             groupBox2.Controls.Add(autoSendTextBox);
             groupBox2.Controls.Add(radioButtonOff);
             groupBox2.Controls.Add(radioButtonOn);
-            groupBox2.Location = new Point(637, 103);
+            groupBox2.Location = new Point(647, 41);
             groupBox2.Margin = new Padding(3, 2, 3, 2);
             groupBox2.Name = "groupBox2";
             groupBox2.Padding = new Padding(3, 2, 3, 2);
-            groupBox2.Size = new Size(266, 132);
+            groupBox2.Size = new Size(256, 128);
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
-            groupBox2.Text = "Set AutoSend created XMLs";
+            groupBox2.Text = "Set AutoSend All Created XMLs";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(46, 75);
+            label3.Location = new Point(46, 60);
             label3.Name = "label3";
             label3.Size = new Size(81, 15);
             label3.TabIndex = 3;
@@ -235,7 +239,7 @@
             // 
             // autoSendTextBox
             // 
-            autoSendTextBox.Location = new Point(46, 100);
+            autoSendTextBox.Location = new Point(46, 85);
             autoSendTextBox.Margin = new Padding(3, 2, 3, 2);
             autoSendTextBox.Name = "autoSendTextBox";
             autoSendTextBox.Size = new Size(150, 23);
@@ -244,7 +248,7 @@
             // radioButtonOff
             // 
             radioButtonOff.AutoSize = true;
-            radioButtonOff.Location = new Point(153, 36);
+            radioButtonOff.Location = new Point(93, 36);
             radioButtonOff.Margin = new Padding(3, 2, 3, 2);
             radioButtonOff.Name = "radioButtonOff";
             radioButtonOff.Size = new Size(42, 19);
@@ -275,9 +279,9 @@
             groupBox3.Controls.Add(saveToDbRadioButtonOn);
             groupBox3.Controls.Add(SavePODToDbButton);
             groupBox3.Controls.Add(SavePOHToDbButton);
-            groupBox3.Location = new Point(12, 65);
+            groupBox3.Location = new Point(12, 41);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(280, 100);
+            groupBox3.Size = new Size(280, 128);
             groupBox3.TabIndex = 10;
             groupBox3.TabStop = false;
             groupBox3.Text = "Save XMLs to DB";
@@ -285,7 +289,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(192, 30);
+            label4.Location = new Point(192, 37);
             label4.Name = "label4";
             label4.Size = new Size(33, 15);
             label4.TabIndex = 5;
@@ -294,7 +298,7 @@
             // saveToDbRadioButtonOff
             // 
             saveToDbRadioButtonOff.AutoSize = true;
-            saveToDbRadioButtonOff.Location = new Point(221, 49);
+            saveToDbRadioButtonOff.Location = new Point(221, 56);
             saveToDbRadioButtonOff.Margin = new Padding(3, 2, 3, 2);
             saveToDbRadioButtonOff.Name = "saveToDbRadioButtonOff";
             saveToDbRadioButtonOff.Size = new Size(42, 19);
@@ -308,7 +312,7 @@
             // saveToDbRadioButtonOn
             // 
             saveToDbRadioButtonOn.AutoSize = true;
-            saveToDbRadioButtonOn.Location = new Point(174, 49);
+            saveToDbRadioButtonOn.Location = new Point(174, 56);
             saveToDbRadioButtonOn.Margin = new Padding(3, 2, 3, 2);
             saveToDbRadioButtonOn.Name = "saveToDbRadioButtonOn";
             saveToDbRadioButtonOn.Size = new Size(41, 19);
@@ -320,21 +324,56 @@
             // 
             // groupBox4
             // 
+            groupBox4.Controls.Add(CreateDataRangePOS);
+            groupBox4.Controls.Add(dateTimePicker2);
+            groupBox4.Controls.Add(dateTimePicker1);
             groupBox4.Controls.Add(label5);
             groupBox4.Controls.Add(createXmlDbRadioButtonOff);
             groupBox4.Controls.Add(Button);
             groupBox4.Controls.Add(createXmlDbRadioButtonOn);
             groupBox4.Location = new Point(12, 185);
             groupBox4.Name = "groupBox4";
-            groupBox4.Size = new Size(280, 74);
+            groupBox4.Size = new Size(722, 74);
             groupBox4.TabIndex = 11;
             groupBox4.TabStop = false;
             groupBox4.Text = "Create XMLs from DB";
             // 
+            // CreateDataRangePOS
+            // 
+            CreateDataRangePOS.Location = new Point(507, 33);
+            CreateDataRangePOS.Name = "CreateDataRangePOS";
+            CreateDataRangePOS.Size = new Size(185, 23);
+            CreateDataRangePOS.TabIndex = 9;
+            CreateDataRangePOS.Text = "Create DataRange POS XMLs";
+            CreateDataRangePOS.UseVisualStyleBackColor = true;
+            CreateDataRangePOS.Click += CreateDataRangePOS_Click;
+            // 
+            // dateTimePicker2
+            // 
+            dateTimePicker2.Format = DateTimePickerFormat.Short;
+            dateTimePicker2.Location = new Point(390, 32);
+            dateTimePicker2.MinDate = new DateTime(2011, 4, 1, 0, 0, 0, 0);
+            dateTimePicker2.Name = "dateTimePicker2";
+            dateTimePicker2.Size = new Size(99, 23);
+            dateTimePicker2.TabIndex = 8;
+            dateTimePicker2.Value = new DateTime(2012, 2, 2, 5, 55, 0, 0);
+            dateTimePicker2.ValueChanged += dateTimePicker2_ValueChanged;
+            // 
+            // dateTimePicker1
+            // 
+            dateTimePicker1.Format = DateTimePickerFormat.Short;
+            dateTimePicker1.Location = new Point(276, 32);
+            dateTimePicker1.MinDate = new DateTime(2011, 4, 1, 0, 0, 0, 0);
+            dateTimePicker1.Name = "dateTimePicker1";
+            dateTimePicker1.Size = new Size(99, 23);
+            dateTimePicker1.TabIndex = 7;
+            dateTimePicker1.Value = new DateTime(2011, 4, 1, 5, 53, 0, 0);
+            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
+            // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(192, 19);
+            label5.Location = new Point(182, 18);
             label5.Name = "label5";
             label5.Size = new Size(33, 15);
             label5.TabIndex = 6;
@@ -343,7 +382,7 @@
             // createXmlDbRadioButtonOff
             // 
             createXmlDbRadioButtonOff.AutoSize = true;
-            createXmlDbRadioButtonOff.Location = new Point(221, 39);
+            createXmlDbRadioButtonOff.Location = new Point(211, 38);
             createXmlDbRadioButtonOff.Margin = new Padding(3, 2, 3, 2);
             createXmlDbRadioButtonOff.Name = "createXmlDbRadioButtonOff";
             createXmlDbRadioButtonOff.Size = new Size(42, 19);
@@ -357,7 +396,7 @@
             // createXmlDbRadioButtonOn
             // 
             createXmlDbRadioButtonOn.AutoSize = true;
-            createXmlDbRadioButtonOn.Location = new Point(174, 39);
+            createXmlDbRadioButtonOn.Location = new Point(164, 38);
             createXmlDbRadioButtonOn.Margin = new Padding(3, 2, 3, 2);
             createXmlDbRadioButtonOn.Name = "createXmlDbRadioButtonOn";
             createXmlDbRadioButtonOn.Size = new Size(41, 19);
@@ -386,11 +425,24 @@
             label6.TabIndex = 13;
             label6.Text = "Info Window";
             // 
+            // exitAppButton
+            // 
+            exitAppButton.BackColor = Color.Red;
+            exitAppButton.ForeColor = SystemColors.ButtonHighlight;
+            exitAppButton.Location = new Point(786, 185);
+            exitAppButton.Name = "exitAppButton";
+            exitAppButton.Size = new Size(75, 74);
+            exitAppButton.TabIndex = 14;
+            exitAppButton.Text = "Exit App";
+            exitAppButton.UseVisualStyleBackColor = false;
+            exitAppButton.Click += exitAppButton_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(925, 503);
+            Controls.Add(exitAppButton);
             Controls.Add(label6);
             Controls.Add(richTextBoxLogs);
             Controls.Add(groupBox4);
@@ -447,5 +499,9 @@
         private RadioButton createXmlDbRadioButtonOn;
         private RichTextBox richTextBoxLogs;
         private Label label6;
+        private DateTimePicker dateTimePicker2;
+        private DateTimePicker dateTimePicker1;
+        private Button CreateDataRangePOS;
+        private Button exitAppButton;
     }
 }
