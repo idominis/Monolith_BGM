@@ -52,6 +52,7 @@
             saveToDbRadioButtonOff = new RadioButton();
             saveToDbRadioButtonOn = new RadioButton();
             groupBox4 = new GroupBox();
+            sendDataRangeButton = new Button();
             CreateDataRangePOS = new Button();
             dateTimePicker2 = new DateTimePicker();
             dateTimePicker1 = new DateTimePicker();
@@ -307,7 +308,7 @@
             saveToDbRadioButtonOff.Text = "Off";
             saveToDbRadioButtonOff.UseMnemonic = false;
             saveToDbRadioButtonOff.UseVisualStyleBackColor = true;
-            saveToDbRadioButtonOff.CheckedChanged += saveToDbRadioButtonOff_CheckedChanged;
+            saveToDbRadioButtonOff.CheckedChanged += SaveToDbRadioButtonOff_CheckedChanged;
             // 
             // saveToDbRadioButtonOn
             // 
@@ -320,10 +321,11 @@
             saveToDbRadioButtonOn.TabStop = true;
             saveToDbRadioButtonOn.Text = "On";
             saveToDbRadioButtonOn.UseVisualStyleBackColor = true;
-            saveToDbRadioButtonOn.CheckedChanged += saveToDbRadioButtonOn_CheckedChanged;
+            saveToDbRadioButtonOn.CheckedChanged += SaveToDbRadioButtonOn_CheckedChanged;
             // 
             // groupBox4
             // 
+            groupBox4.Controls.Add(sendDataRangeButton);
             groupBox4.Controls.Add(CreateDataRangePOS);
             groupBox4.Controls.Add(dateTimePicker2);
             groupBox4.Controls.Add(dateTimePicker1);
@@ -333,16 +335,26 @@
             groupBox4.Controls.Add(createXmlDbRadioButtonOn);
             groupBox4.Location = new Point(12, 185);
             groupBox4.Name = "groupBox4";
-            groupBox4.Size = new Size(722, 74);
+            groupBox4.Size = new Size(810, 74);
             groupBox4.TabIndex = 11;
             groupBox4.TabStop = false;
             groupBox4.Text = "Create XMLs from DB";
+            // 
+            // sendDataRangeButton
+            // 
+            sendDataRangeButton.Location = new Point(682, 32);
+            sendDataRangeButton.Name = "sendDataRangeButton";
+            sendDataRangeButton.Size = new Size(122, 23);
+            sendDataRangeButton.TabIndex = 10;
+            sendDataRangeButton.Text = "Send DataRange POS XMLs";
+            sendDataRangeButton.UseVisualStyleBackColor = true;
+            sendDataRangeButton.Click += SendDataRangeButton_Click;
             // 
             // CreateDataRangePOS
             // 
             CreateDataRangePOS.Location = new Point(507, 33);
             CreateDataRangePOS.Name = "CreateDataRangePOS";
-            CreateDataRangePOS.Size = new Size(185, 23);
+            CreateDataRangePOS.Size = new Size(169, 23);
             CreateDataRangePOS.TabIndex = 9;
             CreateDataRangePOS.Text = "Create DataRange POS XMLs";
             CreateDataRangePOS.UseVisualStyleBackColor = true;
@@ -357,18 +369,18 @@
             dateTimePicker2.Size = new Size(99, 23);
             dateTimePicker2.TabIndex = 8;
             dateTimePicker2.Value = new DateTime(2012, 2, 2, 5, 55, 0, 0);
-            dateTimePicker2.ValueChanged += dateTimePicker2_ValueChanged;
+            dateTimePicker2.ValueChanged += DateTimePicker2_ValueChanged;
             // 
             // dateTimePicker1
             // 
             dateTimePicker1.Format = DateTimePickerFormat.Short;
             dateTimePicker1.Location = new Point(276, 32);
-            dateTimePicker1.MinDate = new DateTime(2011, 4, 1, 0, 0, 0, 0);
+            dateTimePicker1.MinDate = new DateTime(2011, 3, 31, 0, 0, 0, 0);
             dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(99, 23);
+            dateTimePicker1.Size = new Size(95, 23);
             dateTimePicker1.TabIndex = 7;
             dateTimePicker1.Value = new DateTime(2011, 4, 1, 5, 53, 0, 0);
-            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
+            dateTimePicker1.ValueChanged += DateTimePicker1_ValueChanged;
             // 
             // label5
             // 
@@ -391,7 +403,7 @@
             createXmlDbRadioButtonOff.Text = "Off";
             createXmlDbRadioButtonOff.UseMnemonic = false;
             createXmlDbRadioButtonOff.UseVisualStyleBackColor = true;
-            createXmlDbRadioButtonOff.CheckedChanged += createXmlDbRadioButtonOff_CheckedChanged;
+            createXmlDbRadioButtonOff.CheckedChanged += CreateXmlDbRadioButtonOff_CheckedChanged;
             // 
             // createXmlDbRadioButtonOn
             // 
@@ -404,7 +416,7 @@
             createXmlDbRadioButtonOn.TabStop = true;
             createXmlDbRadioButtonOn.Text = "On";
             createXmlDbRadioButtonOn.UseVisualStyleBackColor = true;
-            createXmlDbRadioButtonOn.CheckedChanged += createXmlDbRadioButtonOn_CheckedChanged;
+            createXmlDbRadioButtonOn.CheckedChanged += CreateXmlDbRadioButtonOn_CheckedChanged;
             // 
             // richTextBoxLogs
             // 
@@ -429,7 +441,7 @@
             // 
             exitAppButton.BackColor = Color.Red;
             exitAppButton.ForeColor = SystemColors.ButtonHighlight;
-            exitAppButton.Location = new Point(786, 185);
+            exitAppButton.Location = new Point(828, 185);
             exitAppButton.Name = "exitAppButton";
             exitAppButton.Size = new Size(75, 74);
             exitAppButton.TabIndex = 14;
@@ -503,5 +515,6 @@
         private DateTimePicker dateTimePicker1;
         private Button CreateDataRangePOS;
         private Button exitAppButton;
+        private Button sendDataRangeButton;
     }
 }

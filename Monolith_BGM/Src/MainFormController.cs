@@ -372,7 +372,7 @@ namespace Monolith_BGM.Src
         /// <returns>
         ///   <br />
         /// </returns>
-        public async Task<bool> SendDateGeneratedXml(DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<bool> SendComboDateGeneratedXml(DateTime? startDate = null, DateTime? endDate = null)
         {
             string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
             string fileName = $"PurchaseOrderSummariesGenerated_{startDate:yyyyMMdd}_to_{endDate:yyyyMMdd}.xml";
@@ -420,6 +420,69 @@ namespace Monolith_BGM.Src
             {
                 _errorHandler.LogError(ex, "Error sending XML file", null, "FileUpload");
                 ErrorOccurred?.Invoke($"Error sending XML file: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> SendDateGeneratedXml(DateTime startDate, DateTime endDate)
+        {
+            // Path where the XML files are generated and will be uploaded from
+            string localBaseDirectoryXmlCreatedPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
+
+            try
+            {
+                // Retrieve all purchase order summaries within the specified date range
+                List<PurchaseOrderSummary> purchaseOrderSummaries = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate, endDate);
+
+                // Fetch already uploaded purchase order IDs to avoid duplicate uploads
+                HashSet<int> alreadySentIds = await _dataService.FetchAlreadySentPurchaseOrderIdsAsync();
+
+                // Filter out already sent purchase orders to get only those that need to be uploaded
+                List<PurchaseOrderSummary> idsToUpload = purchaseOrderSummaries
+                    .Where(summary => !alreadySentIds.Contains(summary.PurchaseOrderID))
+                    .ToList();
+
+                if (!idsToUpload.Any())
+                {
+                    MessageBox.Show("All Purchase Orders in the specified date range have already been sent.", "Nothing to Send", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return false;
+                }
+
+                // Generate the XML files for the filtered summaries
+                _xmlService.GenerateXMLFiles(idsToUpload);
+
+                // Loop through the summaries and create/upload the corresponding XML files
+                foreach (var summary in idsToUpload)
+                {
+                    // Create the file name dynamically using the PurchaseOrderID
+                    string fileName = $"PurchaseOrderGenerated_{summary.PurchaseOrderID}.xml";
+                    string filePath = Path.Combine(localBaseDirectoryXmlCreatedPath, fileName);
+
+                    // Determine the remote directory path where the file will be uploaded
+                    string remotePath = Path.Combine("/Uploaded/", fileName);
+
+                    // Upload the file to the remote path
+                    await _fileHandler.UploadFileAsync(filePath, remotePath);
+
+                    // Extract the detail IDs from the generated XML file
+                    List<int> detailIds = _xmlService.ExtractPurchaseOrderDetailIdsFromXml(filePath);
+
+                    // Update the database with the upload status for each detail
+                    foreach (int detailsId in detailIds)
+                    {
+                        await _dataService.UpdatePurchaseOrderStatus(summary.PurchaseOrderID, detailsId, true, true, 0); // 0 - Auto, 1 - Custom
+                    }
+                }
+
+                MessageBox.Show("Files successfully sent for the specified date range.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Log.Information("Files sent successfully for the specified date range.");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to send Purchase Order XML files for the specified date range.");
+                MessageBox.Show($"Failed to send Purchase Order files: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -503,9 +566,6 @@ namespace Monolith_BGM.Src
 
                     bool filesDownloaded = await _fileHandler.DownloadXmlFilesFromDirectoryAsync(remotePath, localPath);
 
-                    // Validation
-                    //var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
-
                     if (filesDownloaded)
                     {
                         _statusUpdateService.RaiseStatusUpdated($"XML files from {remotePath} have been downloaded successfully!");
@@ -517,9 +577,6 @@ namespace Monolith_BGM.Src
                         Log.Information($"No new XML files in {remotePath}.");
                     }
 
-                    // Validation
-                    //var allPurchaseOrderDetails = await FetchXmlDetailsDataAsync();
-                    // Exit the loop after a successful download
                     shouldRetry = false;
                 }
                 catch (Exception ex)
