@@ -19,11 +19,9 @@ namespace Monolith_BGM.Models
         }
 
         public virtual DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=BGM_db;Trusted_Connection=True;");
-        }
+        public virtual DbSet<PurchaseOrderHeader> PurchaseOrderHeaders { get; set; }
+        public virtual DbSet<PurchaseOrdersProcessedSent> PurchaseOrdersProcessedSents { get; set; }
+        public virtual DbSet<VPurchaseOrderSummary> VPurchaseOrderSummaries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,7 +39,6 @@ namespace Monolith_BGM.Models
                     .HasComment("Primary key. Foreign key to PurchaseOrderHeader.PurchaseOrderID.");
 
                 entity.Property(e => e.PurchaseOrderDetailId)
-                    .ValueGeneratedOnAdd()
                     .HasColumnName("PurchaseOrderDetailID")
                     .HasComment("Primary key. One line number per purchased product.");
 
@@ -81,6 +78,126 @@ namespace Monolith_BGM.Models
                 entity.Property(e => e.UnitPrice)
                     .HasColumnType("money")
                     .HasComment("Vendor's selling price of a single product.");
+            });
+
+            modelBuilder.Entity<PurchaseOrderHeader>(entity =>
+            {
+                entity.HasKey(e => e.PurchaseOrderId)
+                    .HasName("PK_PurchaseOrderHeader_PurchaseOrderID");
+
+                entity.ToTable("PurchaseOrderHeader", "Purchasing");
+
+                entity.HasComment("General purchase order information. See PurchaseOrderDetail.");
+
+                entity.Property(e => e.PurchaseOrderId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("PurchaseOrderID")
+                    .HasComment("Primary key.");
+
+                entity.Property(e => e.EmployeeId)
+                    .HasColumnName("EmployeeID")
+                    .HasComment("Employee who created the purchase order. Foreign key to Employee.BusinessEntityID.");
+
+                entity.Property(e => e.Freight)
+                    .HasColumnType("money")
+                    .HasDefaultValueSql("((0.00))")
+                    .HasComment("Shipping cost.");
+
+                entity.Property(e => e.ModifiedDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())")
+                    .HasComment("Date and time the record was last updated.");
+
+                entity.Property(e => e.OrderDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())")
+                    .HasComment("Purchase order creation date.");
+
+                entity.Property(e => e.RevisionNumber).HasComment("Incremental number to track changes to the purchase order over time.");
+
+                entity.Property(e => e.ShipDate)
+                    .HasColumnType("datetime")
+                    .HasComment("Estimated shipment date from the vendor.");
+
+                entity.Property(e => e.ShipMethodId)
+                    .HasColumnName("ShipMethodID")
+                    .HasComment("Shipping method. Foreign key to ShipMethod.ShipMethodID.");
+
+                entity.Property(e => e.Status)
+                    .HasDefaultValueSql("((1))")
+                    .HasComment("Order current status. 1 = Pending; 2 = Approved; 3 = Rejected; 4 = Complete");
+
+                entity.Property(e => e.SubTotal)
+                    .HasColumnType("money")
+                    .HasDefaultValueSql("((0.00))")
+                    .HasComment("Purchase order subtotal. Computed as SUM(PurchaseOrderDetail.LineTotal)for the appropriate PurchaseOrderID.");
+
+                entity.Property(e => e.TaxAmt)
+                    .HasColumnType("money")
+                    .HasDefaultValueSql("((0.00))")
+                    .HasComment("Tax amount.");
+
+                entity.Property(e => e.TotalDue)
+                    .HasColumnType("money")
+                    .HasComputedColumnSql("(isnull(([SubTotal]+[TaxAmt])+[Freight],(0)))", true)
+                    .HasComment("Total due to vendor. Computed as Subtotal + TaxAmt + Freight.");
+
+                entity.Property(e => e.VendorId)
+                    .HasColumnName("VendorID")
+                    .HasComment("Vendor with whom the purchase order is placed. Foreign key to Vendor.BusinessEntityID.");
+            });
+
+            modelBuilder.Entity<PurchaseOrdersProcessedSent>(entity =>
+            {
+                entity.HasKey(e => e.PurchaseOrderDetailId)
+                    .HasName("PK__Purchase__5026B6986F3ECF87");
+
+                entity.ToTable("PurchaseOrdersProcessedSent", "Purchasing");
+
+                entity.Property(e => e.PurchaseOrderDetailId).ValueGeneratedNever();
+
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<VPurchaseOrderSummary>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("vPurchaseOrderSummary", "Purchasing");
+
+                entity.Property(e => e.Freight).HasColumnType("money");
+
+                entity.Property(e => e.LineTotal).HasColumnType("money");
+
+                entity.Property(e => e.OrderDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ProductId).HasColumnName("ProductID");
+
+                entity.Property(e => e.ProductName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.ProductNumber)
+                    .IsRequired()
+                    .HasMaxLength(25);
+
+                entity.Property(e => e.PurchaseOrderDetailId).HasColumnName("PurchaseOrderDetailID");
+
+                entity.Property(e => e.PurchaseOrderId).HasColumnName("PurchaseOrderID");
+
+                entity.Property(e => e.SubTotal).HasColumnType("money");
+
+                entity.Property(e => e.TaxAmt).HasColumnType("money");
+
+                entity.Property(e => e.TotalDue).HasColumnType("money");
+
+                entity.Property(e => e.UnitPrice).HasColumnType("money");
+
+                entity.Property(e => e.VendorId).HasColumnName("VendorID");
+
+                entity.Property(e => e.VendorName)
+                    .IsRequired()
+                    .HasMaxLength(50);
             });
 
             OnModelCreatingPartial(modelBuilder);

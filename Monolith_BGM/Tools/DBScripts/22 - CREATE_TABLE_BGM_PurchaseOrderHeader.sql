@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE TABLE [Purchasing].[PurchaseOrderHeader](
-	[PurchaseOrderID] [int] IDENTITY(1,1) NOT NULL,
+	[PurchaseOrderID] [int] NOT NULL,
 	[RevisionNumber] [tinyint] NOT NULL,
 	[Status] [tinyint] NOT NULL,
 	[EmployeeID] [int] NOT NULL,

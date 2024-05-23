@@ -4,8 +4,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monolith_BGM", "Monolith_BGM\Monolith_BGM.csproj", "{6D3ECA49-AE91-48CE-86B8-C17A6ED6620A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B} = {9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BGM.SftpUtilities", "BGM.SftpUtilities\BGM.SftpUtilities.csproj", "{3A39FF7E-D506-42BB-9B6C-B19504CCF578}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BGM.SftpUtilities", "BGM.SftpUtilities\BGM.SftpUtilities.csproj", "{3A39FF7E-D506-42BB-9B6C-B19504CCF578}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B} = {9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BGM.Common", "BGM.Common\BGM.Common.csproj", "{9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +29,10 @@ Global
 		{3A39FF7E-D506-42BB-9B6C-B19504CCF578}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A39FF7E-D506-42BB-9B6C-B19504CCF578}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A39FF7E-D506-42BB-9B6C-B19504CCF578}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B27E7A7-CA2F-4816-915A-9E6F9C2C9A1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

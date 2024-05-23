@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- Schema for Purchase Order Details -->
+	<xs:element name="PurchaseOrderDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PurchaseOrderDetail" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:dateTime" name="DueDate" minOccurs="0" nillable="true"/>
+							<xs:element type="xs:int" name="OrderQty"/>
+							<xs:element type="xs:int" name="ProductID"/>
+							<xs:element type="xs:decimal" name="UnitPrice"/>
+							<xs:element type="xs:decimal" name="LineTotal"/>
+							<xs:element type="xs:decimal" name="ReceivedQty"/>
+							<xs:element type="xs:decimal" name="RejectedQty"/>
+							<xs:element type="xs:decimal" name="StockedQty"/>
+							<xs:element type="xs:dateTime" name="ModifiedDate"/>
+						</xs:sequence>
+						<xs:attribute type="xs:int" name="PurchaseOrderID" use="required"/>
+						<xs:attribute type="xs:int" name="PurchaseOrderDetailID" use="required"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Schema for Purchase Order Headers -->
+	<xs:element name="PurchaseOrderHeaders">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PurchaseOrderHeader" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:int" name="PurchaseOrderID"/>
+							<xs:element type="xs:byte" name="RevisionNumber"/>
+							<xs:element type="xs:byte" name="Status"/>
+							<xs:element type="xs:int" name="EmployeeID"/>
+							<xs:element type="xs:int" name="VendorID"/>
+							<xs:element type="xs:int" name="ShipMethodID"/>
+							<xs:element type="xs:dateTime" name="OrderDate"/>
+							<xs:element type="xs:dateTime" name="ShipDate" minOccurs="0" nillable="true"/>
+							<xs:element type="xs:decimal" name="SubTotal"/>
+							<xs:element type="xs:decimal" name="TaxAmt"/>
+							<xs:element type="xs:decimal" name="Freight"/>
+							<xs:element type="xs:decimal" name="TotalDue"/>
+							<xs:element type="xs:dateTime" name="ModifiedDate"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Schema for Purchase Order Summary -->
+	<xs:element name="ArrayOfPurchaseOrderSummary">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PurchaseOrderSummary" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:int" name="PurchaseOrderID"/>
+							<xs:element type="xs:int" name="PurchaseOrderDetailID"/>
+							<xs:element type="xs:dateTime" name="OrderDate"/>
+							<xs:element type="xs:int" name="VendorID"/>
+							<xs:element type="xs:string" name="VendorName"/>
+							<xs:element type="xs:int" name="ProductID"/>
+							<xs:element type="xs:string" name="ProductNumber"/>
+							<xs:element type="xs:string" name="ProductName"/>
+							<xs:element type="xs:int" name="OrderQty"/>
+							<xs:element type="xs:decimal" name="UnitPrice"/>
+							<xs:element type="xs:decimal" name="LineTotal"/>
+							<xs:element type="xs:decimal" name="SubTotal"/>
+							<xs:element type="xs:decimal" name="TaxAmt"/>
+							<xs:element type="xs:decimal" name="Freight"/>
+							<xs:element type="xs:decimal" name="TotalDue"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

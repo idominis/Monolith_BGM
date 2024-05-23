@@ -2,87 +2,137 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using BGM.Common;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using Renci.SshNet.Sftp;
+using Serilog;
 
 namespace BGM.SftpUtilities
 {
     public class SftpFileHandler
     {
         private SftpClientManager _clientManager;
+        private readonly IStatusUpdateService _statusUpdateService;
 
-        public SftpFileHandler(SftpClientManager clientManager)
+        public SftpFileHandler(SftpClientManager clientManager, IStatusUpdateService statusUpdateService)
         {
             _clientManager = clientManager;
+            _statusUpdateService = statusUpdateService;
         }
 
-        public void UploadFile(string localFilePath, string remotePath)
+        public async Task UploadFileAsync(string localFilePath, string remotePath)
         {
-            using (var client = _clientManager.Connect())
+            try
             {
-                using (var fileStream = new FileStream(localFilePath, FileMode.Open))
+                using (var client = _clientManager.Connect())
                 {
-                    client.UploadFile(fileStream, remotePath);
+                    // Extract the remote directory from the path
+                    string remoteDirectory = Path.GetDirectoryName(remotePath);
+
+                    // Check if the directory exists and create it if it doesn't
+                    if (!client.Exists(remoteDirectory))
+                    {
+                        client.CreateDirectory(remoteDirectory); // Ensure this method is available or implement it
+                    }
+
+                    using (var fileStream = new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        await Task.Run(() => client.UploadFile(fileStream, remotePath));
+                    }
+                    _clientManager.Disconnect(client);
                 }
-                _clientManager.Disconnect(client);
+                Log.Information("File uploaded successfully: {LocalFilePath}", localFilePath);
+                _statusUpdateService.RaiseStatusUpdated("File uploaded successfully");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to upload file: {LocalFilePath}", localFilePath);
+                throw;
             }
         }
 
-        // Method to download XML files from a directory
-        public bool DownloadXmlFilesFromDirectory(string remoteDirectoryPath, string localBaseDirectoryPath)
+        public async Task<bool> DownloadXmlFilesFromDirectoryAsync(string remoteDirectoryPath, string localBaseDirectoryPath)
         {
             bool newFilesDownloaded = false;
 
-            using (var client = _clientManager.Connect())
+            try
             {
-                // Get the list of directories in the remote directory
-                var directories = client.ListDirectory(remoteDirectoryPath).Where(x => x.IsDirectory && x.Name != "." && x.Name != "..");
-
-                foreach (var directory in directories)
+                using (var client = _clientManager.Connect())
                 {
-                    // Create a local directory with the same name if it doesn't exist
-                    string localDirectoryPath = Path.Combine(localBaseDirectoryPath, directory.Name);
-                    Directory.CreateDirectory(localDirectoryPath);
+                    var entries = client.ListDirectory(remoteDirectoryPath);
 
-                    // Get the list of files in the remote directory
-                    var files = client.ListDirectory(Path.Combine(remoteDirectoryPath, directory.Name)).Where(x => !x.IsDirectory);
-
-                    foreach (var file in files)
+                    if (!Directory.Exists(localBaseDirectoryPath))
                     {
-                        // Skip the file if it has been marked as processed
-                        if (file.Name.EndsWith(".processed"))
-                        {
-                            continue;
-                        }
+                        Directory.CreateDirectory(localBaseDirectoryPath);
+                    }
 
-                        // Check if the file has already been downloaded
-                        string localFilePath = Path.Combine(localDirectoryPath, file.Name);
-                        if (File.Exists(localFilePath))
+                    foreach (var entry in entries)
+                    {
+                        if (entry.IsDirectory && entry.Name != "." && entry.Name != "..")
                         {
-                            continue;
-                        }
+                            string subDirectoryPath = Path.Combine(remoteDirectoryPath, entry.Name);
+                            string localSubDirectoryPath = Path.Combine(localBaseDirectoryPath, entry.Name);
 
-                        // Download the file
-                        using (var fileStream = new FileStream(localFilePath, FileMode.Create))
+                            if (!Directory.Exists(localSubDirectoryPath))
+                            {
+                                Directory.CreateDirectory(localSubDirectoryPath);
+                            }
+
+                            newFilesDownloaded |= await DownloadXmlFilesFromDirectoryAsync(subDirectoryPath, localSubDirectoryPath);
+                        }
+                        else if (!entry.IsDirectory && !entry.Name.EndsWith(".processed"))
                         {
-                            client.DownloadFile(file.FullName, fileStream);
-                        }
+                            SftpFile file = entry as SftpFile;
+                            if (file != null)
+                            {
+                                // Check if file exists locally and matches the remote file's size
+                                string localFilePath = Path.Combine(localBaseDirectoryPath, entry.Name);
 
-                        newFilesDownloaded = true;
-          
-                        // Rename the remote file to mark it as processed
-                        string processedFilePath = file.FullName + ".processed";
-                        client.RenameFile(file.FullName, processedFilePath);
+                                bool fileExists = File.Exists(localFilePath);
+                                bool sizeMatches = fileExists && new FileInfo(localFilePath).Length == entry.Attributes.Size;
+
+                                if (!fileExists || !sizeMatches)
+                                {
+                                    // File missing or incomplete, download it
+                                    newFilesDownloaded |= ProcessFilesInDirectory(client, new[] { file }, localBaseDirectoryPath, remoteDirectoryPath);
+                                }
+                            }
+                        }
                     }
                 }
-
-                _clientManager.Disconnect(client);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to download XML files from directory: {DirectoryPath}", remoteDirectoryPath);
+                throw;
             }
 
             return newFilesDownloaded;
         }
 
-    }
+        private bool ProcessFilesInDirectory(SftpClient client, IEnumerable<SftpFile> files, string localDirectoryPath, string remoteDirectoryPath)
+        {
+            bool downloaded = false;
+            foreach (var file in files)
+            {
+                string localFilePath = Path.Combine(localDirectoryPath, file.Name);
+                if (!File.Exists(localFilePath))
+                {
+                    using (var fileStream = new FileStream(localFilePath, FileMode.Create))
+                    {
+                        client.DownloadFile(file.FullName, fileStream);
+                    }
+                    downloaded = true;
 
+                    // Rename the file on server to mark as processed
+                    string processedFilePath = file.FullName + ".processed";
+                    client.RenameFile(file.FullName, processedFilePath);
+                    Log.Information("File {FileName} downloaded and marked as processed.", file.Name);
+                }
+            }
+            return downloaded;
+        }
+
+    }
 }
