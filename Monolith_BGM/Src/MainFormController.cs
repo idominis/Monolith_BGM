@@ -334,7 +334,7 @@ namespace Monolith_BGM.Src
         public async Task<bool> GenerateXml(DateTime? startDate = null, DateTime? endDate = null)
         {
             var alreadyGeneratedIds = await AlreadyGenerated();
-            var allSummaries = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate.GetValueOrDefault(), endDate.GetValueOrDefault());
+            var allSummaries = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate.GetValueOrDefault(), endDate.GetValueOrDefault()); //fetches ALL, just sorted by date
             var summariesToGenerate = allSummaries.Where(summary => !alreadyGeneratedIds.Contains(summary.PurchaseOrderID)).ToList();
 
             if (!summariesToGenerate.Any())
@@ -487,13 +487,13 @@ namespace Monolith_BGM.Src
             }
         }
 
-        /// <summary>Uploads all headers.</summary>
+        /// <summary>Uploads all PO.</summary>
         public async Task UploadAllHeaders()
         {
             string localBaseDirectoryPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
             string remoteDirectoryPath = "/Uploaded/";
 
-            var alreadySentIds = await AlreadySent();
+            var alreadySentIds = await AlreadySent();  //_dataService.FetchAlreadySentPurchaseOrderIdsAsync();    
             var alreadyGeneratedIds = await _dataService.FetchAlreadyGeneratedPurchaseOrderIdsAsync();
 
             DateTime? latestDate = null;
@@ -511,7 +511,7 @@ namespace Monolith_BGM.Src
                         continue;
                     }
 
-                    var orderIdsFromXml = _xmlService.ExtractPurchaseOrderIdsFromXml(filePath);
+                    var orderIdsFromXml = _xmlService.ExtractPurchaseOrderIdsFromXml(filePath); //TODO: Why return and then iterate through list? 
                     foreach (var id in orderIdsFromXml)
                     {
                         if (alreadySentIds.Contains(id))

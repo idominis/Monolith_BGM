@@ -13,16 +13,18 @@ using System.Diagnostics.CodeAnalysis;
 public class XmlService : IXmlService
 {
     private FileManager _fileManager;
+    private readonly string _purchaseOrderDetailsXsdPath;
 
-    public XmlService(FileManager fileManager)
+    public XmlService(FileManager fileManager, string xsdPath)
     {
         _fileManager = fileManager;
+        _purchaseOrderDetailsXsdPath = xsdPath;
     }
 
     public T LoadFromXml<T>(string filePath) where T : class
     {
         XmlSchemaSet schemas = new XmlSchemaSet();
-        schemas.Add("", "C:\\Users\\ido\\source\\repos\\Monolith_BGM\\Monolith_BGM\\Tools\\purchaseOrderDetails.xsd");
+        schemas.Add("", _purchaseOrderDetailsXsdPath);
 
         XmlReaderSettings settings = new XmlReaderSettings();
         settings.ValidationType = ValidationType.Schema;

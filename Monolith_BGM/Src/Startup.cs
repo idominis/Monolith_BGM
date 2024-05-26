@@ -55,9 +55,15 @@ public class Startup
         });
 
         // Common Services
+        
         services.AddScoped<IStatusUpdateService, StatusUpdateService>();
         services.AddScoped<IXmlService, XmlService>();
         services.AddScoped<FileManager>();
+        services.AddScoped<IXmlService>(provider =>
+            new XmlService(
+                provider.GetRequiredService<FileManager>(),
+                configuration["SchemaPaths:PurchaseOrderDetails"]
+            ));
         services.AddScoped<ErrorHandlerService>();
         services.AddScoped<DataService>();
         services.AddScoped<MainFormController>();

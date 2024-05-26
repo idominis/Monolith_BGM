@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <Folder Include="Libs\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>

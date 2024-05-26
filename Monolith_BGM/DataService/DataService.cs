@@ -141,9 +141,9 @@ public class DataService
     public async Task<DateTime?> GetLatestDateForPurchaseOrder(int purchaseOrderId)
     {
         var latestDate = await _dbContext.VPurchaseOrderSummaries
-                                          .Where(x => x.PurchaseOrderId == purchaseOrderId)
-                                          .Select(x => x.OrderDate)
-                                          .FirstOrDefaultAsync();
+                                         .Where(x => x.PurchaseOrderId == purchaseOrderId)
+                                         .Select(x => x.OrderDate)
+                                         .FirstOrDefaultAsync();
 
         return latestDate;
     }
