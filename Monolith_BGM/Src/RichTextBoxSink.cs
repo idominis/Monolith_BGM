@@ -6,17 +6,36 @@ using System.Windows.Forms;
 
 namespace Monolith_BGM.Src
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Serilog.Core.ILogEventSink" />
     public class RichTextBoxSink : ILogEventSink
     {
+        /// <summary>
+        /// The rich text box
+        /// </summary>
         private readonly RichTextBox _richTextBox;
+        /// <summary>
+        /// The format provider
+        /// </summary>
         private readonly IFormatProvider _formatProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RichTextBoxSink"/> class.
+        /// </summary>
+        /// <param name="richTextBox">The rich text box.</param>
+        /// <param name="formatProvider">The format provider.</param>
         public RichTextBoxSink(RichTextBox richTextBox, IFormatProvider formatProvider = null)
         {
             _richTextBox = richTextBox;
             _formatProvider = formatProvider;
         }
 
+        /// <summary>
+        /// Emit the provided log event to the sink.
+        /// </summary>
+        /// <param name="logEvent">The log event to write.</param>
         public void Emit(LogEvent logEvent)
         {
             if (_richTextBox == null || logEvent == null)

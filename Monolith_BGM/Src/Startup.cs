@@ -9,8 +9,16 @@ using BGM.SftpUtilities;
 using Monolith_BGM.XMLService;
 using Monolith_BGM.Src;
 
+/// <summary>
+/// 
+/// </summary>
 public class Startup
 {
+    /// <summary>
+    /// Configures the services.
+    /// </summary>
+    /// <param name="configuration">The configuration.</param>
+    /// <returns></returns>
     public static IServiceProvider ConfigureServices(IConfiguration configuration)
     {
         var services = new ServiceCollection();

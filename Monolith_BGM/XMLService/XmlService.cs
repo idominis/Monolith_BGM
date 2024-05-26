@@ -10,17 +10,37 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
+/// <summary>
+/// 
+/// </summary>
 public class XmlService : IXmlService
 {
+    /// <summary>
+    /// The file manager
+    /// </summary>
     private FileManager _fileManager;
+    /// <summary>
+    /// The purchase order details XSD path
+    /// </summary>
     private readonly string _purchaseOrderDetailsXsdPath;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="XmlService"/> class.
+    /// </summary>
+    /// <param name="fileManager">The file manager.</param>
+    /// <param name="xsdPath">The XSD path.</param>
     public XmlService(FileManager fileManager, string xsdPath)
     {
         _fileManager = fileManager;
         _purchaseOrderDetailsXsdPath = xsdPath;
     }
 
+    /// <summary>
+    /// Loads from XML.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="filePath">The file path.</param>
+    /// <returns></returns>
     public T LoadFromXml<T>(string filePath) where T : class
     {
         XmlSchemaSet schemas = new XmlSchemaSet();
@@ -63,6 +83,11 @@ public class XmlService : IXmlService
         }
     }
 
+    /// <summary>
+    /// Validations the event handler.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="ValidationEventArgs"/> instance containing the event data.</param>
     private static void ValidationEventHandler([NotNull] object sender, ValidationEventArgs e)
     {
         //if (sender == null) throw new ArgumentNullException(nameof(sender));
@@ -73,6 +98,12 @@ public class XmlService : IXmlService
         }
     }
 
+    /// <summary>
+    /// Generates the XML files.
+    /// </summary>
+    /// <param name="summaries">The summaries.</param>
+    /// <param name="startDate">The start date.</param>
+    /// <param name="endDate">The end date.</param>
     public void GenerateXMLFiles(List<PurchaseOrderSummary> summaries, DateTime? startDate = null, DateTime? endDate = null)
     {
         var serializer = new XmlSerializer(typeof(List<PurchaseOrderSummary>));
@@ -105,6 +136,12 @@ public class XmlService : IXmlService
         }
     }
 
+    /// <summary>
+    /// Extracts the purchase order ids from XML.
+    /// </summary>
+    /// <param name="filePath">The file path.</param>
+    /// <returns></returns>
+    /// <exception cref="System.ApplicationException">Failed to extract Purchase Order IDs.</exception>
     public List<int> ExtractPurchaseOrderIdsFromXml(string filePath)
     {
         try
@@ -118,6 +155,12 @@ public class XmlService : IXmlService
         }
     }
 
+    /// <summary>
+    /// Extracts the purchase order detail ids from XML.
+    /// </summary>
+    /// <param name="filePath">The file path.</param>
+    /// <returns></returns>
+    /// <exception cref="System.ApplicationException">Failed to extract Purchase Order Detail IDs.</exception>
     public List<int> ExtractPurchaseOrderDetailIdsFromXml(string filePath)
     {
         try

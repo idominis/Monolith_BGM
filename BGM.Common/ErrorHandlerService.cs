@@ -11,7 +11,7 @@ namespace BGM.Common
         /// <param name="message">A custom message describing the error.</param>
         /// <param name="fileName">An optional file name where the error occurred.</param>
         /// <param name="errorCategory">Optional category of the error (e.g., "Validation", "Connection").</param>
-        public void LogError(Exception ex, string message, string fileName = null, string errorCategory = "General")
+        public void LogError(Exception ex, string message, string? fileName = null, string errorCategory = "General")
         {
             var errorMessage = fileName == null
                 ? $"{message}\nCategory: {errorCategory}\nError: {ex.Message}"

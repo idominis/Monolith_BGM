@@ -5,13 +5,52 @@ using System.Collections.Generic;
 
 namespace Monolith_BGM.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class PurchaseOrdersProcessedSent
     {
+        /// <summary>
+        /// Gets or sets the purchase order identifier.
+        /// </summary>
+        /// <value>
+        /// The purchase order identifier.
+        /// </value>
         public int PurchaseOrderId { get; set; }
+        /// <summary>
+        /// Gets or sets the purchase order detail identifier.
+        /// </summary>
+        /// <value>
+        /// The purchase order detail identifier.
+        /// </value>
         public int PurchaseOrderDetailId { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether [order processed].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [order processed]; otherwise, <c>false</c>.
+        /// </value>
         public bool OrderProcessed { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether [order sent].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [order sent]; otherwise, <c>false</c>.
+        /// </value>
         public bool OrderSent { get; set; }
+        /// <summary>
+        /// Gets or sets the channel.
+        /// </summary>
+        /// <value>
+        /// The channel.
+        /// </value>
         public int Channel { get; set; }
+        /// <summary>
+        /// Gets or sets the modified date.
+        /// </summary>
+        /// <value>
+        /// The modified date.
+        /// </value>
         public DateTime ModifiedDate { get; set; }
     }
 }

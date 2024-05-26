@@ -17,20 +17,62 @@ using Log = Serilog.Log;
 
 namespace Monolith_BGM.Src
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class MainFormController
     {
+        /// <summary>
+        /// The data service
+        /// </summary>
         private readonly DataService _dataService;
+        /// <summary>
+        /// The file manager
+        /// </summary>
         private readonly FileManager _fileManager;
+        /// <summary>
+        /// The XML service
+        /// </summary>
         private readonly IXmlService _xmlService;
+        /// <summary>
+        /// The error handler
+        /// </summary>
         private readonly ErrorHandlerService _errorHandler;
+        /// <summary>
+        /// The file handler
+        /// </summary>
         private readonly SftpFileHandler _fileHandler;
+        /// <summary>
+        /// The status update service
+        /// </summary>
         private readonly IStatusUpdateService _statusUpdateService;
 
+        /// <summary>
+        /// Occurs when [dates initialized].
+        /// </summary>
         public event Action<List<DateTime>>? DatesInitialized;
+        /// <summary>
+        /// Occurs when [data initialized].
+        /// </summary>
         public event Action<List<int>>? DataInitialized;
+        /// <summary>
+        /// Occurs when [error occurred].
+        /// </summary>
         public event Action<string>? ErrorOccurred;
+        /// <summary>
+        /// Occurs when [latest date updated].
+        /// </summary>
         public event Action<DateTime> LatestDateUpdated;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainFormController"/> class.
+        /// </summary>
+        /// <param name="dataService">The data service.</param>
+        /// <param name="fileManager">The file manager.</param>
+        /// <param name="xmlService">The XML service.</param>
+        /// <param name="errorHandler">The error handler.</param>
+        /// <param name="sftpFileHandler">The SFTP file handler.</param>
+        /// <param name="statusUpdateService">The status update service.</param>
         public MainFormController(DataService dataService, FileManager fileManager, IXmlService xmlService, ErrorHandlerService errorHandler, SftpFileHandler sftpFileHandler, IStatusUpdateService statusUpdateService)
         {
             _dataService = dataService;
@@ -41,6 +83,9 @@ namespace Monolith_BGM.Src
             _statusUpdateService = statusUpdateService;
         }
 
+        /// <summary>
+        /// Initializes the data asynchronous.
+        /// </summary>
         public async void InitializeDataAsync()
         {
             try
@@ -55,7 +100,9 @@ namespace Monolith_BGM.Src
                 ErrorOccurred?.Invoke($"{message}: {ex.Message}");
             }
         }
-        /// <summary>Downloads the files for PurchaseOrderDetails and PurchaseOrderHeaders asynchronous.</summary>
+        /// <summary>
+        /// Downloads the files for PurchaseOrderDetails and PurchaseOrderHeaders asynchronous.
+        /// </summary>
         public async Task DownloadFilesForPODAndPOHAsync()
         {
             try
@@ -79,6 +126,10 @@ namespace Monolith_BGM.Src
             }
         }
 
+        /// <summary>
+        /// Fetches the XML details data asynchronous.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<PurchaseOrderDetailDto>> FetchXmlDetailsDataAsync()
         {
             List<PurchaseOrderDetailDto> allPurchaseOrderDetails = new List<PurchaseOrderDetailDto>();
@@ -104,7 +155,7 @@ namespace Monolith_BGM.Src
                         }
 
                         bool hasInvalidEntries = false;
-                        foreach (var detail in purchaseOrderDetails.Details)
+                        foreach (var detail in purchaseOrderDetails.Details!)
                         {
                             ValidationResult results = new PurchaseOrderDetailValidator().Validate(detail);
                             if (!results.IsValid)
@@ -133,12 +184,21 @@ namespace Monolith_BGM.Src
             return allPurchaseOrderDetails;
         }
 
+        /// <summary>
+        /// Moves the invalid file.
+        /// </summary>
+        /// <param name="sourceFilePath">The source file path.</param>
+        /// <param name="targetDirectory">The target directory.</param>
         private void MoveInvalidFile(string sourceFilePath, string targetDirectory)
         {
             string targetPath = Path.Combine(targetDirectory, Path.GetFileName(sourceFilePath));
             File.Move(sourceFilePath, targetPath, true);
             Log.Information($"Moved invalid XML file to {targetPath}");
         }
+        /// <summary>
+        /// Fetches the XML headers data asynchronous.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<PurchaseOrderHeaderDto>> FetchXmlHeadersDataAsync()
         {
             List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders = new List<PurchaseOrderHeaderDto>();
@@ -239,6 +299,11 @@ namespace Monolith_BGM.Src
         //return allPurchaseOrderHeaders;
         //}
 
+        /// <summary>
+        /// Saves the po details to database.
+        /// </summary>
+        /// <param name="purchaseOrderDetailsDto">The purchase order details dto.</param>
+        /// <returns></returns>
         public async Task<bool> SavePODetailsToDb(List<PurchaseOrderDetailDto> purchaseOrderDetailsDto)
         {
             bool isSuccess = false;
@@ -265,6 +330,11 @@ namespace Monolith_BGM.Src
             return isSuccess;
         }
 
+        /// <summary>
+        /// Saves the po headers to database.
+        /// </summary>
+        /// <param name="purchaseOrderHeadersDto">The purchase order headers dto.</param>
+        /// <returns></returns>
         public async Task<bool> SavePOHeadersToDb(List<PurchaseOrderHeaderDto> purchaseOrderHeadersDto)
         {
             bool isSuccess = false;
@@ -291,6 +361,10 @@ namespace Monolith_BGM.Src
             return isSuccess;
         }
 
+        /// <summary>
+        /// Generates the XML from database asynchronous.
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> GenerateXmlFromDbAsync()  // CreatePOSXMLsButton_ClickAsync
         {
             var alreadyGeneratedIds = await AlreadyGenerated();
@@ -321,16 +395,30 @@ namespace Monolith_BGM.Src
         }
 
 
+        /// <summary>
+        /// Alreadies the generated.
+        /// </summary>
+        /// <returns></returns>
         private async Task<List<int>> AlreadyGenerated()
         {
             return await _dataService.FetchPurchaseOrderIdGeneratedAsync();           
         }
 
+        /// <summary>
+        /// Alreadies the sent.
+        /// </summary>
+        /// <returns></returns>
         private async Task<HashSet<int>> AlreadySent()
         {
             return await _dataService.FetchAlreadySentPurchaseOrderIdsAsync();          
         }
 
+        /// <summary>
+        /// Generates the XML.
+        /// </summary>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <returns></returns>
         public async Task<bool> GenerateXml(DateTime? startDate = null, DateTime? endDate = null)
         {
             var alreadyGeneratedIds = await AlreadyGenerated();
@@ -366,7 +454,9 @@ namespace Monolith_BGM.Src
             }
         }
 
-        /// <summary>Sends the date generated XML.</summary>
+        /// <summary>
+        /// Sends the date generated XML.
+        /// </summary>
         /// <param name="startDate">The start date.</param>
         /// <param name="endDate">The end date.</param>
         /// <returns>
@@ -424,6 +514,12 @@ namespace Monolith_BGM.Src
             }
         }
 
+        /// <summary>
+        /// Sends the date generated XML.
+        /// </summary>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <returns></returns>
         public async Task<bool> SendDateGeneratedXml(DateTime startDate, DateTime endDate)
         {
             // Path where the XML files are generated and will be uploaded from
@@ -487,7 +583,9 @@ namespace Monolith_BGM.Src
             }
         }
 
-        /// <summary>Uploads all PO.</summary>
+        /// <summary>
+        /// Uploads all PO.
+        /// </summary>
         public async Task UploadAllHeaders()
         {
             string localBaseDirectoryPath = _fileManager.GetBaseDirectoryXmlCreatedPath();
@@ -548,11 +646,21 @@ namespace Monolith_BGM.Src
         }
 
 
+        /// <summary>
+        /// Fetches the distinct order dates asynchronous.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<DateTime>> FetchDistinctOrderDatesAsync()
         {
             return await _dataService.FetchDistinctOrderDatesAsync();
         }
 
+        /// <summary>
+        /// Downloads the files pod asynchronous.
+        /// </summary>
+        /// <param name="remotePath">The remote path.</param>
+        /// <param name="localPath">The local path.</param>
+        /// <exception cref="System.InvalidOperationException">File handler is not initialized.</exception>
         public async Task DownloadFilesPODAsync(string remotePath, string localPath)
         {
             bool shouldRetry = true;
@@ -601,6 +709,12 @@ namespace Monolith_BGM.Src
             }
         }
 
+        /// <summary>
+        /// Downloads the files poh asynchronous.
+        /// </summary>
+        /// <param name="remotePath">The remote path.</param>
+        /// <param name="localPath">The local path.</param>
+        /// <exception cref="System.InvalidOperationException">File handler is not initialized.</exception>
         public async Task DownloadFilesPOHAsync(string remotePath, string localPath)
         {
             bool shouldRetry = true;
@@ -650,6 +764,12 @@ namespace Monolith_BGM.Src
             }
         }
 
+        /// <summary>
+        /// Searches the purchase orders within date range asynchronous.
+        /// </summary>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <returns></returns>
         public async Task<List<PurchaseOrderSummary>> SearchPurchaseOrdersWithinDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             var purchaseOrders = await _dataService.FetchPurchaseOrderSummariesByDateAsync(startDate, endDate);

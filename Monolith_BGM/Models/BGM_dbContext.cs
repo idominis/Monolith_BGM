@@ -7,22 +7,78 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Monolith_BGM.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
     public partial class BGM_dbContext : DbContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BGM_dbContext"/> class.
+        /// </summary>
+        /// <remarks>
+        /// See <see href="https://aka.ms/efcore-docs-dbcontext">DbContext lifetime, configuration, and initialization</see>
+        /// for more information.
+        /// </remarks>
         public BGM_dbContext()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BGM_dbContext"/> class.
+        /// </summary>
+        /// <param name="options">The options.</param>
         public BGM_dbContext(DbContextOptions<BGM_dbContext> options)
             : base(options)
         {
         }
 
+        /// <summary>
+        /// Gets or sets the purchase order details.
+        /// </summary>
+        /// <value>
+        /// The purchase order details.
+        /// </value>
         public virtual DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
+        /// <summary>
+        /// Gets or sets the purchase order headers.
+        /// </summary>
+        /// <value>
+        /// The purchase order headers.
+        /// </value>
         public virtual DbSet<PurchaseOrderHeader> PurchaseOrderHeaders { get; set; }
+        /// <summary>
+        /// Gets or sets the purchase orders processed sents.
+        /// </summary>
+        /// <value>
+        /// The purchase orders processed sents.
+        /// </value>
         public virtual DbSet<PurchaseOrdersProcessedSent> PurchaseOrdersProcessedSents { get; set; }
+        /// <summary>
+        /// Gets or sets the v purchase order summaries.
+        /// </summary>
+        /// <value>
+        /// The v purchase order summaries.
+        /// </value>
         public virtual DbSet<VPurchaseOrderSummary> VPurchaseOrderSummaries { get; set; }
 
+        /// <summary>
+        /// Override this method to further configure the model that was discovered by convention from the entity types
+        /// exposed in <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1" /> properties on your derived context. The resulting model may be cached
+        /// and re-used for subsequent instances of your derived context.
+        /// </summary>
+        /// <param name="modelBuilder">The builder being used to construct the model for this context. Databases (and other extensions) typically
+        /// define extension methods on this object that allow you to configure aspects of the model that are specific
+        /// to a given database.</param>
+        /// <remarks>
+        /// <para>
+        /// If a model is explicitly set on the options for this context (via <see cref="M:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.UseModel(Microsoft.EntityFrameworkCore.Metadata.IModel)" />)
+        /// then this method will not be run.
+        /// </para>
+        /// <para>
+        /// See <see href="https://aka.ms/efcore-docs-modeling">Modeling entity types and relationships</see> for more information.
+        /// </para>
+        /// </remarks>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PurchaseOrderDetail>(entity =>

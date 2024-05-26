@@ -15,34 +15,95 @@ using Monolith_BGM.Src;
 
 namespace Monolith_BGM
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="System.Windows.Forms.Form" />
     public partial class MainForm : Form
     {
         #region Fields
-        private System.Timers.Timer timer;
+        /// <summary>
+        /// The timer
+        /// </summary>
+        private System.Timers.Timer? timer;
+        /// <summary>
+        /// The client manager
+        /// </summary>
         private SftpClientManager clientManager;
+        /// <summary>
+        /// The file handler
+        /// </summary>
         private SftpFileHandler fileHandler;
+        /// <summary>
+        /// The mapper
+        /// </summary>
         private readonly IMapper _mapper;
+        /// <summary>
+        /// The data service
+        /// </summary>
         private readonly DataService _dataService;
+        /// <summary>
+        /// The error handler
+        /// </summary>
         private readonly ErrorHandlerService _errorHandler;
+        /// <summary>
+        /// The status update service
+        /// </summary>
         private readonly IStatusUpdateService _statusUpdateService;
+        /// <summary>
+        /// The file handler
+        /// </summary>
         private SftpFileHandler _fileHandler;
+        /// <summary>
+        /// The controller
+        /// </summary>
         private MainFormController _controller;
+        /// <summary>
+        /// The XML service
+        /// </summary>
         private readonly IXmlService _xmlService;
+        /// <summary>
+        /// The file manager
+        /// </summary>
         private FileManager _fileManager;
-        private System.Timers.Timer autoGenerateXmlTimer;
-        private System.Timers.Timer saveToDbTimer;
+        /// <summary>
+        /// The automatic generate XML timer
+        /// </summary>
+        private System.Timers.Timer? autoGenerateXmlTimer;
+        /// <summary>
+        /// The save to database timer
+        /// </summary>
+        private System.Timers.Timer? saveToDbTimer;
+        /// <summary>
+        /// The rich text box logs
+        /// </summary>
         private RichTextBox _richTextBoxLogs;
+        /// <summary>
+        /// The error handler service
+        /// </summary>
         private ErrorHandlerService _errorHandlerService;
+        /// <summary>
+        /// The start date
+        /// </summary>
         private DateTime _startDate;
+        /// <summary>
+        /// The end date
+        /// </summary>
         private DateTime _endDate;
         #endregion
 
         #region Constructor
+        // ********************************************************************************
         /// <summary>
-        /// Initializes a new instance of the <see cref="MainForm"/> class.
+        /// Initializes a new instance of the <see cref="MainForm" /> class.
         /// </summary>
         /// <param name="controller">The controller.</param>
         /// <param name="statusUpdateService">The status update service.</param>
+        /// <param name="errorHandlerService">The error handler service.</param>
+        /// <returns></returns>
+        // <created>,5/26/2024</created>
+        // <changed>,5/26/2024</changed>
+        // ********************************************************************************
         public MainForm(MainFormController controller, IStatusUpdateService statusUpdateService, ErrorHandlerService errorHandlerService)
         {
             InitializeComponent();
@@ -62,6 +123,9 @@ namespace Monolith_BGM
         #endregion
 
         #region Initialization
+        /// <summary>
+        /// Setups the initial values.
+        /// </summary>
         private void SetupInitialValues()
         {
             radioButtonOff.Checked = true;
@@ -70,6 +134,9 @@ namespace Monolith_BGM
             this.StartPosition = FormStartPosition.CenterScreen;
         }
 
+        /// <summary>
+        /// Initializes the timer.
+        /// </summary>
         private void InitializeTimer()
         {
             if (timer == null)
@@ -81,6 +148,9 @@ namespace Monolith_BGM
             timer.Enabled = true;
         }
 
+        /// <summary>
+        /// Initializes the automatic generate XML timer.
+        /// </summary>
         private void InitializeAutoGenerateXmlTimer()
         {
             autoGenerateXmlTimer = new System.Timers.Timer(10000); // Set interval to 10 seconds
@@ -88,6 +158,9 @@ namespace Monolith_BGM
             autoGenerateXmlTimer.AutoReset = true;
         }
 
+        /// <summary>
+        /// Initializes the save to database timer.
+        /// </summary>
         private void InitializeSaveToDbTimer()
         {
             saveToDbTimer = new System.Timers.Timer(10000); // Set interval to 10 seconds
@@ -95,6 +168,9 @@ namespace Monolith_BGM
             saveToDbTimer.AutoReset = true;
         }
 
+        /// <summary>
+        /// Initializes the rich text box logs.
+        /// </summary>
         private void InitializeRichTextBoxLogs()
         {
             _richTextBoxLogs = new RichTextBox
@@ -107,6 +183,9 @@ namespace Monolith_BGM
             Controls.Add(_richTextBoxLogs);
         }
 
+        /// <summary>
+        /// Configures the logging.
+        /// </summary>
         private void ConfigureLogging()
         {
             var richTextBoxSink = new RichTextBoxSink(richTextBoxLogs);
@@ -121,6 +200,9 @@ namespace Monolith_BGM
             _errorHandlerService = new ErrorHandlerService();
         }
 
+        /// <summary>
+        /// Registers the event handlers.
+        /// </summary>
         private void RegisterEventHandlers()
         {
             _controller.DatesInitialized += Controller_DatesInitialized;
@@ -134,7 +216,9 @@ namespace Monolith_BGM
         #endregion
 
         #region Event Handlers
-        /// <summary>Controllers the dates initialized.</summary>
+        /// <summary>
+        /// Controllers the dates initialized.
+        /// </summary>
         /// <param name="orderDates">The order dates.</param>
         private void Controller_DatesInitialized(List<DateTime> orderDates)
         {
@@ -153,11 +237,19 @@ namespace Monolith_BGM
             ValidateDateSelection();
         }
 
+        /// <summary>
+        /// Controllers the error occurred.
+        /// </summary>
+        /// <param name="message">The message.</param>
         private void Controller_ErrorOccurred(string message)
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        /// <summary>
+        /// Updates the latest date.
+        /// </summary>
+        /// <param name="latestDate">The latest date.</param>
         private void UpdateLatestDate(DateTime latestDate)
         {
             if (InvokeRequired)
@@ -168,6 +260,10 @@ namespace Monolith_BGM
             autoSendTextBox.Text = latestDate.ToString("yyyy-MM-dd");
         }
 
+        /// <summary>
+        /// Updates the status message.
+        /// </summary>
+        /// <param name="message">The message.</param>
         private void UpdateStatusMessage(string message)
         {
             if (InvokeRequired)
@@ -180,11 +276,18 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Shows the error message.
+        /// </summary>
+        /// <param name="message">The message.</param>
         private void ShowErrorMessage(string message)
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        /// <summary>
+        /// Loads the data asynchronous.
+        /// </summary>
         private async void LoadDataAsync()
         {
             try
@@ -197,18 +300,31 @@ namespace Monolith_BGM
                 _errorHandler.LogError(ex, "Failed to load order dates.");
                 Controller_ErrorOccurred("Failed to load order dates: " + ex.Message);
             }
-        }  
-        
+        }
+
+        /// <summary>
+        /// Handles the SelectedIndexChanged event of the ComboBoxStartDate control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void ComboBoxStartDate_SelectedIndexChanged(object sender, EventArgs e)
         {
             ValidateDateSelection();
         }
 
+        /// <summary>
+        /// Handles the SelectedIndexChanged event of the ComboBoxEndDate control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void ComboBoxEndDate_SelectedIndexChanged(object sender, EventArgs e)
         {
             ValidateDateSelection();
         }
 
+        /// <summary>
+        /// Validates the date selection.
+        /// </summary>
         private void ValidateDateSelection()
         {
             if (comboBoxStartDate.SelectedItem != null && comboBoxEndDate.SelectedItem != null)
@@ -226,10 +342,15 @@ namespace Monolith_BGM
         #endregion
 
         #region Timer Events
+        /// <summary>
+        /// Called when [timed event].
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
         private async void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
             // Stop the timer to prevent further invocations while handling errors
-            timer.Stop();
+            timer?.Stop();
 
             try
             {
@@ -257,11 +378,16 @@ namespace Monolith_BGM
             timer.Start();
         }
 
+        /// <summary>
+        /// Handles the Elapsed event of the SaveToDbTimer control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
         private async void SaveToDbTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (!saveToDbRadioButtonOn.Checked)
             {
-                saveToDbTimer.Stop();
+                saveToDbTimer?.Stop();
                 return;
             }
 
@@ -288,11 +414,16 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the Elapsed event of the AutoGenerateXmlTimer control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
         private async void AutoGenerateXmlTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (!createXmlDbRadioButtonOn.Checked)
             {
-                autoGenerateXmlTimer.Stop();
+                autoGenerateXmlTimer?.Stop();
                 return;
             }
 
@@ -318,6 +449,11 @@ namespace Monolith_BGM
         #endregion
 
         #region Service Control
+        /// <summary>
+        /// Handles the Click event of the ServiceStartButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void ServiceStartButton_Click(object sender, EventArgs e)
         {
             if (timer == null || !timer.Enabled)
@@ -333,6 +469,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the ServiceStopButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void ServiceStopButton_Click(object sender, EventArgs e)
         {
             if (timer != null && timer.Enabled)
@@ -350,6 +491,11 @@ namespace Monolith_BGM
         #endregion
 
         #region Data Management
+        /// <summary>
+        /// Saves the pod to database.
+        /// </summary>
+        /// <param name="allPurchaseOrderDetails">All purchase order details.</param>
+        /// <returns></returns>
         private async Task<bool> SavePODToDb(List<PurchaseOrderDetailDto> allPurchaseOrderDetails)
         {
             bool isSuccess = false;
@@ -382,6 +528,11 @@ namespace Monolith_BGM
 
         }
 
+        /// <summary>
+        /// Saves the poh to database.
+        /// </summary>
+        /// <param name="allPurchaseOrderHeaders">All purchase order headers.</param>
+        /// <returns></returns>
         private async Task<bool> SavePOHToDb(List<PurchaseOrderHeaderDto> allPurchaseOrderHeaders)
         {
             bool isSuccess = false;
@@ -413,6 +564,11 @@ namespace Monolith_BGM
             return isSuccess;
         }
 
+        /// <summary>
+        /// Handles the Click event of the SavePODToDbButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void SavePODToDbButton_Click(object sender, EventArgs e)
         {
             //await SavePODToDb();
@@ -440,6 +596,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the SavePOHToDbButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void SavePOHToDbButton_Click(object sender, EventArgs e)
         {
             // TESTING PURPOSES ONLY
@@ -468,6 +629,11 @@ namespace Monolith_BGM
         #endregion
 
         #region Utility Methods
+        /// <summary>
+        /// Appends the log.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="isError">if set to <c>true</c> [is error].</param>
         public void AppendLog(string message, bool isError = false)
         {
             richTextBoxLogs.Invoke(new Action(() =>
@@ -489,6 +655,11 @@ namespace Monolith_BGM
         #endregion
 
         #region Date Range Selection
+        /// <summary>
+        /// Handles the ValueChanged event of the DateTimePicker1 control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void DateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
             _startDate = dateTimePicker1.Value;
@@ -498,6 +669,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the ValueChanged event of the DateTimePicker2 control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void DateTimePicker2_ValueChanged(object sender, EventArgs e)
         {
             _endDate = dateTimePicker2.Value;
@@ -507,6 +683,9 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Searches the po within date range.
+        /// </summary>
         private async void SearchPOWithinDateRange()
         {
             try
@@ -537,6 +716,11 @@ namespace Monolith_BGM
         #endregion
 
         #region Application Exit
+        /// <summary>
+        /// Handles the Click event of the exitAppButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void exitAppButton_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(
@@ -554,6 +738,11 @@ namespace Monolith_BGM
         #endregion
 
         #region XML Generation and Sending
+        /// <summary>
+        /// Handles the Click event of the CreateDataRangePOS control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void CreateDataRangePOS_Click(object sender, EventArgs e)
         {
             try
@@ -580,6 +769,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the SendXmlDateGeneratedButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void SendXmlDateGeneratedButton_Click(object sender, EventArgs e)
         {
             try
@@ -607,6 +801,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the ClickAsync event of the CreatePOSXMLsButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void CreatePOSXMLsButton_ClickAsync(object sender, EventArgs e)
         {
             try
@@ -627,6 +826,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the GenerateXmlByDateButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void GenerateXmlByDateButton_Click(object sender, EventArgs e)
         {
             try
@@ -652,6 +856,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the SendDataRangeButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void SendDataRangeButton_Click(object sender, EventArgs e)
         {
             try
@@ -679,30 +888,45 @@ namespace Monolith_BGM
 
         #region Buttons onn / off
 
+        /// <summary>
+        /// Handles the CheckedChanged event of the SaveToDbRadioButtonOn control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SaveToDbRadioButtonOn_CheckedChanged(object sender, EventArgs e)
         {
             if (saveToDbRadioButtonOn.Checked)
             {
-                saveToDbTimer.Start();
+                saveToDbTimer?.Start();
             }
             else
             {
-                saveToDbTimer.Stop();
+                saveToDbTimer?.Stop();
             }
         }
 
+        /// <summary>
+        /// Handles the CheckedChanged event of the SaveToDbRadioButtonOff control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SaveToDbRadioButtonOff_CheckedChanged(object sender, EventArgs e)
         {
             if (saveToDbRadioButtonOff.Checked)
             {
-                saveToDbTimer.Stop();
+                saveToDbTimer?.Stop();
             }
             else
             {
-                saveToDbTimer.Start();
+                saveToDbTimer?.Start();
             }
         }
 
+        /// <summary>
+        /// Handles the CheckedChanged event of the RadioButtonOn control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void RadioButtonOn_CheckedChanged(object sender, EventArgs e)
         {
             // Upload all Purchase Orders when the radio button is checked
@@ -713,6 +937,11 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the CheckedChanged event of the RadioButtonOff control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void RadioButtonOff_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButtonOff.Checked)
@@ -721,27 +950,37 @@ namespace Monolith_BGM
             }
         }
 
+        /// <summary>
+        /// Handles the CheckedChanged event of the CreateXmlDbRadioButtonOn control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void CreateXmlDbRadioButtonOn_CheckedChanged(object sender, EventArgs e)
         {
             if (createXmlDbRadioButtonOn.Checked)
             {
-                autoGenerateXmlTimer.Start();
+                autoGenerateXmlTimer?.Start();
             }
             else
             {
-                autoGenerateXmlTimer.Stop();
+                autoGenerateXmlTimer?.Stop();
             }
         }
 
+        /// <summary>
+        /// Handles the CheckedChanged event of the CreateXmlDbRadioButtonOff control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void CreateXmlDbRadioButtonOff_CheckedChanged(object sender, EventArgs e)
         {
             if (createXmlDbRadioButtonOff.Checked)
             {
-                autoGenerateXmlTimer.Stop();
+                autoGenerateXmlTimer?.Stop();
             }
             else
             {
-                autoGenerateXmlTimer.Start();
+                autoGenerateXmlTimer?.Start();
             }
         }
 
@@ -749,6 +988,10 @@ namespace Monolith_BGM
 
 
         #region Cleanup
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Forms.Form.FormClosing" /> event.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.FormClosingEventArgs" /> that contains the event data.</param>
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (timer != null)
